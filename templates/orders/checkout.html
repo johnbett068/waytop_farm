@@ -1,0 +1,80 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Checkout | WayTop Farm & Nurseries{% endblock %}
+{% block meta_description %}Choose fulfillment and review your seedling request with WayTop Farm & Nurseries.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/checkout.css' %}">{% endblock %}
+{% block content %}
+<section class="checkout-page" data-checkout-page data-state-mode="{{ state_mode }}" aria-labelledby="checkout-title">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><a href="{% url 'cart:cart' %}">Cart</a></li><li><span aria-current="page">Checkout</span></li></ol></nav>
+    <header class="checkout-header"><p class="caption">Secure checkout preview</p><h1 class="heading-1" id="checkout-title">Complete your seedling request</h1><p class="body-large">Choose how you would like to receive your seedlings. Availability and the internal fulfillment location are confirmed by our team later.</p></header>
+    {% include "orders/components/stepper.html" %}
+
+    <div class="checkout-state" data-checkout-loading role="status"><span class="checkout-spinner" aria-hidden="true"></span><h2 class="heading-3">Preparing checkout</h2><p>Loading your saved cart and current estimate.</p></div>
+    <div class="checkout-state" data-checkout-empty hidden><span class="commerce-empty__icon" aria-hidden="true">⌑</span><h2 class="heading-2">Your cart is empty</h2><p>Add seedlings before starting checkout.</p><a class="btn btn--primary" href="{% url 'products:shop' %}">Explore seedlings</a></div>
+    <div class="checkout-state checkout-state--error" data-checkout-error hidden role="alert"><span class="commerce-empty__icon" aria-hidden="true">!</span><h2 class="heading-2">Checkout is unavailable</h2><p>We could not prepare your checkout. Your cart remains saved on this device.</p><button class="btn btn--primary" type="button" data-checkout-retry>Try again</button></div>
+    <div class="checkout-state checkout-state--error" data-checkout-permission hidden role="alert"><span class="commerce-empty__icon" aria-hidden="true">⌧</span><h2 class="heading-2">Checkout access is unavailable</h2><p>This reusable permission state is reserved for future account or sales-channel restrictions.</p><a class="btn btn--primary" href="{% url 'cart:cart' %}">Return to cart</a></div>
+
+    <div class="checkout-layout" data-checkout-layout hidden>
+      <form class="checkout-form" data-checkout-form data-success-url="{% url 'orders:success' %}" novalidate>
+        <div class="checkout-error-summary" data-validation-summary role="alert" tabindex="-1" hidden><h2 class="heading-4">Please check the highlighted fields</h2><ul></ul></div>
+
+        <fieldset class="checkout-panel" data-checkout-step="1">
+          <legend><span class="caption">Step 1 of 4</span><span class="heading-2">Customer information</span></legend>
+          <div class="checkout-mode" role="radiogroup" aria-label="Checkout type">
+            <label><input type="radio" name="checkout_mode" value="guest" checked><span><strong>Guest checkout</strong><small>Continue without an account.</small></span></label>
+            <label><input type="radio" name="checkout_mode" value="returning"><span><strong>Returning customer</strong><small>Sign-in will be available in a future phase.</small></span></label>
+            <label><input type="radio" name="checkout_mode" value="create"><span><strong>Create an account</strong><small>Account creation will be available later.</small></span></label>
+          </div>
+          <div class="checkout-info" data-account-placeholder hidden role="note">Authentication is not active in this frontend milestone. Continue as a guest to preview checkout.</div>
+          <div class="checkout-fields checkout-fields--two">
+            <label class="checkout-field"><span>Full name <em>Required</em></span><input name="full_name" type="text" autocomplete="name" required minlength="2" placeholder="Jane Chebet"><small data-field-error></small></label>
+            <label class="checkout-field"><span>Phone number <em>Required</em></span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+254 724 853 914"><small class="checkout-field__hint">Use +254 followed by nine digits.</small><small data-field-error></small></label>
+            <label class="checkout-field checkout-field--wide"><span>Email address <em>Required</em></span><input name="email" type="email" autocomplete="email" required placeholder="jane@example.com"><small>We will use this for fulfillment updates and the future receipt.</small><small data-field-error></small></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="checkout-panel" data-checkout-step="2" hidden>
+          <legend><span class="caption">Step 2 of 4</span><span class="heading-2">Fulfillment</span></legend>
+          <p class="body">Choose a method. The operational branch is assigned after you place your request based on stock, proximity, workload and business rules.</p>
+          <div class="checkout-options">
+            <label class="checkout-option"><input type="radio" name="fulfillment" value="delivery" data-fulfillment="delivery" checked><span class="checkout-option__body"><strong>Home Delivery</strong><small>Estimated 1–3 business days after availability confirmation.</small><b>KES 350 mock fee</b></span></label>
+            <label class="checkout-option"><input type="radio" name="fulfillment" value="pickup" data-fulfillment="pickup"><span class="checkout-option__body"><strong>Farm Pickup</strong><small>Pickup location and readiness are confirmed after internal assignment.</small><b>Free</b></span></label>
+          </div>
+          <div class="checkout-fields checkout-fields--two" data-delivery-address>
+            <label class="checkout-field"><span>County <em>Required</em></span><select name="county" required><option value="">Select county</option><option value="Bomet">Bomet County</option></select><small data-field-error></small></label>
+            <label class="checkout-field"><span>Town or area <em>Required</em></span><input name="town" autocomplete="address-level2" required placeholder="Bomet Town"><small data-field-error></small></label>
+            <label class="checkout-field checkout-field--wide"><span>Delivery address <em>Required</em></span><textarea name="address" autocomplete="street-address" required rows="3" placeholder="Road, estate, landmark or farm gate details"></textarea><small data-field-error></small></label>
+          </div>
+          <label class="checkout-field"><span>Order notes <em>Optional</em></span><textarea name="notes" rows="3" maxlength="500" placeholder="Access directions or handling information"></textarea><small>Do not include payment PINs or sensitive financial information.</small></label>
+        </fieldset>
+
+        <fieldset class="checkout-panel" data-checkout-step="3" hidden>
+          <legend><span class="caption">Step 3 of 4</span><span class="heading-2">Payment method</span></legend>
+          <p class="body">This selection is for interface preview only. No payment request or transaction will occur.</p>
+          <div class="checkout-options">
+            <label class="checkout-option"><input type="radio" name="payment" value="mpesa" data-payment="mpesa" checked><span class="checkout-option__body"><strong>M-Pesa</strong><small>In production, payment instructions will follow authoritative stock and fulfillment confirmation.</small><b>No charge today</b></span></label>
+            <label class="checkout-option" data-cash-option><input type="radio" name="payment" value="cash_pickup" data-payment="cash_pickup"><span class="checkout-option__body"><strong>Cash on Pickup</strong><small>Available only for Farm Pickup. Pay when your confirmed order is ready.</small><b>Pickup only</b></span></label>
+          </div>
+          <div class="checkout-info" role="note"><strong>Frontend preview:</strong> WayTop will not request an M-Pesa PIN on this page.</div>
+        </fieldset>
+
+        <section class="checkout-panel" data-checkout-step="4" hidden aria-labelledby="review-title">
+          <p class="caption">Step 4 of 4</p><h2 class="heading-2" id="review-title">Review your request</h2>
+          <div class="checkout-review" data-checkout-review></div>
+          <label class="checkout-consent"><input type="checkbox" name="confirm_review" required><span>I have reviewed my contact and fulfillment details and understand that prices and availability are not yet confirmed.</span></label>
+          <small class="checkout-consent-error" data-consent-error></small>
+        </section>
+
+        <div class="checkout-actions">
+          <button class="btn btn--outline" type="button" data-checkout-back hidden>Back</button>
+          <button class="btn btn--primary" type="button" data-checkout-next>Continue to fulfillment</button>
+          <button class="btn btn--primary" type="submit" data-checkout-submit hidden>Submit mock order</button>
+        </div>
+        <p class="checkout-boundary small">Submitting demonstrates the confirmation experience only. It does not create an order, reserve inventory, deduct stock or initiate payment.</p>
+      </form>
+      {% include "orders/components/order-summary.html" %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/checkout.js' %}"></script>{% endblock %}

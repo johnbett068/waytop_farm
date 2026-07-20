@@ -1,0 +1,13 @@
+{% extends "staff_base.html" %}{% load static %}
+{% block title %}{% block delivery_title %}Delivery & Fulfillment{% endblock %} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-delivery.css' %}">{% endblock %}
+{% block content %}
+<section class="delivery-page" data-delivery-page data-state-mode="{{ state_mode }}" aria-labelledby="delivery-page-title">
+  <aside class="delivery-simulation-banner" aria-label="Authorization simulation" data-delivery-simulator><div><strong>Authorization simulation — not secure</strong><span data-delivery-simulator-summary>John Bett · Operations Manager · All branches</span></div><label for="delivery-identity">Simulated staff</label><select id="delivery-identity" data-delivery-simulator-select><option value="john">John Bett — Operations Manager</option><option value="mary">Mary Chebet — Sales Officer (view)</option><option value="sarah">Sarah Wanjiku — Inventory Clerk (view)</option><option value="amina">Amina Noor — Administrator (denied)</option></select></aside>
+  <div class="sr-only" aria-live="polite" data-delivery-simulator-live></div>
+  <header class="staff-page-header delivery-page-header"><div><p class="staff-eyebrow">{% block delivery_eyebrow %}Customer fulfillment · Mock projection{% endblock %}</p><h1 id="delivery-page-title">{% block delivery_heading %}Delivery & Fulfillment{% endblock %}</h1><p>{% block delivery_intro %}Track lightweight delivery progress without managing transport resources.{% endblock %}</p></div><div class="staff-page-header__actions">{% block delivery_actions %}{% endblock %}</div></header>
+  {% include "dashboard/delivery/components/module-nav.html" %}{% include "dashboard/delivery/components/states.html" %}
+  <div data-delivery-success>{% block delivery_content %}{% endblock %}<p class="staff-preview-note">Frontend Delivery preview only. No Order, Fulfillment, dispatch, collection, Inventory, payment, Accounting, vehicle, driver, GPS, route, fuel or transport-cost record is created, calculated, persisted, or changed.</p></div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/staff-delivery.js' %}"></script>{% endblock %}

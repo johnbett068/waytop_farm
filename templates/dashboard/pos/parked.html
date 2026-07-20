@@ -1,0 +1,11 @@
+{% extends "dashboard/pos/base.html" %}
+{% block pos_title %}Parked Sales{% endblock %}{% block pos_heading %}Parked Sales{% endblock %}{% block pos_intro %}Temporarily set aside mock carts without reserving or deducting Inventory.{% endblock %}
+{% block pos_actions %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:pos_sale' %}" data-pos-capability="pos.process_sale">New sale</a>{% endblock %}
+{% block pos_content %}
+<div class="parked-sales-grid">
+  <article><header><div><small>PARK-260718-02</small><h2>Walk-in Customer</h2></div><span class="pos-status is-warning">Parked 18 min</span></header><div class="parked-sale-lines"><span>2 × Grafted Hass Avocado</span><span>1 × Premium Potting Media</span></div><dl><div><dt>Cashier</dt><dd>Jane Atieno</dd></div><div><dt>Register</dt><dd>BMT-01</dd></div><div><dt>Mock total</dt><dd>KSh 2,600</dd></div><div><dt>Reason</dt><dd>Customer collecting more items</dd></div></dl><footer><button class="staff-button staff-button--secondary" data-pos-capability="pos.process_sale" data-cancel-parked>Cancel parked sale</button><a class="staff-button staff-button--primary" href="{% url 'dashboard:pos_sale' %}" data-pos-capability="pos.process_sale">Resume sale</a></footer></article>
+  <article><header><div><small>PARK-260718-01</small><h2>James Kirui</h2></div><span class="pos-status is-info">Parked 42 min</span></header><div class="parked-sale-lines"><span>20 × Gloria Star Cabbage</span><span>10 × Anna F1 Tomato</span></div><dl><div><dt>Cashier</dt><dd>Jane Atieno</dd></div><div><dt>Register</dt><dd>BMT-01</dd></div><div><dt>Mock total</dt><dd>KSh 4,400</dd></div><div><dt>Reason</dt><dd>Customer confirming transport</dd></div></dl><footer><button class="staff-button staff-button--secondary" data-pos-capability="pos.process_sale" data-cancel-parked>Cancel parked sale</button><a class="staff-button staff-button--primary" href="{% url 'dashboard:pos_sale' %}" data-pos-capability="pos.process_sale">Resume sale</a></footer></article>
+</div>
+<p class="pos-rule-note">Parking stores no data in Phase 4A. Future parked carts do not reserve Inventory unless a separately governed reservation is created.</p>
+<div class="pos-toast" role="status" aria-live="polite" data-pos-toast hidden></div>
+{% endblock %}

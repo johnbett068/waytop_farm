@@ -1,0 +1,53 @@
+{% extends "dashboard/inventory/base.html" %}
+{% block inventory_title %}Inventory Dashboard{% endblock %}{% block inventory_heading %}Inventory Dashboard{% endblock %}
+{% block inventory_intro %}Monitor physical stock, custody workflows and exceptions without editing balances directly.{% endblock %}
+{% block inventory_actions %}<button class="staff-button staff-button--secondary" data-capability="inventory.count" type="button">Count stock</button><button class="staff-button staff-button--primary" data-capability="inventory.receive" type="button">Receive stock</button>{% endblock %}
+{% block inventory_content %}
+<div class="inventory-metric-grid" data-inventory-metrics>
+  <article><span>Total inventory items</span><strong>286</strong><small>Active stock definitions</small></article>
+  <article class="is-success"><span>Available stock</span><strong>24,680</strong><small>Mixed units · not a valuation</small></article>
+  <article class="is-info"><span>Reserved stock</span><strong>1,248</strong><small>Availability partition only</small></article>
+  <article class="is-warning"><span>Quality hold</span><strong>436</strong><small>8 lots restricted</small></article>
+  <article class="is-danger"><span>Low stock alerts</span><strong>12</strong><small>4 critical</small></article>
+  <article class="is-danger"><span>Out of stock</span><strong>4</strong><small>Replenishment review</small></article>
+  <article class="is-info"><span>In transit</span><strong>1,860</strong><small>3 open transfers</small></article>
+  <article><span>Pending receipts</span><strong>3</strong><small>Supplier, Production, transfer</small></article>
+</div>
+<div class="inventory-dashboard-grid">
+  <main class="inventory-column">
+    <section class="inventory-panel"><div class="inventory-panel__head"><div><p>Exception-first control</p><h2>Inventory alerts</h2></div><span>7 require attention</span></div>
+      <div class="inventory-alert-grid">
+        <article class="inventory-alert is-critical"><span>Out of stock</span><h3>Grafting tape · 25 mm</h3><p>Bomet Main Store has no available rolls. Two Production requests are waiting.</p><small>Critical · Updated 24 min ago</small></article>
+        <article class="inventory-alert is-warning"><span>Near reorder</span><h3>128-cell seedling trays</h3><p>Available 42 trays; governed reorder level shown as 40.</p><small>Bomet Main Store · Mock threshold</small></article>
+        <article class="inventory-alert is-hold"><span>Quality hold</span><h3>Copper fungicide · LOT-CF-2605</h3><p>Four kilograms restricted pending condition review.</p><small>Chemical Store · Expiry 30 Sep 2026</small></article>
+        <article class="inventory-alert is-info"><span>Transfer delayed</span><h3>TRF-2607-018</h3><p>Ndaraweta → Bomet has remained in transit beyond the planned arrival.</p><small>640 avocado rootstocks · 1 day overdue</small></article>
+        <article class="inventory-alert is-warning"><span>Pending count</span><h3>CYC-2607-009 · Packaging zone</h3><p>Cycle count is assigned and due today.</p><small>28 item/lot lines · Sarah Wanjiku</small></article>
+        <article class="inventory-alert is-danger"><span>Recent damage</span><h3>Polybags · LOT-PB-2606</h3><p>Adjustment request ADJ-2607-012 awaits independent approval.</p><small>120 pieces · Water damage evidence</small></article>
+      </div>
+    </section>
+    <section class="inventory-panel"><div class="inventory-panel__head"><div><p>Immutable projection</p><h2>Recent Inventory activity</h2></div><a href="{% url 'dashboard:inventory_movements' %}">View ledger</a></div>
+      <ol class="inventory-activity">
+        <li><time>10:42 am</time><span></span><div><strong>Production receipt prepared</strong><p>128 Anna F1 Tomato seedlings · PB-TOM-2606-11</p><small>Peter Kiptoo · Awaiting Inventory posting · COR-7F2A</small></div></li>
+        <li><time>9:18 am</time><span></span><div><strong>Transfer received</strong><p>TRF-2607-016 · 1,200 Gloria Star cabbage seedlings</p><small>Sarah Wanjiku · Bomet Dispatch Store · COR-19D4</small></div></li>
+        <li><time>8:35 am</time><span></span><div><strong>Cycle count submitted</strong><p>CYC-2607-008 · Chemical Store</p><small>David Langat · Variance review required · COR-83B1</small></div></li>
+        <li><time>Yesterday</time><span></span><div><strong>POS sale issue posted</strong><p>MOV-2607-1884 · 6 Hass avocado seedlings</p><small>Inventory service · Bomet Sales Store · COR-4C71</small></div></li>
+      </ol>
+    </section>
+  </main>
+  <aside class="inventory-column">
+    <section class="inventory-panel"><div class="inventory-panel__head"><div><p>Operational queues</p><h2>Pending work</h2></div></div>
+      <div class="inventory-queue"><a href="{% url 'dashboard:inventory_receiving' %}"><span>Pending receipts</span><strong>3</strong><small>1 Production release</small></a><a href="{% url 'dashboard:inventory_transfers' %}"><span>Pending transfers</span><strong>2</strong><small>1 delayed</small></a><a href="{% url 'dashboard:inventory_counts' %}"><span>Pending cycle counts</span><strong>2</strong><small>1 due today</small></a><a href="{% url 'dashboard:inventory_adjustments' %}"><span>Pending approval</span><strong>3</strong><small>Independent review</small></a></div>
+    </section>
+    <section class="inventory-panel"><div class="inventory-panel__head"><div><p>Capability filtered</p><h2>Quick actions</h2></div></div>
+      <div class="inventory-quick-actions">
+        <a href="{% url 'dashboard:inventory_receiving' %}" data-capability="inventory.receive"><span>＋</span><strong>Receive stock</strong><small>Prepare evidence</small></a>
+        <a href="{% url 'dashboard:inventory_transfers' %}" data-capability="inventory.transfer"><span>⇄</span><strong>Transfer stock</strong><small>Start custody flow</small></a>
+        <a href="{% url 'dashboard:inventory_counts' %}" data-capability="inventory.count"><span>✓</span><strong>Count stock</strong><small>Record observation</small></a>
+        <a href="{% url 'dashboard:inventory_adjustments' %}" data-capability="inventory.adjust"><span>±</span><strong>Adjust stock</strong><small>Request only</small></a>
+        <a href="{% url 'dashboard:inventory_movements' %}" data-capability="inventory.view"><span>≡</span><strong>View ledger</strong><small>Movement history</small></a>
+        <button type="button" data-capability="inventory.view"><span>!</span><strong>Create alert</strong><small>Mock notification</small></button>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

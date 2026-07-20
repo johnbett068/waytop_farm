@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Seedling Categories | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
+{% block content %}
+  <section class="catalog-hero section-sm"><div class="container"><p class="caption">Browse by crop group</p><h1 class="heading-1">Seedling categories</h1><p class="body-large">Start with the type of crop you plan to grow, then compare varieties, units and availability.</p></div></section>
+  <section class="section"><div class="container category-listing">
+    {% for category in categories %}<article class="category-list-card"><div class="category-list-card__image catalog-image--{{ category.image_variant }}" aria-hidden="true"></div><div><p class="caption">{{ category.count }} products</p><h2 class="heading-2">{{ category.name }}</h2><p class="body">{{ category.description }}</p><a class="btn btn--outline" href="{% url 'products:category' category.slug %}">Explore category</a></div></article>{% empty %}{% include "components/page-states/empty.html" with state_title="No categories available" state_message="Please check again after our nursery catalog is updated." %}{% endfor %}
+  </div></section>
+{% endblock %}

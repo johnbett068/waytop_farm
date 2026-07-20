@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Service unavailable | WayTop Farm{% endblock %}
+{% block content %}
+  <section class="status-page section">
+    <div class="container status-page__inner">
+      {% url 'core:home' as home_url %}
+      {% include "components/page-states/error.html" with state_title="Our service is temporarily unavailable" state_message="Please try again shortly. If your enquiry is urgent, call our nursery team." retry_url=home_url %}
+    </div>
+  </section>
+{% endblock %}

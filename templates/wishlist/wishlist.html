@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Your Wishlist | WayTop Farm & Nurseries{% endblock %}
+{% block meta_description %}Review seedlings saved to your WayTop Farm wishlist and move available products into your cart.{% endblock %}
+{% block content %}
+<section class="commerce-page commerce-page--wishlist" data-commerce-page="wishlist" data-state-mode="{{ state_mode }}" aria-labelledby="wishlist-title">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><span aria-current="page">Wishlist</span></li></ol></nav>
+    <header class="commerce-page__header">
+      <div><p class="caption">Saved for later</p><h1 class="heading-1" id="wishlist-title">Your seedling wishlist</h1><p class="body-large">Keep promising varieties together, then move available seedlings into your cart when you are ready.</p></div>
+      <button class="btn btn--outline" type="button" data-clear-wishlist hidden>Clear wishlist</button>
+    </header>
+
+    <div class="commerce-loading" data-commerce-loading role="status"><div class="commerce-skeleton-grid"><span></span><span></span><span></span></div><span class="sr-only">Loading your wishlist</span></div>
+    <div class="commerce-state commerce-state--error" data-commerce-error hidden>
+      <span class="commerce-empty__icon" aria-hidden="true">!</span><h2 class="heading-2">We could not load your wishlist</h2><p class="body">Your saved products are still on this device. Try loading them again.</p><button class="btn btn--primary" type="button" data-commerce-retry>Try again</button>
+    </div>
+    <div class="commerce-state" data-wishlist-empty hidden>
+      <span class="commerce-empty__icon" aria-hidden="true">♡</span><h2 class="heading-2">Save seedlings worth returning to</h2><p class="body-large">Use the heart button on any product to build a shortlist for your next planting plan.</p><a class="btn btn--primary" href="{% url 'products:shop' %}">Browse seedlings</a>
+    </div>
+    <div class="wishlist-grid" data-wishlist-grid hidden></div>
+  </div>
+</section>
+{% endblock %}

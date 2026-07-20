@@ -1,0 +1,11 @@
+<article class="production-batch-card" data-production-batch>
+  <header>
+    <div><small>Batch number</small><a href="{% url 'dashboard:production_batch_detail' number %}">{{ number }}</a><h2>{{ product }}</h2></div>
+    <div><small>Health status</small><span class="production-status production-status--{{ health_tone }}">{{ health }}</span></div>
+  </header>
+  <dl>
+    <div><dt>Propagation method</dt><dd>{{ method }}</dd></div><div><dt>Current stage</dt><dd>{{ stage }}</dd></div><div><dt>Age</dt><dd>{{ age }}</dd></div><div><dt>Location</dt><dd>{{ location }}</dd></div><div><dt>Assigned staff</dt><dd>{{ staff }}</dd></div><div><dt>Expected release</dt><dd>{{ release }}</dd></div><div><dt>Estimated quantity</dt><dd>{{ expected }}</dd></div><div><dt>Current quantity</dt><dd>{{ current }}</dd></div>
+  </dl>
+  <p>Notes: Mock operational observation; quantities are recorded examples, not calculated values.</p>
+  <a class="staff-button staff-button--secondary" href="{% url 'dashboard:production_batch_detail' number %}">Open batch</a>
+</article>

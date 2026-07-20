@@ -1,0 +1,40 @@
+<div class="catalog-layout" data-catalog data-page-size="6" data-mode="{{ catalog_mode }}">
+  <div class="catalog-toolbar">
+    <button class="btn btn--outline catalog-toolbar__filter" type="button" data-filter-open aria-controls="filter-drawer" aria-expanded="false">Filters</button>
+    <p class="catalog-toolbar__count" role="status" aria-live="polite"><strong data-result-count>{{ products|length }}</strong> seedlings</p>
+    <label class="sort-control">Sort by
+      <select class="form-control" data-sort>
+        <option value="featured">Featured</option>
+        <option value="name-asc">Name A–Z</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+      </select>
+    </label>
+  </div>
+
+  <aside class="catalog-sidebar" aria-label="Catalog filters">
+    {% include "products/components/catalog-filters.html" %}
+  </aside>
+
+  <div class="filter-drawer" id="filter-drawer" aria-hidden="true">
+    <button class="filter-drawer__backdrop" type="button" data-filter-close aria-label="Close filters"></button>
+    <div class="filter-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="filter-title" tabindex="-1">
+      <div class="filter-drawer__header"><h2 class="heading-3" id="filter-title">Filter seedlings</h2><button class="icon-button" type="button" data-filter-close aria-label="Close filters">×</button></div>
+      <div data-mobile-filters></div>
+    </div>
+  </div>
+
+  <section class="catalog-results" aria-label="Seedling results">
+    {% include "products/components/skeleton-grid.html" %}
+    <div class="catalog-grid" data-product-grid>
+      {% for product in products %}{% include "products/components/product-card.html" %}{% endfor %}
+    </div>
+    <div data-empty-state hidden>
+      {% include "components/page-states/empty.html" with state_title="No seedlings match your selection" state_message="Try removing a filter or searching for another variety." %}
+    </div>
+    <div data-error-state hidden>
+      {% include "components/page-states/error.html" with state_title="We could not update these results" state_message="Clear your filters and try again." %}
+    </div>
+    <nav class="pagination" aria-label="Product pages" data-pagination></nav>
+  </section>
+</div>

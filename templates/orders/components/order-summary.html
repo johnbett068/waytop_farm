@@ -1,0 +1,18 @@
+<aside class="checkout-summary" data-checkout-summary aria-labelledby="checkout-summary-title">
+  <button class="checkout-summary__toggle" type="button" data-summary-toggle aria-expanded="false" aria-controls="checkout-summary-content">
+    <span>Order summary</span><strong data-summary-toggle-total>KES 0</strong><span aria-hidden="true">⌄</span>
+  </button>
+  <div id="checkout-summary-content" class="checkout-summary__content">
+    <div class="checkout-summary__heading"><div><p class="caption">Your estimate</p><h2 class="heading-3" id="checkout-summary-title">Order summary</h2></div><a href="{% url 'cart:cart' %}">Edit cart</a></div>
+    <div class="checkout-summary__items" data-checkout-summary-items></div>
+    <dl class="checkout-totals">
+      <div><dt>Subtotal</dt><dd data-checkout-subtotal>KES 0</dd></div>
+      <div><dt>Fulfillment</dt><dd data-checkout-delivery>Not selected</dd></div>
+      <div><dt>Payment</dt><dd data-checkout-payment>Not selected</dd></div>
+      <div><dt>Estimated savings</dt><dd data-checkout-savings>KES 0</dd></div>
+      <div class="checkout-totals__total"><dt>Estimated total</dt><dd data-checkout-total>KES 0</dd></div>
+    </dl>
+    <div class="checkout-summary__notes" data-summary-notes hidden><strong>Order notes</strong><span></span></div>
+    <p class="small">Prices, availability and fulfillment are revalidated before a real order is accepted. No stock is reserved here.</p>
+  </div>
+</aside>

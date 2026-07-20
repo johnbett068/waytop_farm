@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Shop Seedlings | WayTop Farm{% endblock %}
+{% block meta_description %}Browse vegetable, fruit and tree seedlings from WayTop Farm & Nurseries in Bomet, Kenya.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
+{% block content %}
+  <section class="catalog-hero section-sm">
+    <div class="container">
+      {% url 'products:shop' as shop_url %}{% include "products/components/breadcrumbs.html" with breadcrumbs=breadcrumbs only %}
+      <p class="caption">WayTop seedling catalog</p>
+      <h1 class="heading-1">Healthy beginnings for productive farms</h1>
+      <p class="body-large">Explore nursery-raised vegetable, fruit and tree seedlings with transparent units, growing guidance and clear availability.</p>
+      <form class="catalog-search" action="{% url 'products:search' %}" method="get" role="search">
+        <label class="sr-only" for="shop-search">Search seedlings and varieties</label>
+        <input class="form-control" id="shop-search" type="search" name="q" placeholder="Search tomatoes, Hass avocado, Grevillea…" autocomplete="off">
+        <button class="btn btn--primary" type="submit">Search</button>
+      </form>
+    </div>
+  </section>
+  <section class="section catalog-section"><div class="container">{% include "products/components/catalog-layout.html" %}</div></section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/catalog.js' %}"></script>{% endblock %}

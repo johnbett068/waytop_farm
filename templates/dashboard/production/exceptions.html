@@ -1,0 +1,21 @@
+{% extends "staff_base.html" %}{% load static %}
+{% block title %}Production Exceptions | Production{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-production.css' %}">{% endblock %}
+{% block content %}
+<section data-production-page data-state-mode="{{ state_mode }}" aria-labelledby="exceptions-title">
+  <header class="staff-page-header"><div><p class="staff-eyebrow">Decision-focused workspace</p><h1 id="exceptions-title">Production Exceptions</h1><p>Show only conditions requiring investigation, correction, hold, review or approval.</p></div><button class="staff-button staff-button--secondary" disabled>Export exception view</button></header>
+  {% include "dashboard/production/components/module-nav.html" %}{% include "dashboard/production/components/states.html" %}
+  <div data-production-success>
+    <div class="exception-summary"><span><strong>2</strong> Critical</span><span><strong>3</strong> Warning</span><span><strong>1</strong> Awaiting approval</span></div>
+    {% include "dashboard/production/components/exception-cards.html" %}
+    <section class="production-panel"><div class="production-panel__head"><div><p>Additional governed exceptions</p><h2>Resource and process risks</h2></div></div><div class="exception-table">
+      <article><span class="production-status production-status--danger">Poor establishment</span><strong>PB-CUT-2606-07 · Tree tomato cuttings</strong><p>Rooting observation below method-aware policy threshold.</p><small>Owner: Propagation lead · Open 4 hours</small></article>
+      <article><span class="production-status production-status--warning">Poor growth</span><strong>PB-TRE-2605-09 · Tree seedlings</strong><p>Growth observations require investigation against the production plan.</p><small>Owner: Growing lead · Open 1 day</small></article>
+      <article><span class="production-status production-status--danger">Poor quality</span><strong>PB-ORN-2605-02 · Ornamentals</strong><p>Quality observations require review before any release decision.</p><small>Owner: Quality role · Open 3 hours</small></article>
+      <article><span class="production-status production-status--warning">Delayed batch</span><strong>PB-HER-2606-05 · Rosemary cuttings</strong><p>Expected stage entry passed without an authorised transition.</p><small>Owner: Production planner · Open 2 days</small></article>
+      <article><span class="production-status production-status--warning">Overdue task</span><strong>Hardening review queue</strong><p>Required task is beyond its governed due window.</p><small>Owner: Hardening team · Due yesterday</small></article>
+      <article><span class="production-status production-status--warning">Input shortage</span><strong>Potting media allocation</strong><p>Planned batch work exceeds the recorded input projection.</p><small>Owner: Production planner · Due today</small></article>
+    </div></section>
+  </div>
+</section>
+{% endblock %}{% block extra_js %}<script src="{% static 'js/staff-production.js' %}"></script>{% endblock %}

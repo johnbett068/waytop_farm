@@ -1,0 +1,69 @@
+/* Motion utilities */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes image-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes card-lift {
+  from {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+  to {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up var(--transition-slow) both;
+}
+
+.animate-fade-in {
+  animation: fade-in var(--transition-normal) both;
+}
+
+.animate-image-zoom {
+  animation: image-zoom var(--transition-slow) both;
+}
+
+.animate-card-lift {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.animate-card-lift:hover {
+  animation: card-lift var(--transition-normal) forwards;
+}
+
+.animate-button-hover {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.animate-button-hover:hover,
+.animate-button-hover:focus-visible {
+  transform: translateY(-1px);
+}

@@ -1,0 +1,112 @@
+:root {
+  /* Brand palette */
+  --color-primary: #1F5E2D;
+  --color-secondary: #4CAF50;
+  --color-accent: #7BC96F;
+  --color-background: #F8F7F3;
+  --color-white: #FFFFFF;
+  --color-dark: #17212B;
+  --color-gray: #6B7280;
+  --color-border: #E5E7EB;
+  --color-success: #2E7D32;
+  --color-primary-hover: #174723;
+  --color-secondary-hover: #3D8F41;
+  --color-primary-soft: rgba(31, 94, 45, 0.1);
+  --color-surface-muted: #F3F6F1;
+  --color-border-strong: #B8C2B7;
+  --color-focus: #D4A017;
+  --color-warning-surface: #FFF4D6;
+  --color-warning-border: #E6BE55;
+  --color-warning-text: #5C4300;
+  --color-error: #A62B1F;
+  --color-error-surface: #FBE9E7;
+  --color-success-surface: #E8F5E9;
+  --color-success-text: #185C2C;
+  --color-info-surface: #E8F1F7;
+  --color-info-text: #234E70;
+  --color-nav-blue-soft: #EEF7FF;
+  --color-nav-blue-mist: #F5FBFF;
+  --color-nav-sage: #F4FBF4;
+  --color-nav-blue-glass: rgba(238, 247, 255, 0.86);
+  --color-nav-sage-glass: rgba(244, 251, 244, 0.86);
+  --gradient-nav-surface: linear-gradient(100deg, var(--color-nav-blue-mist) 0%, var(--color-white) 34%, var(--color-nav-sage) 69%, var(--color-nav-blue-soft) 100%);
+  --gradient-nav-glass: linear-gradient(100deg, var(--color-nav-blue-glass), var(--color-white-90) 38%, var(--color-nav-sage-glass) 74%, var(--color-nav-blue-glass));
+  --gradient-nav-cta: linear-gradient(135deg, var(--color-primary) 0%, var(--color-success) 58%, var(--color-secondary-hover) 100%);
+  --color-skeleton: #DCE4DA;
+  --color-accent-gold: #D4A017;
+  --color-primary-faint: rgba(31, 94, 45, 0.04);
+  --color-primary-muted: rgba(31, 94, 45, 0.08);
+  --color-accent-soft: rgba(123, 201, 111, 0.18);
+  --color-accent-muted: rgba(123, 201, 111, 0.12);
+  --color-dark-faint: rgba(23, 33, 43, 0.04);
+  --color-overlay: rgba(23, 33, 43, 0.4);
+  --color-white-80: rgba(255, 255, 255, 0.8);
+  --color-white-90: rgba(255, 255, 255, 0.9);
+  --color-white-96: rgba(255, 255, 255, 0.96);
+  --color-white-border: rgba(255, 255, 255, 0.45);
+  --color-white-faint: rgba(255, 255, 255, 0.12);
+  --color-hero-overlay: linear-gradient(90deg, rgba(9, 47, 24, 0.82) 0%, rgba(9, 47, 24, 0.67) 42%, rgba(9, 47, 24, 0.18) 76%, rgba(9, 47, 24, 0.06) 100%);
+  --color-hero-overlay-mobile: linear-gradient(90deg, rgba(9, 47, 24, 0.84) 0%, rgba(9, 47, 24, 0.67) 72%, rgba(9, 47, 24, 0.28) 100%);
+  --color-hero-transition: linear-gradient(180deg, transparent 0%, rgba(9, 47, 24, 0.12) 48%, rgba(9, 47, 24, 0.52) 100%);
+  --color-image-overlay: linear-gradient(135deg, rgba(31, 94, 45, 0.12), rgba(123, 201, 111, 0.16));
+  --color-connector: linear-gradient(90deg, rgba(31, 94, 45, 0.15), rgba(31, 94, 45, 0.05));
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 2.5rem;
+  --space-9: 3rem;
+  --space-10: 4rem;
+  --space-11: 5rem;
+  --space-12: 6rem;
+  --space-13: 7.5rem;
+
+  /* Radius scale */
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-round: 999px;
+
+  /* Elevation */
+  --shadow-sm: 0 10px 30px rgba(23, 33, 43, 0.06);
+  --shadow-md: 0 18px 40px rgba(23, 33, 43, 0.08);
+  --shadow-lg: 0 24px 60px rgba(23, 33, 43, 0.12);
+  --shadow-xl: 0 36px 90px rgba(23, 33, 43, 0.16);
+  --shadow-trust: 0 24px 70px rgba(14, 44, 24, 0.16);
+  --shadow-float: 0 12px 30px rgba(23, 33, 43, 0.06);
+  --shadow-nav: 0 10px 30px rgba(23, 33, 43, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(31, 94, 45, 0.08);
+  --shadow-nav-sticky: 0 18px 45px rgba(23, 33, 43, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  --shadow-nav-logo: 0 10px 28px rgba(31, 94, 45, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  --shadow-nav-cta: 0 12px 28px rgba(31, 94, 45, 0.24);
+
+  /* Motion */
+  --transition-fast: 180ms ease;
+  --transition-normal: 280ms ease;
+  --transition-slow: 420ms ease;
+  --transition-premium: 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Typography */
+  --font-sans: 'Manrope', 'Segoe UI', Roboto, Arial, sans-serif;
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* Text sizes */
+  --text-display-xl: clamp(2.5rem, 4vw, 4.25rem);
+  --text-display-lg: clamp(2rem, 3.2vw, 3rem);
+  --text-heading-1: clamp(1.75rem, 2.8vw, 2.5rem);
+  --text-heading-2: clamp(1.4rem, 2.2vw, 2rem);
+  --text-heading-3: clamp(1.1rem, 1.7vw, 1.35rem);
+  --text-heading-4: 1rem;
+  --text-body-lg: 1.05rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+}

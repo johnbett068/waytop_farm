@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Access denied | WayTop Farm{% endblock %}
+{% block content %}
+  <section class="status-page section">
+    <div class="container status-page__inner">
+      {% include "components/page-states/permission-denied.html" %}
+    </div>
+  </section>
+{% endblock %}

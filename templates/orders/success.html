@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Order confirmation | WayTop Farm & Nurseries{% endblock %}
+{% block meta_description %}Review your mock WayTop seedling order confirmation and continue to guest order tracking.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/order-tracking.css' %}">{% endblock %}
+{% block content %}
+<section class="order-page order-confirmation" data-order-confirmation data-state-mode="{{ state_mode }}" aria-labelledby="confirmation-title">
+  <div class="container order-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><span aria-current="page">Order confirmation</span></li></ol></nav>
+    <div class="tracking-state" data-confirmation-loading hidden role="status"><span class="tracking-spinner" aria-hidden="true"></span><h2 class="heading-3">Preparing your confirmation</h2><p>Loading the customer-safe order summary.</p></div>
+    <div class="tracking-state" data-confirmation-empty hidden><span class="commerce-empty__icon" aria-hidden="true">⌑</span><h2 class="heading-2">No confirmation is available</h2><p>Complete Checkout or use guest tracking with an existing order number.</p><a class="btn btn--primary" href="{% url 'orders:tracking' %}">Track an order</a></div>
+    <div class="tracking-state tracking-state--error" data-confirmation-expired hidden role="alert"><span class="commerce-empty__icon" aria-hidden="true">⌛</span><h2 class="heading-2">This confirmation link has expired</h2><p>Enter your order number and phone number to continue securely.</p><a class="btn btn--primary" href="{% url 'orders:tracking' %}">Track your order</a></div>
+    <div class="tracking-state tracking-state--error" data-confirmation-error hidden role="alert"><span class="commerce-empty__icon" aria-hidden="true">!</span><h2 class="heading-2">Confirmation is temporarily unavailable</h2><p>Your order is not affected. Try again or use guest tracking.</p><a class="btn btn--primary" href="{% url 'orders:success' %}">Try again</a></div>
+    <div class="tracking-state tracking-state--error" data-confirmation-permission hidden role="alert"><span class="commerce-empty__icon" aria-hidden="true">⌧</span><h2 class="heading-2">Confirmation access is unavailable</h2><p>This reusable state supports future confirmation-token or account restrictions.</p></div>
+    <div data-confirmation-success>
+    <div class="order-success-banner">
+      <span class="order-success-banner__icon" aria-hidden="true">✓</span>
+      <div><p class="caption">Mock order received</p><h1 class="heading-1" id="confirmation-title" tabindex="-1">Thank you, Jane Chebet</h1><p class="body-large">Your seedling request has been captured for this frontend preview. In production, WayTop will confirm availability and fulfillment before proceeding.</p></div>
+    </div>
+    <div class="order-confirmation-grid">
+      <main class="order-stack">
+        {% include "orders/components/order-header.html" %}
+        {% include "orders/components/order-items.html" %}
+        <section class="order-card" aria-labelledby="next-title"><p class="caption">What happens next</p><h2 class="heading-2" id="next-title">We’ll prepare your fulfillment update</h2><div class="next-steps"><div><span>1</span><p><strong>Availability review</strong><small>Products and current prices are confirmed.</small></p></div><div><span>2</span><p><strong>Fulfillment preparation</strong><small>Your seedlings are prepared for Home Delivery.</small></p></div><div><span>3</span><p><strong>Customer update</strong><small>Tracking reflects the next customer-facing milestone.</small></p></div></div></section>
+      </main>
+      <aside class="order-stack">
+        {% include "orders/components/summary-card.html" %}
+        <div class="order-actions-card"><a class="btn btn--primary" href="{% url 'orders:tracking' %}?state=success">Track Order</a><a class="btn btn--outline" href="{% url 'products:shop' %}">Continue Shopping</a><a class="btn btn--outline" href="tel:{{ business_phone.uri }}">Contact WayTop</a><button class="btn btn--outline" type="button" disabled>Download Receipt · Coming soon</button></div>
+      </aside>
+    </div>
+    {% include "orders/components/support-card.html" %}
+    <p class="order-preview-boundary small">Phase 2B frontend preview: no order, payment, receipt, notification, stock reservation or inventory movement has been created.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/order-tracking.js' %}"></script>{% endblock %}

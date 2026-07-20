@@ -1,0 +1,30 @@
+<form class="catalog-filters" id="catalog-filters" aria-label="Filter seedlings">
+  <div class="filter-group">
+    <h2 class="heading-4">Category</h2>
+    <label class="check-control"><input type="checkbox" name="category" value="all" checked><span>All seedlings</span></label>
+    {% for item in categories %}
+      <label class="check-control"><input type="checkbox" name="category" value="{{ item.slug }}"><span>{{ item.name }}</span></label>
+    {% endfor %}
+  </div>
+  <fieldset class="filter-group">
+    <legend class="heading-4">Availability</legend>
+    <label class="check-control"><input type="checkbox" name="status" value="in-stock"><span>In stock</span></label>
+    <label class="check-control"><input type="checkbox" name="status" value="low-stock"><span>Low stock</span></label>
+    <label class="check-control"><input type="checkbox" name="status" value="preorder"><span>Pre-order</span></label>
+    <label class="check-control"><input type="checkbox" name="status" value="out-of-stock"><span>Unavailable</span></label>
+  </fieldset>
+  <div class="filter-group">
+    <label class="form-label" for="max-price">Maximum price</label>
+    <select class="form-control" id="max-price" name="max-price">
+      <option value="">Any price</option>
+      <option value="100">Up to KES 100</option>
+      <option value="500">Up to KES 500</option>
+      <option value="2000">Up to KES 2,000</option>
+      <option value="3000">Up to KES 3,000</option>
+    </select>
+  </div>
+  <div class="catalog-filters__actions">
+    <button type="reset" class="btn btn--ghost">Clear filters</button>
+    <button type="button" class="btn btn--primary catalog-filters__done" data-filter-close>Show products</button>
+  </div>
+</form>

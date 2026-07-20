@@ -1,0 +1,8 @@
+<div class="page-state page-state--error" role="alert">
+  <span class="page-state__icon" aria-hidden="true">&#128274;</span>
+  <div>
+    <h1 class="heading-2">{{ state_title|default:"You do not have access" }}</h1>
+    <p class="body">{{ state_message|default:"Your account does not have permission to view this page or perform this action." }}</p>
+    <a class="btn btn--primary" href="{% url 'core:home' %}">Return home</a>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WayTop Farm">
+  <rect width="64" height="64" rx="14" fill="#f8f7f3"/>
+  <path d="M31 46V18" fill="none" stroke="#1f5e2d" stroke-width="4" stroke-linecap="round"/>
+  <path d="M31 23C21 22 15 16 15 8c9-1 16 4 19 12l-3 3Zm1-4C36 10 43 6 52 8c-2 9-8 14-18 14l-2-3Z" fill="#4caf50"/>
+  <path d="M10 46c15-6 29-6 44 0-15 2-27 6-35 11-4-3-7-6-9-11Z" fill="#2e7d32"/>
+</svg>

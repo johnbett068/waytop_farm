@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Staff Operations | WayTop Farm{% endblock %}</title>
+  {% load static %}
+  <link rel="icon" href="{% static 'images/logo/favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/base.css' %}"><link rel="stylesheet" href="{% static 'css/components.css' %}"><link rel="stylesheet" href="{% static 'css/staff.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="staff-body">
+  <a class="skip-link" href="#staff-main">Skip to operations content</a>
+  <div class="staff-app" data-staff-app>
+    {% include "dashboard/components/navigation.html" %}
+    <div class="staff-shell">
+      {% include "dashboard/components/topbar.html" %}
+      <main class="staff-main" id="staff-main" tabindex="-1">{% block content %}{% endblock %}</main>
+    </div>
+  </div>
+  {% include "dashboard/components/drawer.html" %}
+  {% include "dashboard/components/confirmation-dialog.html" %}
+  <script src="{% static 'js/staff.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

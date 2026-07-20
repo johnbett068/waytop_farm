@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page not found | WayTop Farm{% endblock %}
+{% block content %}
+  <section class="status-page section">
+    <div class="container status-page__inner">
+      <p class="caption">Error 404</p>
+      <h1 class="heading-1">We could not find that page</h1>
+      <p class="body-large">The link may be outdated or the address may have been entered incorrectly.</p>
+      <a class="btn btn--primary" href="{% url 'core:home' %}">Return to the homepage</a>
+    </div>
+  </section>
+{% endblock %}

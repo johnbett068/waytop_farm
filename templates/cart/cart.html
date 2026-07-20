@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Your Cart | WayTop Farm & Nurseries{% endblock %}
+{% block meta_description %}Review seedling quantities and estimated totals in your WayTop Farm cart.{% endblock %}
+{% block content %}
+<section class="commerce-page commerce-page--cart" data-commerce-page="cart" data-state-mode="{{ state_mode }}" aria-labelledby="cart-title">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><a href="{% url 'products:shop' %}">Shop</a></li><li><span aria-current="page">Cart</span></li></ol></nav>
+    <header class="commerce-page__header">
+      <div><p class="caption">Guest cart</p><h1 class="heading-1" id="cart-title">Review your seedlings</h1><p class="body-large">Adjust quantities before continuing. Fulfillment is selected at checkout; stock is confirmed later.</p></div>
+      <button class="btn btn--outline" type="button" data-clear-cart hidden>Clear cart</button>
+    </header>
+
+    <div class="commerce-loading" data-commerce-loading role="status"><div class="commerce-skeleton-list"><span></span><span></span></div><span class="sr-only">Loading your cart</span></div>
+    <div class="commerce-state commerce-state--error" data-commerce-error hidden><span class="commerce-empty__icon" aria-hidden="true">!</span><h2 class="heading-2">We could not load your cart</h2><p class="body">Your cart remains saved on this device. Try loading it again.</p><button class="btn btn--primary" type="button" data-commerce-retry>Try again</button></div>
+    <div class="commerce-state" data-cart-empty hidden><span class="commerce-empty__icon" aria-hidden="true">⌑</span><h2 class="heading-2">Your planting plan starts here</h2><p class="body-large">Add seedlings from the catalog, then return here to compare quantities and availability.</p><a class="btn btn--primary" href="{% url 'products:shop' %}">Explore seedlings</a></div>
+
+    <div class="cart-layout" data-cart-layout hidden>
+      <div><div class="cart-items" data-cart-items></div><a class="commerce-continue" href="{% url 'products:shop' %}"><span aria-hidden="true">←</span> Continue shopping</a></div>
+      <aside class="order-summary" aria-labelledby="order-summary-title">
+        <p class="caption">Your estimate</p><h2 class="heading-2" id="order-summary-title">Order summary</h2>
+        <dl><div><dt>Seedling items</dt><dd data-summary-items>0</dd></div><div><dt>Subtotal</dt><dd data-summary-subtotal>KES 0</dd></div><div><dt>Delivery</dt><dd>Confirmed later</dd></div><div class="order-summary__total"><dt>Estimated total</dt><dd data-summary-total>KES 0</dd></div></dl>
+        <div class="order-summary__notice" role="note"><strong>Delivery is coordinated separately</strong><span>Final availability, collection timing and delivery cost will be confirmed before an order is created.</span></div>
+        <a class="btn btn--primary" href="{% url 'orders:checkout' %}" data-prepare-checkout>Proceed to checkout</a>
+        <p class="small">No payment, order creation or stock reservation occurs in this frontend preview.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

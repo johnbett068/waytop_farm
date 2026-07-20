@@ -1,0 +1,33 @@
+{% extends "dashboard/delivery/base.html" %}
+{% block delivery_title %}Delivery Dashboard{% endblock %}
+{% block delivery_heading %}Delivery Dashboard{% endblock %}
+{% block delivery_intro %}Customer confirmation, dispatch and collection queues across authorized branches.{% endblock %}
+{% block delivery_actions %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:delivery_jobs' %}" data-delivery-capability="fulfillment.view">View delivery jobs</a>{% endblock %}
+{% block delivery_content %}
+<div class="delivery-metrics">
+  <article class="is-warning"><span>Awaiting customer confirmation</span><strong>4</strong><small>Contact before dispatch</small></article>
+  <article><span>Ready for dispatch</span><strong>3</strong><small>Checklist evidence visible</small></article>
+  <article class="is-info"><span>Out for delivery</span><strong>2</strong><small>External transport · no GPS</small></article>
+  <article class="is-success"><span>Delivered today</span><strong>6</strong><small>Received-by evidence recorded</small></article>
+  <article class="is-danger"><span>Failed deliveries</span><strong>1</strong><small>Reschedule requested</small></article>
+  <article><span>Customer pickups awaiting collection</span><strong>5</strong><small>Ready for Collection</small></article>
+</div>
+<div class="delivery-dashboard-grid">
+  <main class="delivery-column">
+    <section class="delivery-panel"><div class="delivery-panel__head"><div><p>Attention queue</p><h2>Delivery jobs requiring action</h2></div><a href="{% url 'dashboard:delivery_jobs' %}">View all</a></div>
+      <div class="delivery-job-list">
+        <a href="{% url 'dashboard:delivery_job_detail' 'DEL-260718-0048' %}"><span class="delivery-method">Home Delivery</span><div><strong>DEL-260718-0048 · Jane Chebet</strong><small>WTF-260716-1042 · Sotik Road, Bomet</small></div><span class="delivery-status is-warning">Awaiting Customer Confirmation</span><time>Expected 19 Jul</time></a>
+        <a href="{% url 'dashboard:delivery_job_detail' 'DEL-260718-0044' %}"><span class="delivery-method">Home Delivery</span><div><strong>DEL-260718-0044 · David Kiprotich</strong><small>WTF-260716-1038 · Kaplong</small></div><span class="delivery-status is-info">Out for Delivery</span><time>Expected today</time></a>
+        <a href="{% url 'dashboard:delivery_job_detail' 'PUP-260718-0021' %}"><span class="delivery-method">Customer Pickup</span><div><strong>PUP-260718-0021 · Mary Wambui</strong><small>WTF-260716-1039 · Bomet Nursery</small></div><span class="delivery-status is-success">Ready for Collection</span><time>Expected today</time></a>
+      </div>
+    </section>
+    <section class="delivery-panel"><div class="delivery-panel__head"><div><p>Today</p><h2>Recent activity</h2></div></div>
+      <ol class="delivery-activity"><li><span>✓</span><div><strong>Delivered</strong><p>DEL-260718-0041 received by K. Rotich.</p><time>10:36 am</time></div></li><li><span>⇢</span><div><strong>Dispatched</strong><p>DEL-260718-0044 moved to external hired pickup.</p><time>9:42 am</time></div></li><li><span>☎</span><div><strong>Confirmation received</strong><p>Jane Chebet prefers 19 July, 9–11 am.</p><time>9:18 am</time></div></li><li><span>↻</span><div><strong>Rescheduled</strong><p>DEL-260717-0037 moved to 20 July.</p><time>8:55 am</time></div></li></ol>
+    </section>
+  </main>
+  <aside class="delivery-column">
+    <section class="delivery-panel"><div class="delivery-panel__head"><div><p>Capability filtered</p><h2>Quick actions</h2></div></div><div class="delivery-quick-actions"><a href="{% url 'dashboard:delivery_jobs' %}" data-delivery-capability="fulfillment.view"><span>≡</span><strong>View all jobs</strong></a><a href="{% url 'dashboard:delivery_job_detail' 'DEL-260718-0048' %}" data-delivery-capability="fulfillment.assign"><span>☎</span><strong>Record confirmation</strong></a><a href="{% url 'dashboard:delivery_job_detail' 'DEL-260718-0044' %}" data-delivery-capability="fulfillment.dispatch"><span>⇢</span><strong>Dispatch delivery</strong></a><a href="{% url 'dashboard:delivery_job_detail' 'PUP-260718-0021' %}" data-delivery-capability="fulfillment.record_delivery"><span>✓</span><strong>Record collection</strong></a></div></section>
+    <section class="delivery-panel delivery-boundary-card"><span aria-hidden="true">◇</span><h2>Process tracking only</h2><p>WayTop arranges transport manually. This module never assigns drivers or vehicles, tracks GPS, optimizes routes, or calculates fuel and delivery cost.</p></section>
+  </aside>
+</div>
+{% endblock %}

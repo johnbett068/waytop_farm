@@ -1,0 +1,27 @@
+<footer class="site-footer" id="contact">
+  <div class="container site-footer__grid">
+    <div>
+      <p class="heading-3 site-footer__brand">WayTop Farm &amp; Nurseries</p>
+      <p class="body site-footer__copy">Healthy seedlings, dependable service and practical growing guidance from Bomet, Kenya.</p>
+    </div>
+    <div>
+      <h2 class="heading-4">Visit or call</h2>
+      <address class="site-footer__address">
+        Bomet County, Kenya<br>
+        <a href="tel:{{ business_phone.uri }}">{{ business_phone.display }}</a>
+      </address>
+    </div>
+    <div>
+      <h2 class="heading-4">Explore</h2>
+      <nav class="site-footer__links" aria-label="Footer navigation">
+        <a href="{% url 'products:categories' %}">Seedling categories</a>
+        <a href="{% url 'products:shop' %}">Shop seedlings</a>
+        <a href="{% url 'core:home' %}#featured">Featured seedlings</a>
+        <a href="{% url 'core:home' %}#how-it-works">How to order</a>
+      </nav>
+    </div>
+  </div>
+  <div class="container site-footer__bottom">
+    <small>&copy; {% now "Y" %} WayTop Farm &amp; Nurseries. All rights reserved.</small>
+  </div>
+</footer>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}WayTop Farm &amp; Nurseries{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Nursery-raised seedlings and practical farming support from WayTop Farm &amp; Nurseries in Bomet, Kenya.{% endblock %}">
+    <meta name="theme-color" content="#1f5e2d">
+
+    {% load static %}
+
+    <link rel="icon" href="{% static 'images/logo/favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'images/logo/apple-touch-icon.png' %}" sizes="180x180">
+
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/states.css' %}">
+    <link rel="stylesheet" href="{% static 'css/commerce.css' %}">
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    {% block page_decor %}{% endblock %}
+    {% include "includes/navbar.html" %}
+    {% include "includes/commerce-overlay.html" %}
+    {% include "components/page-states/offline-banner.html" %}
+
+    <main id="main-content" tabindex="-1">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "includes/footer.html" %}
+
+    {{ commerce_catalog|json_script:"commerce-catalog-data" }}
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/network-status.js' %}"></script>
+    <script src="{% static 'js/commerce.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

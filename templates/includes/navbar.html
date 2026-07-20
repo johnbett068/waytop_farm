@@ -1,0 +1,74 @@
+{% load static %}
+
+<div class="nav-shell">
+  <div class="nav-topbar">
+    <div class="container nav-topbar__inner">
+      <span class="nav-topbar__item">KEPHIS-conscious nursery practices</span>
+      <a class="nav-topbar__item nav-topbar__contact" href="tel:{{ business_phone.uri }}">Call {{ business_phone.display }}</a>
+      <span class="nav-topbar__item nav-topbar__item--desktop">Bomet, Kenya</span>
+    </div>
+  </div>
+
+  <header class="nav-bar" id="site-navbar">
+    <div class="container nav-bar__inner">
+      <a href="{% url 'core:home' %}" class="nav-bar__brand" aria-label="WayTop Farm home">
+        <picture class="nav-bar__logo-picture">
+          <source srcset="{% static 'images/logo/logo.svg' %}" type="image/svg+xml">
+          <img src="{% static 'images/logo/logo.webp' %}" width="360" height="80" alt="WayTop Farm & Nurseries" class="nav-bar__logo">
+        </picture>
+      </a>
+
+      <nav class="nav-bar__menu" aria-label="Primary navigation">
+        <a href="{% url 'core:home' %}" class="nav-bar__link"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Home</a>
+        <a href="{% url 'products:shop' %}" class="nav-bar__link"{% if request.resolver_match.url_name == 'shop' %} aria-current="page"{% endif %}>Shop</a>
+        <a href="{% url 'products:categories' %}" class="nav-bar__link"{% if request.resolver_match.url_name == 'categories' %} aria-current="page"{% endif %}>Categories</a>
+        <a href="{% url 'core:home' %}#why-waytop" class="nav-bar__link">Why WayTop</a>
+        <a href="{% url 'core:home' %}#how-it-works" class="nav-bar__link">How to order</a>
+      </nav>
+
+      <div class="nav-bar__actions">
+        <div class="nav-bar__utilities" aria-label="Shopping utilities">
+          <a href="{% url 'products:search' %}" class="nav-bar__icon btn btn--ghost" aria-label="Search seedlings">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg>
+          </a>
+          <a href="{% url 'wishlist:wishlist' %}" class="nav-bar__icon btn btn--ghost" aria-label="Wishlist, 0 items" data-wishlist-link>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.4 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg>
+            <span class="nav-bar__badge" data-wishlist-count hidden>0</span>
+          </a>
+          <button class="nav-bar__icon btn btn--ghost" type="button" aria-label="Open cart, 0 items" aria-controls="mini-cart" aria-expanded="false" data-cart-open>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 4h2l2 11h10l2-8H6M9 20h.01M17 20h.01"/></svg>
+            <span class="nav-bar__badge" data-cart-count hidden>0</span>
+          </button>
+        </div>
+        <a href="tel:{{ business_phone.uri }}" class="btn btn--outline nav-bar__account"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3 4 5c0 8 7 15 15 15l2-3-4-3-2 2c-3-1-6-4-7-7l2-2-3-4Z"/></svg>Talk to our team</a>
+      </div>
+
+      <button class="nav-bar__toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-drawer">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+</div>
+
+<div class="nav-drawer" id="nav-drawer" aria-hidden="true">
+  <button class="nav-drawer__backdrop" type="button" data-nav-close="true" aria-label="Close navigation menu"></button>
+  <div class="nav-drawer__panel" role="dialog" aria-modal="true" aria-label="Navigation menu" tabindex="-1">
+    <div class="nav-drawer__head">
+      <span class="heading-4">Menu</span>
+      <button class="nav-bar__toggle nav-bar__toggle--close" type="button" aria-label="Close navigation menu" data-nav-close="true">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+    </div>
+    <nav class="nav-drawer__menu" aria-label="Mobile navigation">
+      <a href="{% url 'core:home' %}" class="nav-drawer__link"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Home</a>
+      <a href="{% url 'products:shop' %}" class="nav-drawer__link"{% if request.resolver_match.url_name == 'shop' %} aria-current="page"{% endif %}>Shop seedlings</a>
+      <a href="{% url 'products:categories' %}" class="nav-drawer__link"{% if request.resolver_match.url_name == 'categories' %} aria-current="page"{% endif %}>Categories</a>
+      <a href="{% url 'products:search' %}" class="nav-drawer__link"{% if request.resolver_match.url_name == 'search' %} aria-current="page"{% endif %}>Search</a>
+      <a href="{% url 'wishlist:wishlist' %}" class="nav-drawer__link"{% if request.resolver_match.namespace == 'wishlist' %} aria-current="page"{% endif %}>Wishlist <span data-wishlist-count>0</span></a>
+      <button type="button" class="nav-drawer__link nav-drawer__button" data-cart-open aria-controls="mini-cart" aria-expanded="false">Cart <span data-cart-count>0</span></button>
+      <a href="{% url 'core:home' %}#why-waytop" class="nav-drawer__link">Why WayTop</a>
+      <a href="{% url 'core:home' %}#how-it-works" class="nav-drawer__link">How to order</a>
+    </nav>
+    <a href="tel:{{ business_phone.uri }}" class="btn btn--primary">Call our nursery team</a>
+  </div>
+</div>

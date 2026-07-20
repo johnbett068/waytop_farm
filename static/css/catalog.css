@@ -1,0 +1,184 @@
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.catalog-hero {
+  background: linear-gradient(135deg, var(--color-accent-muted), var(--color-background));
+  border-bottom: 1px solid var(--color-border);
+}
+
+.catalog-hero h1 { max-width: 48rem; margin: var(--space-3) 0 var(--space-4); }
+.catalog-hero .body-large { max-width: 46rem; margin-bottom: 0; }
+
+.catalog-search { display: flex; gap: var(--space-3); max-width: 43rem; margin-top: var(--space-6); }
+.catalog-search .form-control { min-width: 0; flex: 1; }
+
+.form-control {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-dark);
+}
+
+.form-label { display: block; margin-bottom: var(--space-2); font-weight: 700; }
+.catalog-section { background: var(--color-white); }
+.catalog-layout { display: grid; gap: var(--space-6); }
+
+.catalog-toolbar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  align-items: center;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.catalog-toolbar__count { margin: 0; color: var(--color-gray); }
+.sort-control { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-small); font-weight: 700; }
+.sort-control .form-control { flex: 1; }
+.catalog-sidebar { display: none; }
+
+.catalog-results { min-width: 0; }
+.catalog-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-5); }
+
+.catalog-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.catalog-card:hover, .catalog-card:focus-within { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.catalog-card[hidden] { display: none; }
+.catalog-card__media { position: relative; display: block; aspect-ratio: 5 / 4; overflow: hidden; background: var(--color-surface-muted); }
+.catalog-card__media img, .product-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.catalog-card__media .stock-badge, .product-gallery > .stock-badge { position: absolute; top: var(--space-3); left: var(--space-3); }
+.catalog-card__body { display: grid; gap: var(--space-3); padding: var(--space-5); }
+.catalog-card__category { margin: 0; color: var(--color-primary); font-size: var(--text-caption); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+.catalog-card__title, .catalog-card__variety, .catalog-card__description { margin: 0; }
+.catalog-card__variety { color: var(--color-gray); font-size: var(--text-small); }
+.catalog-card__description { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.catalog-card__branch { display: flex; gap: var(--space-2); align-items: center; margin: 0; color: var(--color-gray); font-size: var(--text-caption); }
+.catalog-card__branch span { color: var(--color-success); }
+.catalog-card__footer { display: flex; align-items: end; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
+.catalog-price { display: grid; gap: var(--space-1); margin: 0; color: var(--color-primary); }
+.catalog-price strong { font-size: 1.1rem; }
+.catalog-price span { color: var(--color-gray); font-size: var(--text-caption); }
+.btn--compact { min-height: 2.5rem; padding: 0.7rem 1rem; }
+
+.category-list-card__image.catalog-image--vegetable { background-position: 12% 58%; }
+.category-list-card__image.catalog-image--fruit { background-position: 65% 58%; }
+.category-list-card__image.catalog-image--tree { background-position: 88% 58%; }
+.category-list-card__image.catalog-image--ornamental { background-position: 42% 58%; }
+
+.stock-badge { display: inline-flex; width: fit-content; padding: 0.45rem 0.7rem; border-radius: var(--radius-round); font-size: var(--text-caption); font-weight: 800; }
+.stock-badge--in-stock { background: var(--color-success-surface); color: var(--color-success-text); }
+.stock-badge--low-stock { background: var(--color-warning-surface); color: var(--color-warning-text); }
+.stock-badge--preorder { background: var(--color-info-surface); color: var(--color-info-text); }
+.stock-badge--out-of-stock { background: var(--color-error-surface); color: var(--color-error); }
+
+.catalog-filters { display: grid; gap: var(--space-6); }
+.filter-group { display: grid; gap: var(--space-3); margin: 0; padding: 0 0 var(--space-5); border: 0; border-bottom: 1px solid var(--color-border); }
+.filter-group h2, .filter-group legend { margin-bottom: var(--space-2); }
+.check-control { display: flex; align-items: center; gap: var(--space-3); min-height: 2.5rem; cursor: pointer; }
+.check-control input { width: 1.2rem; height: 1.2rem; accent-color: var(--color-primary); }
+.catalog-filters__actions { display: grid; gap: var(--space-2); }
+
+.filter-drawer { position: fixed; inset: 0; z-index: 1200; visibility: hidden; opacity: 0; transition: opacity var(--transition-fast), visibility var(--transition-fast); }
+.filter-drawer.is-open { visibility: visible; opacity: 1; }
+.filter-drawer__backdrop { position: absolute; inset: 0; width: 100%; border: 0; background: var(--color-overlay); }
+.filter-drawer__panel { position: absolute; inset: 0 0 0 auto; width: min(90vw, 24rem); padding: var(--space-6); overflow-y: auto; background: var(--color-white); transform: translateX(100%); transition: transform var(--transition-normal); }
+.filter-drawer.is-open .filter-drawer__panel { transform: translateX(0); }
+.filter-drawer__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
+.filter-drawer__header h2 { margin: 0; }
+.icon-button { display: inline-grid; width: 2.75rem; height: 2.75rem; place-items: center; border: 1px solid var(--color-border); border-radius: var(--radius-round); background: var(--color-white); font-size: 1.5rem; cursor: pointer; }
+
+.pagination { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); margin-top: var(--space-8); }
+.pagination button { min-width: 2.75rem; height: 2.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-round); background: var(--color-white); color: var(--color-dark); cursor: pointer; }
+.pagination button[aria-current="page"] { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-white); }
+
+.skeleton-card { display: grid; gap: var(--space-3); height: 26rem; padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-surface-muted); }
+.skeleton-card span { display: block; height: 1.1rem; border-radius: var(--radius-sm); background: var(--color-skeleton); animation: skeleton-pulse 1.2s ease-in-out infinite alternate; }
+.skeleton-card span:first-child { height: 14rem; }
+.skeleton-card span:nth-child(3) { width: 72%; }
+.skeleton-card span:last-child { width: 45%; }
+@keyframes skeleton-pulse { to { opacity: 0.45; } }
+
+.search-summary { min-height: 1.5rem; margin: var(--space-4) 0 0; color: var(--color-gray); }
+.category-listing { display: grid; gap: var(--space-6); }
+.category-list-card { display: grid; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-white); box-shadow: var(--shadow-sm); }
+.category-list-card__image { min-height: 15rem; background-image: var(--color-image-overlay), url('../images/hero/hero-photo.webp'); background-size: cover; }
+.category-list-card > div:last-child { padding: var(--space-6); }
+.category-list-card h2 { margin: var(--space-2) 0 var(--space-3); }
+
+.product-detail { background: var(--color-white); }
+.product-detail__layout { display: grid; gap: var(--space-7); align-items: center; }
+.product-gallery { position: relative; overflow: hidden; aspect-ratio: 5 / 4; border-radius: var(--radius-xl); background-color: var(--color-surface-muted); box-shadow: var(--shadow-md); }
+.product-summary h1 { margin: var(--space-2) 0; }
+.product-summary__variety { margin: 0 0 var(--space-5); color: var(--color-gray); }
+.product-summary__price { display: grid; gap: var(--space-1); margin: var(--space-6) 0; color: var(--color-primary); }
+.product-summary__price strong { font-size: var(--text-heading-1); }
+.product-summary__price span { color: var(--color-gray); }
+.product-summary__notice { display: grid; gap: var(--space-1); margin-bottom: var(--space-5); padding: var(--space-4); border-left: 4px solid var(--color-accent-gold); border-radius: var(--radius-sm); background: var(--color-warning-surface); }
+.product-information { background: var(--color-background); }
+.specification-grid { display: grid; gap: var(--space-3); margin: 0; }
+.specification-grid div { padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-white); }
+.specification-grid dt { color: var(--color-gray); font-size: var(--text-small); }
+.specification-grid dd { margin: var(--space-2) 0 0; font-weight: 700; }
+.planting-guide { background: var(--color-white); }
+.planting-guide__layout { display: grid; gap: var(--space-7); }
+.planting-guide h2 { margin: var(--space-3) 0; }
+.planting-steps { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.planting-steps li { display: flex; gap: var(--space-4); align-items: flex-start; padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.planting-steps span { display: grid; flex: 0 0 2.25rem; height: 2.25rem; place-items: center; border-radius: var(--radius-round); background: var(--color-primary); color: var(--color-white); font-weight: 800; }
+.planting-steps p { margin: var(--space-1) 0 0; }
+.branch-availability { background: var(--color-background); }
+.branch-grid { display: grid; gap: var(--space-4); }
+.branch-stock-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-white); }
+.branch-stock-card h3, .branch-stock-card p { margin: 0; }
+.rail-heading { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); }
+.rail-heading h2 { margin: var(--space-2) 0 0; }
+.rail-heading > a { color: var(--color-primary); font-weight: 700; text-decoration: underline; }
+.product-rail--muted { background: var(--color-background); }
+.data-note { margin-bottom: 0; color: var(--color-gray); font-size: var(--text-small); }
+
+@media (min-width: 576px) {
+  .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .specification-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .category-list-card { grid-template-columns: minmax(14rem, 0.8fr) 1.2fr; }
+}
+
+@media (min-width: 900px) {
+  .catalog-layout { grid-template-columns: 16rem minmax(0, 1fr); }
+  .catalog-toolbar { grid-column: 1 / -1; grid-template-columns: 1fr auto; }
+  .catalog-toolbar__filter { display: none; }
+  .sort-control { grid-column: auto; }
+  .catalog-sidebar { display: block; position: sticky; top: 8rem; align-self: start; padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-white); }
+  .catalog-filters__done { display: none; }
+  .catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .catalog-grid--rail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .product-detail__layout { grid-template-columns: minmax(0, 1.1fr) minmax(22rem, 0.9fr); gap: var(--space-10); }
+  .planting-guide__layout { grid-template-columns: 0.8fr 1.2fr; }
+  .branch-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .branch-stock-card { display: grid; }
+}
+
+@media (max-width: 575px) {
+  .catalog-search { display: grid; }
+  .catalog-card__footer { align-items: stretch; flex-direction: column; }
+  .catalog-card__footer .btn { width: 100%; }
+}

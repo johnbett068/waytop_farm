@@ -1,0 +1,10 @@
+<nav class="inventory-module-nav" aria-label="Inventory sections">
+  <a href="{% url 'dashboard:inventory' %}"{% if request.resolver_match.url_name == 'inventory' %} aria-current="page"{% endif %}>Dashboard</a>
+  <a href="{% url 'dashboard:inventory_items' %}"{% if request.resolver_match.url_name == 'inventory_items' or request.resolver_match.url_name == 'inventory_item_detail' %} aria-current="page"{% endif %}>Stock Items</a>
+  <a href="{% url 'dashboard:inventory_lots' %}"{% if request.resolver_match.url_name == 'inventory_lots' %} aria-current="page"{% endif %}>Lots</a>
+  <a href="{% url 'dashboard:inventory_movements' %}"{% if request.resolver_match.url_name == 'inventory_movements' %} aria-current="page"{% endif %}>Movements</a>
+  <a href="{% url 'dashboard:inventory_receiving' %}"{% if request.resolver_match.url_name == 'inventory_receiving' %} aria-current="page"{% endif %}>Receiving <span>3</span></a>
+  <a href="{% url 'dashboard:inventory_transfers' %}"{% if request.resolver_match.url_name == 'inventory_transfers' %} aria-current="page"{% endif %}>Transfers <span>2</span></a>
+  <a href="{% url 'dashboard:inventory_counts' %}"{% if request.resolver_match.url_name == 'inventory_counts' %} aria-current="page"{% endif %}>Counts <span>2</span></a>
+  <a href="{% url 'dashboard:inventory_adjustments' %}"{% if request.resolver_match.url_name == 'inventory_adjustments' %} aria-current="page"{% endif %}>Adjustments <span>3</span></a>
+</nav>

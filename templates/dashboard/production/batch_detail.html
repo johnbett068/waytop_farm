@@ -1,0 +1,191 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}{{ batch_number }} | Production Workspace{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-production.css' %}">{% endblock %}
+{% block content %}
+<section data-production-page data-production-workspace data-state-mode="{{ state_mode }}" aria-labelledby="batch-title">
+  <nav class="staff-breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'dashboard:production' %}">Production</a><span>/</span>
+    <a href="{% url 'dashboard:production_batches' %}">Batches</a><span>/</span>
+    <span aria-current="page">{{ batch_number }}</span>
+  </nav>
+  {% include "dashboard/production/components/states.html" %}
+  <div data-production-success>
+    <header class="production-workspace-header">
+      <div class="production-workspace-heading">
+        <p>Production batch workspace <span>Mock record</span></p>
+        <div><h1 id="batch-title">Grafted Hass Avocado</h1><span class="production-status production-status--warning">Needs attention</span></div>
+        <p>{{ batch_number }} · Ndaraweta Nursery · Grafting House G-1</p>
+      </div>
+      <div class="production-workspace-actions">
+        <button class="staff-button staff-button--secondary" type="button" disabled>Record activity</button>
+        <button class="staff-button staff-button--primary" type="button" disabled>Add task</button>
+        <small>Preview controls only</small>
+      </div>
+    </header>
+
+    <section class="production-workspace-summary" aria-label="Batch at a glance">
+      <div><span>Current stage</span><strong>Establishment</strong><small>Entered 8 Jul 2026</small></div>
+      <div><span>Supervisor</span><strong>Peter Kiptoo</strong><small>Nursery Supervisor</small></div>
+      <div><span>Expected release</span><strong>29 Jul 2026</strong><small>12 days remaining</small></div>
+      <div><span>Progress</span><strong>42%</strong><span class="workspace-progress" aria-label="Mock progress: 42 percent"><i style="width:42%"></i></span></div>
+    </section>
+
+    <div class="production-workspace-tabs" data-workspace-tabs>
+      <div class="workspace-tab-list" role="tablist" aria-label="Production batch sections">
+        <button id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" tabindex="0" data-workspace-tab="overview"><span aria-hidden="true">⌂</span>Overview</button>
+        <button id="tab-tasks" role="tab" aria-selected="false" aria-controls="panel-tasks" tabindex="-1" data-workspace-tab="tasks"><span aria-hidden="true">✓</span>Tasks <b>8</b></button>
+        <button id="tab-labour" role="tab" aria-selected="false" aria-controls="panel-labour" tabindex="-1" data-workspace-tab="labour"><span aria-hidden="true">♙</span>Labour <b>5</b></button>
+        <button id="tab-inputs" role="tab" aria-selected="false" aria-controls="panel-inputs" tabindex="-1" data-workspace-tab="inputs"><span aria-hidden="true">◇</span>Inputs <b>7</b></button>
+        <button id="tab-expenses" role="tab" aria-selected="false" aria-controls="panel-expenses" tabindex="-1" data-workspace-tab="expenses"><span aria-hidden="true">¤</span>Expenses <b>4</b></button>
+        <button id="tab-quality" role="tab" aria-selected="false" aria-controls="panel-quality" tabindex="-1" data-workspace-tab="quality"><span aria-hidden="true">◎</span>Quality</button>
+        <button id="tab-photos" role="tab" aria-selected="false" aria-controls="panel-photos" tabindex="-1" data-workspace-tab="photos"><span aria-hidden="true">▧</span>Photos <b>4</b></button>
+        <button id="tab-activity" role="tab" aria-selected="false" aria-controls="panel-activity" tabindex="-1" data-workspace-tab="activity"><span aria-hidden="true">↻</span>Activity log</button>
+      </div>
+
+      <section id="panel-overview" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-overview" tabindex="0" data-workspace-panel="overview">
+        <div class="workspace-section-heading"><div><p>Operational snapshot</p><h2>Batch overview</h2></div><span>Last updated 17 Jul, 10:42 am</span></div>
+        <div class="workspace-overview-grid">
+          <article class="production-panel workspace-details-card">
+            <div class="production-panel__head"><div><p>Batch information</p><h3>Production details</h3></div></div>
+            <dl>
+              <div><dt>Batch number</dt><dd>{{ batch_number }}</dd></div><div><dt>Crop</dt><dd>Avocado</dd></div>
+              <div><dt>Variety</dt><dd>Hass</dd></div><div><dt>Propagation method</dt><dd>Grafting</dd></div>
+              <div><dt>Current stage</dt><dd>Establishment</dd></div><div><dt>Current status</dt><dd><span class="production-status production-status--warning">Needs attention</span></dd></div>
+              <div><dt>Responsible supervisor</dt><dd>Peter Kiptoo</dd></div><div><dt>Production area</dt><dd>Grafting House G-1</dd></div>
+              <div><dt>Start date</dt><dd>1 Jul 2026</dd></div><div><dt>Expected release</dt><dd>29 Jul 2026</dd></div>
+            </dl>
+          </article>
+          <article class="production-panel workspace-health-card">
+            <div class="production-panel__head"><div><p>Stage progress</p><h3>Batch health</h3></div><span class="production-status production-status--danger">High loss</span></div>
+            <div class="workspace-health-score"><strong>142</strong><span>living grafts observed</span><small>of 180 propagation units placed</small></div>
+            <div class="workspace-stat-pair"><div><span>Failed establishment</span><strong>38</strong></div><div><span>Next inspection</span><strong>18 Jul</strong></div></div>
+            <p class="workspace-callout">Survival requires supervisor review. Percentages and thresholds shown here are mock projections, not browser calculations.</p>
+          </article>
+        </div>
+        <section class="production-panel">
+          <div class="production-panel__head"><div><p>Canonical lifecycle</p><h3>Production journey</h3></div><span>Establishment current</span></div>
+          <ol class="workspace-stage-track">
+            <li class="is-complete"><span>1</span><strong>Material receipt</strong><small>28 Jun</small></li>
+            <li class="is-complete"><span>2</span><strong>Source lot</strong><small>30 Jun</small></li>
+            <li class="is-complete"><span>3</span><strong>Batch created</strong><small>1 Jul</small></li>
+            <li class="is-complete"><span>4</span><strong>Propagation</strong><small>3 Jul</small></li>
+            <li class="is-current"><span>5</span><strong>Establishment</strong><small>Current</small></li>
+            <li><span>6</span><strong>Growing</strong><small>Planned</small></li>
+            <li><span>7</span><strong>Hardening</strong><small>Planned</small></li>
+            <li><span>8</span><strong>Quality & release</strong><small>Pending</small></li>
+          </ol>
+          <p class="workspace-boundary-note"><strong>Inventory boundary:</strong> released plants remain Production WIP until Inventory independently posts an authorised production-receipt movement.</p>
+        </section>
+        <div class="workspace-quick-stats" aria-label="Quick statistics">
+          <article><span>Open tasks</span><strong>3</strong><small>1 high priority</small></article>
+          <article><span>Labour records</span><strong>5</strong><small>Multiple workers supported</small></article>
+          <article><span>Input records</span><strong>7</strong><small>No stock deducted</small></article>
+          <article><span>Expense records</span><strong>4</strong><small>No accounting entries</small></article>
+        </div>
+      </section>
+
+      <section id="panel-tasks" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-tasks" tabindex="0" data-workspace-panel="tasks" hidden>
+        <div class="workspace-section-heading"><div><p>Work planning</p><h2>Tasks</h2><span>Tasks describe work; they do not record cost or consume inventory.</span></div><button class="staff-button staff-button--primary" disabled>Add task</button></div>
+        <div class="workspace-table-wrap"><table class="workspace-record-table"><thead><tr><th>Task</th><th>Assigned staff</th><th>Priority</th><th>Planned</th><th>Actual</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+          <tr><td><strong>Prepare grafting area</strong><small>TSK-041</small></td><td>Daniel & Mercy</td><td><span class="record-priority record-priority--medium">Medium</span></td><td>1 Jul</td><td>1 Jul</td><td><span class="production-status production-status--success">Completed</span></td><td>Benches sanitised</td></tr>
+          <tr><td><strong>Graft rootstocks</strong><small>TSK-044</small></td><td>Grafting Team A</td><td><span class="record-priority record-priority--high">High</span></td><td>2 Jul</td><td>3 Jul</td><td><span class="production-status production-status--success">Completed</span></td><td>180 grafts placed</td></tr>
+          <tr><td><strong>Water and inspect unions</strong><small>TSK-052</small></td><td>Mercy Cherono</td><td><span class="record-priority record-priority--high">High</span></td><td>18 Jul</td><td>—</td><td><span class="production-status production-status--info">In progress</span></td><td>Review mortality exception</td></tr>
+          <tr><td><strong>Transplant established grafts</strong><small>TSK-061</small></td><td>Unassigned</td><td><span class="record-priority record-priority--medium">Medium</span></td><td>21 Jul</td><td>—</td><td><span class="production-status production-status--neutral">Planned</span></td><td>Await establishment review</td></tr>
+          <tr><td><strong>Harden seedlings</strong><small>TSK-074</small></td><td>Hardening Team</td><td><span class="record-priority">Normal</span></td><td>25 Jul</td><td>—</td><td><span class="production-status production-status--neutral">Planned</span></td><td>Stage transition remains separate</td></tr>
+          <tr><td><strong>Final quality inspection</strong><small>TSK-080</small></td><td>Quality Reviewer</td><td><span class="record-priority record-priority--high">High</span></td><td>28 Jul</td><td>—</td><td><span class="production-status production-status--neutral">Planned</span></td><td>Independent release review</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="panel-labour" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-labour" tabindex="0" data-workspace-panel="labour" hidden>
+        <div class="workspace-section-heading"><div><p>People and time</p><h2>Labour records</h2><span>Multiple labour entries may link to one task. Estimated values are mock projections only.</span></div><button class="staff-button staff-button--primary" disabled>Record labour</button></div>
+        <div class="workspace-metric-strip"><div><span>Entries</span><strong>5</strong></div><div><span>Workers represented</span><strong>7</strong></div><div><span>Recorded time</span><strong>68 hours</strong></div><div><span>Estimated labour</span><strong>KSh 13,600</strong><small>Not calculated here</small></div></div>
+        <div class="workspace-table-wrap"><table class="workspace-record-table"><thead><tr><th>Worker</th><th>Staff type</th><th>Hours / days</th><th>Rate</th><th>Estimated cost</th><th>Linked task</th><th>Supervisor</th><th>Notes</th></tr></thead><tbody>
+          <tr><td><strong>Daniel Kiprotich</strong></td><td>Permanent</td><td>8 hrs · 1 day</td><td>KSh 200/hr</td><td>KSh 1,600</td><td>Prepare grafting area</td><td>Peter Kiptoo</td><td>Bench preparation</td></tr>
+          <tr><td><strong>Mercy Cherono</strong></td><td>Permanent</td><td>16 hrs · 2 days</td><td>KSh 200/hr</td><td>KSh 3,200</td><td>Graft rootstocks</td><td>Peter Kiptoo</td><td>Lead grafter</td></tr>
+          <tr><td><strong>Team A · 3 workers</strong></td><td>Casual</td><td>24 hrs · 1 day</td><td>KSh 180/hr</td><td>KSh 4,320</td><td>Graft rootstocks</td><td>Peter Kiptoo</td><td>Three separate future records</td></tr>
+          <tr><td><strong>Mercy Cherono</strong></td><td>Permanent</td><td>12 hrs · 3 days</td><td>KSh 200/hr</td><td>KSh 2,400</td><td>Water and inspect unions</td><td>Peter Kiptoo</td><td>Daily observation rounds</td></tr>
+          <tr><td><strong>Joseph Langat</strong></td><td>Contract</td><td>8 hrs · 1 day</td><td>KSh 260/hr</td><td>KSh 2,080</td><td>Water and inspect unions</td><td>Peter Kiptoo</td><td>Specialist inspection</td></tr>
+        </tbody></table></div>
+        <p class="workspace-boundary-note"><strong>Costing boundary:</strong> rates and estimated costs are display fixtures. A future costing service owns valuation rules, effective dates, rounding, and totals.</p>
+      </section>
+
+      <section id="panel-inputs" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-inputs" tabindex="0" data-workspace-panel="inputs" hidden>
+        <div class="workspace-section-heading"><div><p>Materials associated with work</p><h2>Input usage</h2><span>Usage records are not Inventory deductions or Procurement receipts.</span></div><button class="staff-button staff-button--primary" disabled>Record input</button></div>
+        <div class="workspace-table-wrap"><table class="workspace-record-table"><thead><tr><th>Item</th><th>Quantity</th><th>Unit</th><th>Est. unit cost</th><th>Est. total</th><th>Supplier</th><th>Linked task</th><th>Batch</th></tr></thead><tbody>
+          <tr><td><strong>Hass scion material</strong><small>Source lot SL-SCION-2606-05</small></td><td>180</td><td>pieces</td><td>KSh 35</td><td>KSh 6,300</td><td>WayTop mother block</td><td>Graft rootstocks</td><td>{{ batch_number }}</td></tr>
+          <tr><td><strong>Avocado rootstocks</strong><small>Source lot SL-ROOT-2606-02</small></td><td>180</td><td>plants</td><td>KSh 55</td><td>KSh 9,900</td><td>Internal nursery</td><td>Graft rootstocks</td><td>{{ batch_number }}</td></tr>
+          <tr><td><strong>Growing media</strong></td><td>12</td><td>bags</td><td>KSh 680</td><td>KSh 8,160</td><td>Future supplier</td><td>Prepare grafting area</td><td>{{ batch_number }}</td></tr>
+          <tr><td><strong>Seedling trays</strong></td><td>15</td><td>trays</td><td>KSh 420</td><td>KSh 6,300</td><td>Future supplier</td><td>Prepare grafting area</td><td>{{ batch_number }}</td></tr>
+          <tr><td><strong>Grafting tape</strong></td><td>4</td><td>rolls</td><td>KSh 350</td><td>KSh 1,400</td><td>Future supplier</td><td>Graft rootstocks</td><td>{{ batch_number }}</td></tr>
+          <tr><td><strong>Copper fungicide</strong></td><td>0.4</td><td>kg</td><td>KSh 1,250</td><td>KSh 500</td><td>Future supplier</td><td>Water and inspect unions</td><td>{{ batch_number }}</td></tr>
+          <tr><td><strong>Plant labels</strong></td><td>180</td><td>pieces</td><td>KSh 4</td><td>KSh 720</td><td>Future supplier</td><td>Graft rootstocks</td><td>{{ batch_number }}</td></tr>
+        </tbody></table></div>
+        <p class="workspace-boundary-note"><strong>Inventory boundary:</strong> these are mock Production usage projections. Future Inventory validates and posts its own lot/location movements; Production cannot edit stock balances.</p>
+      </section>
+
+      <section id="panel-expenses" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-expenses" tabindex="0" data-workspace-panel="expenses" hidden>
+        <div class="workspace-section-heading"><div><p>Non-inventory operating spend</p><h2>Expenses</h2><span>Expenses remain distinct from material inputs and labour time records.</span></div><button class="staff-button staff-button--primary" disabled>Record expense</button></div>
+        <div class="workspace-metric-strip workspace-metric-strip--compact"><div><span>Recorded items</span><strong>4</strong></div><div><span>Mock estimated total</span><strong>KSh 9,450</strong><small>No accounting entry</small></div></div>
+        <div class="workspace-table-wrap"><table class="workspace-record-table"><thead><tr><th>Category</th><th>Description</th><th>Amount</th><th>Date</th><th>Recorded by</th><th>Linked task</th></tr></thead><tbody>
+          <tr><td><span class="expense-category">Water</span></td><td>Irrigation allocation for establishment area</td><td><strong>KSh 1,250</strong></td><td>8 Jul 2026</td><td>Peter Kiptoo</td><td>Water and inspect unions</td></tr>
+          <tr><td><span class="expense-category">Equipment hire</span></td><td>Misting unit hire for graft recovery</td><td><strong>KSh 4,800</strong></td><td>3 Jul 2026</td><td>Faith Rono</td><td>Graft rootstocks</td></tr>
+          <tr><td><span class="expense-category">Transport</span></td><td>Source material transfer to Ndaraweta</td><td><strong>KSh 2,200</strong></td><td>1 Jul 2026</td><td>John Bett</td><td>—</td></tr>
+          <tr><td><span class="expense-category">Repairs</span></td><td>Grafting bench surface repair</td><td><strong>KSh 1,200</strong></td><td>1 Jul 2026</td><td>Daniel Kiprotich</td><td>Prepare grafting area</td></tr>
+        </tbody></table></div>
+        <p class="workspace-boundary-note"><strong>Finance boundary:</strong> this tab describes future batch-attributed expense evidence. It does not create a payable, payment, ledger posting, or accounting transaction.</p>
+      </section>
+
+      <section id="panel-quality" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-quality" tabindex="0" data-workspace-panel="quality" hidden>
+        <div class="workspace-section-heading"><div><p>Observed condition and release evidence</p><h2>Quality</h2><span>Quantities are mock observations; future services own reconciliation and derived metrics.</span></div><button class="staff-button staff-button--primary" disabled>Record inspection</button></div>
+        <div class="quality-metric-grid">
+          <article><span>Propagation material received</span><strong>180</strong><small>grafting units</small></article>
+          <article><span>Successfully established</span><strong>142</strong><small>observed plants</small></article>
+          <article class="is-warning"><span>Failed establishment</span><strong>38</strong><small>recorded losses</small></article>
+          <article><span>Germinated</span><strong>N/A</strong><small>not applicable to grafting</small></article>
+          <article><span>Healthy seedlings</span><strong>124</strong><small>latest inspection</small></article>
+          <article class="is-warning"><span>Weak seedlings</span><strong>14</strong><small>monitoring required</small></article>
+          <article class="is-danger"><span>Diseased</span><strong>4</strong><small>isolated for review</small></article>
+          <article><span>Discarded</span><strong>38</strong><small>traceable loss records</small></article>
+          <article class="is-accent"><span>Estimated release quantity</span><strong>118</strong><small>projection only</small></article>
+        </div>
+        <div class="workspace-quality-grid">
+          <article class="production-panel"><div class="production-panel__head"><div><p>Supervisor observation</p><h3>Quality notes</h3></div><span class="production-status production-status--warning">Review due</span></div><p>Most graft unions are forming evenly. Four plants show leaf-spot symptoms and remain isolated. Weak plants need a second establishment inspection before hardening.</p><div class="quality-hold-box"><strong>No active quality hold</strong><span>An exception does not create a hold. A future authorised command is required.</span></div></article>
+          <article class="production-panel release-panel"><div class="production-panel__head"><div><p>Separation of duty</p><h3>Release readiness</h3></div><span class="production-status production-status--neutral">Not eligible</span></div><p>Release requires an accepted quality review, grades and quantities, no blocking hold, capability and independent approval.</p><button class="staff-button staff-button--primary" disabled>Approve release</button><small>Approval does not create Inventory.</small></article>
+        </div>
+        <section class="production-panel"><div class="production-panel__head"><div><p>Chronological evidence</p><h3>Inspection history</h3></div></div><ol class="workspace-event-list">
+          <li><time datetime="2026-07-16T11:20:00+03:00"><strong>16 Jul</strong>11:20 am</time><span></span><div><strong>Establishment inspection</strong><p>142 living grafts observed. Mortality exception retained for supervisor review.</p><small>Joseph Langat · Quality reviewer</small></div></li>
+          <li><time datetime="2026-07-12T15:40:00+03:00"><strong>12 Jul</strong>3:40 pm</time><span></span><div><strong>Early survival review</strong><p>Twenty failed unions identified and isolated for disposition.</p><small>Peter Kiptoo · Nursery Supervisor</small></div></li>
+          <li><time datetime="2026-07-08T09:15:00+03:00"><strong>8 Jul</strong>9:15 am</time><span></span><div><strong>Recovery-area inspection</strong><p>Batch moved into establishment after recovery observations.</p><small>Mercy Cherono · Grafting Lead</small></div></li>
+        </ol></section>
+      </section>
+
+      <section id="panel-photos" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-photos" tabindex="0" data-workspace-panel="photos" hidden>
+        <div class="workspace-section-heading"><div><p>Visual production evidence</p><h2>Progress photos</h2><span>Timeline placeholders only. No upload or storage backend exists.</span></div><button class="staff-button staff-button--primary" disabled>Add photo</button></div>
+        <ol class="photo-timeline">
+          <li><div class="photo-placeholder photo-placeholder--day1"><span>Day 1</span><b aria-hidden="true">▧</b></div><div><time datetime="2026-07-01">1 Jul 2026</time><h3>Batch prepared</h3><p>Rootstocks, scion material and work area documented before grafting.</p><small>Mock image placeholder · Peter Kiptoo</small></div></li>
+          <li><div class="photo-placeholder photo-placeholder--week1"><span>Week 1</span><b aria-hidden="true">▧</b></div><div><time datetime="2026-07-08">8 Jul 2026</time><h3>Recovery inspection</h3><p>Graft unions entering establishment under monitored conditions.</p><small>Mock image placeholder · Mercy Cherono</small></div></li>
+          <li><div class="photo-placeholder photo-placeholder--week2"><span>Week 2</span><b aria-hidden="true">▧</b></div><div><time datetime="2026-07-16">16 Jul 2026</time><h3>Establishment progress</h3><p>Living, weak and failed unions documented during quality inspection.</p><small>Mock image placeholder · Joseph Langat</small></div></li>
+          <li class="is-future"><div class="photo-placeholder"><span>Hardening</span><b aria-hidden="true">＋</b></div><div><time>Planned</time><h3>Hardening evidence</h3><p>Future milestone placeholder.</p><small>Ready-for-sale evidence follows later, after independent quality approval.</small></div></li>
+        </ol>
+      </section>
+
+      <section id="panel-activity" class="workspace-tab-panel" role="tabpanel" aria-labelledby="tab-activity" tabindex="0" data-workspace-panel="activity" hidden>
+        <div class="workspace-section-heading"><div><p>Append-only operational history</p><h2>Activity log</h2><span>Chronological mock audit projection; corrections would append events.</span></div><button class="staff-button staff-button--secondary" disabled>Export log</button></div>
+        <ol class="workspace-event-list workspace-event-list--audit">
+          <li><time datetime="2026-07-17T10:42:00+03:00"><strong>Today</strong>10:42 am</time><span></span><div><strong>Input added</strong><p>Copper fungicide usage evidence linked to “Water and inspect unions.”</p><small>Actor: Peter Kiptoo · Nursery Supervisor</small></div></li>
+          <li><time datetime="2026-07-16T11:20:00+03:00"><strong>16 Jul</strong>11:20 am</time><span></span><div><strong>Quality inspection</strong><p>Establishment quantities and condition notes recorded.</p><small>Actor: Joseph Langat · Quality Reviewer</small></div></li>
+          <li><time datetime="2026-07-16T11:24:00+03:00"><strong>16 Jul</strong>11:24 am</time><span></span><div><strong>Photo uploaded</strong><p>Week 2 establishment evidence attached to the batch timeline.</p><small>Actor: Joseph Langat · Quality Reviewer</small></div></li>
+          <li><time datetime="2026-07-12T16:05:00+03:00"><strong>12 Jul</strong>4:05 pm</time><span></span><div><strong>Labour recorded</strong><p>Inspection time linked to “Water and inspect unions.”</p><small>Actor: Peter Kiptoo · Nursery Supervisor</small></div></li>
+          <li><time datetime="2026-07-08T09:15:00+03:00"><strong>8 Jul</strong>9:15 am</time><span></span><div><strong>Task added</strong><p>Transplant established grafts planned for 21 July.</p><small>Actor: Peter Kiptoo · Nursery Supervisor</small></div></li>
+          <li><time datetime="2026-07-03T17:10:00+03:00"><strong>3 Jul</strong>5:10 pm</time><span></span><div><strong>Expense recorded</strong><p>Misting unit hire associated with graft recovery.</p><small>Actor: Faith Rono · Operations Assistant</small></div></li>
+          <li><time datetime="2026-07-01T08:30:00+03:00"><strong>1 Jul</strong>8:30 am</time><span></span><div><strong>Batch created</strong><p>{{ batch_number }} planned for 180 Hass avocado grafts.</p><small>Actor: Peter Kiptoo · Nursery Supervisor</small></div></li>
+          <li class="is-future"><time><strong>Future</strong>Pending</time><span></span><div><strong>Released for sale</strong><p>Appears only after governed quality review and independent approval.</p><small>No release event exists</small></div></li>
+        </ol>
+      </section>
+    </div>
+    <p class="staff-preview-note">Frontend workspace preview only. No task, labour, input, expense, quality, photo, cost, stage, release, Inventory, Procurement, Finance or POS record is created, calculated, or changed.</p>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/staff-production.js' %}"></script>{% endblock %}

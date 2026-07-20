@@ -1,0 +1,23 @@
+<div class="commerce-drawer" id="mini-cart" aria-hidden="true">
+  <button class="commerce-drawer__backdrop" type="button" data-cart-close aria-label="Close cart"></button>
+  <aside class="commerce-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="mini-cart-title" tabindex="-1">
+    <header class="commerce-drawer__header">
+      <div><p class="caption">Your selection</p><h2 class="heading-2" id="mini-cart-title">Shopping cart</h2></div>
+      <button class="commerce-icon-button" type="button" data-cart-close aria-label="Close cart"><span aria-hidden="true">×</span></button>
+    </header>
+    <div class="commerce-drawer__body" data-mini-cart-items></div>
+    <div class="commerce-drawer__empty" data-mini-cart-empty hidden>
+      <span class="commerce-empty__icon" aria-hidden="true">⌑</span>
+      <h3 class="heading-3">Your cart is ready when you are</h3>
+      <p class="body">Explore the nursery catalog and add seedlings for comparison.</p>
+      <a class="btn btn--primary" href="{% url 'products:shop' %}">Explore seedlings</a>
+    </div>
+    <footer class="commerce-drawer__footer" data-mini-cart-footer hidden>
+      <div class="commerce-total"><span>Estimated total</span><strong data-mini-cart-total>KES 0</strong></div>
+      <p class="small">Final availability and fulfillment assignment are confirmed after checkout.</p>
+      <a class="btn btn--primary" href="{% url 'cart:cart' %}">Review full cart</a>
+    </footer>
+  </aside>
+</div>
+
+<div class="commerce-toast-region" role="region" aria-label="Shopping updates" aria-live="polite" aria-atomic="true" data-toast-region></div>

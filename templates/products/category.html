@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ category.name }} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
+{% block content %}
+  <section class="catalog-hero section-sm"><div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><a href="{% url 'products:categories' %}">Categories</a></li><li><span aria-current="page">{{ category.name }}</span></li></ol></nav>
+    <p class="caption">Seedling category</p><h1 class="heading-1">{{ category.name }}</h1><p class="body-large">{{ category.description }}</p>
+  </div></section>
+  <section class="section catalog-section"><div class="container">
+    {% if products %}{% include "products/components/catalog-layout.html" %}{% else %}{% include "components/page-states/empty.html" with state_title="No seedlings in this category yet" state_message="Our nursery range changes seasonally. Explore all seedlings or contact our team for upcoming batches." %}{% endif %}
+  </div></section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/catalog.js' %}"></script>{% endblock %}

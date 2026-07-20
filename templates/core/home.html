@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Healthy Seedlings in Kenya | WayTop Farm & Nurseries{% endblock %}
+{% block meta_description %}Explore nursery-raised vegetable, fruit and tree seedlings from WayTop Farm & Nurseries in Bomet, with practical growing guidance and delivery coordination across Kenya.{% endblock %}
+
+{% block page_decor %}
+  <div class="home-edge-art" aria-hidden="true">
+    <div class="home-edge-art__side home-edge-art__side--left">
+      <svg viewBox="0 0 100 1000" preserveAspectRatio="none" focusable="false">
+        <path d="M18 -20 C82 120, 12 245, 68 390 S20 690, 74 1020" />
+        <path d="M2 30 C58 180, 24 330, 86 500 S34 790, 92 980" />
+        <path d="M45 -10 C15 190, 88 310, 38 540 S74 820, 48 1010" />
+      </svg>
+    </div>
+    <div class="home-edge-art__side home-edge-art__side--right">
+      <svg viewBox="0 0 100 1000" preserveAspectRatio="none" focusable="false">
+        <path d="M82 -20 C18 120, 88 245, 32 390 S80 690, 26 1020" />
+        <path d="M98 30 C42 180, 76 330, 14 500 S66 790, 8 980" />
+        <path d="M55 -10 C85 190, 12 310, 62 540 S26 820, 52 1010" />
+      </svg>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/hero.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+  {% include "core/partials/hero.html" %}
+  {% include "core/partials/categories.html" %}
+  {% include "core/partials/featured-products.html" %}
+  {% include "core/partials/why-waytop.html" %}
+  {% include "core/partials/how-it-works.html" %}
+{% endblock %}

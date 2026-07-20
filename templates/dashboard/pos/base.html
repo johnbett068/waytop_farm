@@ -1,0 +1,13 @@
+{% extends "staff_base.html" %}{% load static %}
+{% block title %}{% block pos_title %}Point of Sale{% endblock %} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-pos.css' %}">{% endblock %}
+{% block content %}
+<section class="pos-page" data-pos-page data-state-mode="{{ state_mode }}" aria-labelledby="pos-page-title">
+  <aside class="pos-simulation-banner" aria-label="Authorization simulation" data-pos-simulator><div><strong>Authorization simulation — not secure</strong><span data-pos-simulator-summary>Jane Atieno · Cashier · Bomet Register BMT-01</span></div><label for="pos-identity">Simulated staff</label><select id="pos-identity" data-pos-simulator-select><option value="jane">Jane Atieno — Cashier</option><option value="john">John Bett — Operations Manager</option><option value="amina">Amina Noor — Administrator (denied)</option></select></aside>
+  <div class="sr-only" aria-live="polite" data-pos-simulator-live></div>
+  <header class="staff-page-header pos-page-header"><div><p class="staff-eyebrow">{% block pos_eyebrow %}Walk-in sales · Mock projection{% endblock %}</p><h1 id="pos-page-title">{% block pos_heading %}Point of Sale{% endblock %}</h1><p>{% block pos_intro %}Fast customer sales using authoritative Catalog and Inventory projections.{% endblock %}</p></div><div class="staff-page-header__actions">{% block pos_actions %}{% endblock %}</div></header>
+  {% include "dashboard/pos/components/module-nav.html" %}{% include "dashboard/pos/components/states.html" %}
+  <div data-pos-success>{% block pos_content %}{% endblock %}<p class="staff-preview-note">Frontend POS preview only. No sale, order, payment, tender, cash movement, Inventory issue, Accounting entry, receipt, print, PDF, email, barcode or QR action is created, processed, persisted, or changed.</p></div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/staff-pos.js' %}"></script>{% endblock %}

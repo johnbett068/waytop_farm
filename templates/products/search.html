@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Search Seedlings | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
+{% block content %}
+  <section class="catalog-hero section-sm"><div class="container">
+    <p class="caption">Catalog search</p><h1 class="heading-1">Find the right seedlings</h1>
+    <form class="catalog-search" role="search" data-search-form><label class="sr-only" for="catalog-search">Search products</label><input class="form-control" id="catalog-search" type="search" name="q" placeholder="Search by crop or variety" autocomplete="off" data-search-input><button class="btn btn--primary" type="submit">Search</button></form>
+    <p class="search-summary" data-search-summary>Enter a crop or variety to search the complete mock catalog.</p>
+  </div></section>
+  <section class="section catalog-section"><div class="container">{% include "products/components/catalog-layout.html" %}</div></section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/catalog.js' %}"></script>{% endblock %}

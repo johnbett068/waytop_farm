@@ -1,0 +1,32 @@
+{% load static %}
+<section class="categories-section section" id="categories" aria-labelledby="categories-title">
+  <div class="container">
+    <div class="section-heading">
+      <p class="caption">Seedling range</p>
+      <h2 class="heading-2" id="categories-title">Find the right start for your farm</h2>
+      <p class="body-large">Explore nursery-raised seedlings selected for farms, institutions, landscapers and home growers across Kenya.</p>
+    </div>
+
+    {% if categories %}
+      <div class="grid-4 categories-section__grid">
+        {% for category in categories %}
+          <article class="category-card categories-section__card">
+            <div class="categories-section__media-frame">
+              <picture>
+                <source media="(max-width: 599px)" srcset="{% static category.image_480 %}">
+                <img class="categories-section__media" src="{% static category.image_800 %}" srcset="{% static category.image_480 %} 480w, {% static category.image_800 %} 800w" sizes="(min-width: 992px) 22vw, (min-width: 768px) 46vw, 92vw" width="800" height="600" loading="lazy" alt="{{ category.image_alt }}">
+              </picture>
+            </div>
+            <div class="categories-section__content">
+              <h3 class="heading-3">{{ category.name }}</h3>
+              <p class="body">{{ category.description }}</p>
+              <a class="category-card__link" href="{% url 'products:category' category.slug %}">Explore {{ category.name }} <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      {% include "components/page-states/empty.html" with state_title="Seedling categories are being prepared" state_message="Please contact our nursery team for today's available varieties." %}
+    {% endif %}
+  </div>
+</section>

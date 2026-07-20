@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Track your order | WayTop Farm & Nurseries{% endblock %}
+{% block meta_description %}Use your order number and Kenyan phone number to preview guest order tracking at WayTop Farm & Nurseries.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/order-tracking.css' %}">{% endblock %}
+{% block content %}
+<section class="order-page tracking-page" data-order-tracking data-state-mode="{{ state_mode }}" aria-labelledby="tracking-title">
+  <div class="container order-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><span aria-current="page">Track order</span></li></ol></nav>
+    <header class="tracking-hero"><p class="caption">Guest order tracking</p><h1 class="heading-1" id="tracking-title">Follow your seedling order</h1><p class="body-large">Enter the order number and phone number used at checkout. No account is required.</p></header>
+    {% include "orders/components/tracking-form.html" %}
+
+    <div class="tracking-state" data-tracking-loading hidden role="status"><span class="tracking-spinner" aria-hidden="true"></span><h2 class="heading-3">Finding your order</h2><p>Checking the mock tracking projection.</p></div>
+    <div class="tracking-state" data-tracking-empty><span class="commerce-empty__icon" aria-hidden="true">⌕</span><h2 class="heading-2">Your order updates will appear here</h2><p>Use both details above to protect guest order information.</p></div>
+    <div class="tracking-state tracking-state--error" data-tracking-not-found hidden role="alert" tabindex="-1"><span class="commerce-empty__icon" aria-hidden="true">?</span><h2 class="heading-2">We couldn’t find that order</h2><p>Check the order number and use the same phone number entered at checkout.</p><button class="btn btn--outline" type="button" data-try-again>Check details</button></div>
+    <div class="tracking-state tracking-state--error" data-tracking-error hidden role="alert" tabindex="-1"><span class="commerce-empty__icon" aria-hidden="true">!</span><h2 class="heading-2">Tracking is temporarily unavailable</h2><p>Your order is not affected. Try loading the tracking view again.</p><button class="btn btn--primary" type="button" data-tracking-retry>Try again</button></div>
+    <div class="tracking-state tracking-state--error" data-tracking-expired hidden role="alert" tabindex="-1"><span class="commerce-empty__icon" aria-hidden="true">⌛</span><h2 class="heading-2">This tracking link has expired</h2><p>For your privacy, enter the order number and phone number again.</p><button class="btn btn--primary" type="button" data-try-again>Enter order details</button></div>
+    <div class="tracking-state tracking-state--error" data-tracking-permission hidden role="alert" tabindex="-1"><span class="commerce-empty__icon" aria-hidden="true">⌧</span><h2 class="heading-2">Tracking access is unavailable</h2><p>This reusable permission state supports future channel restrictions. Guest tracking normally requires no account.</p></div>
+
+    <div class="tracking-result" data-tracking-result hidden>
+      {% include "orders/components/order-header.html" %}
+      <div class="tracking-layout">
+        <main class="order-stack">
+          {% include "orders/components/order-timeline.html" %}
+          {% include "orders/components/order-items.html" %}
+          {% include "orders/components/customer-details.html" %}
+        </main>
+        <aside class="order-stack">
+          {% include "orders/components/summary-card.html" %}
+          <section class="order-card estimate-card"><p class="caption">Estimated completion</p><h2 class="heading-3">Friday, 17 July</h2><p>Estimated delivery window: 2:00–5:00 pm, subject to availability confirmation.</p></section>
+        </aside>
+      </div>
+      {% include "orders/components/support-card.html" %}
+    </div>
+    <p class="order-preview-boundary small">Mock tracking data only. Customer responses exclude assigned staff, operational location, inventory data, internal notes and routing.</p>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/order-tracking.js' %}"></script>{% endblock %}

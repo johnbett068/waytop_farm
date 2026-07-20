@@ -1,0 +1,13 @@
+{% extends "dashboard/procurement/base.html" %}
+{% block procurement_title %}Purchase Orders{% endblock %}{% block procurement_heading %}Purchase Orders{% endblock %}
+{% block procurement_intro %}Control approved supplier commitments, delivery schedules and immutable version history.{% endblock %}
+{% block procurement_actions %}<button class="staff-button staff-button--primary" data-procurement-capability="procurement.create_order">Create purchase order</button>{% endblock %}
+{% block procurement_content %}
+<div class="request-status-grid"><article><span>Draft</span><strong>2</strong></article><article><span>Awaiting Approval</span><strong>3</strong></article><article><span>Approved</span><strong>2</strong></article><article><span>Issued</span><strong>5</strong></article><article><span>Partially Received</span><strong>2</strong></article><article><span>Completed</span><strong>18</strong></article><article><span>Cancelled</span><strong>1</strong></article></div>
+<div class="procurement-table-wrap"><table class="procurement-table"><thead><tr><th>Purchase order</th><th>Supplier</th><th>Created</th><th>Delivery</th><th>Lines</th><th>Mock total</th><th>Receipt progress</th><th>Status</th><th>Action</th></tr></thead><tbody>
+<tr><td><strong>PO-2607-0051</strong><small>From PR-2607-0035</small></td><td>East Africa Seed Co.</td><td>16 Jul</td><td>22 Jul</td><td>3</td><td>KSh 72,600</td><td>0 of 3 lines</td><td><span class="procurement-badge is-success">Approved</span></td><td><a href="{% url 'dashboard:purchase_order_detail' 'PO-2607-0051' %}">Open</a></td></tr>
+<tr><td><strong>PO-2607-0048</strong><small>From PR-2607-0031</small></td><td>Greenhouse Supplies Ltd</td><td>13 Jul</td><td>15 Jul</td><td>4</td><td>KSh 114,200</td><td>0 of 4 lines</td><td><span class="procurement-badge is-danger">Delivery overdue</span></td><td><a href="{% url 'dashboard:purchase_order_detail' 'PO-2607-0048' %}">Open</a></td></tr>
+<tr><td><strong>PO-2607-0044</strong><small>Growing media replenishment</small></td><td>GreenGrow Media</td><td>10 Jul</td><td>16–20 Jul</td><td>2</td><td>KSh 89,000</td><td>60 of 100 bags</td><td><span class="procurement-badge is-info">Partially Received</span></td><td><a href="{% url 'dashboard:purchase_order_detail' 'PO-2607-0044' %}">Open</a></td></tr>
+<tr><td><strong>PO-2607-0053</strong><small>Crop protection restock</small></td><td>AgroSafe Kenya</td><td>17 Jul</td><td>Pending issue</td><td>5</td><td>KSh 86,400</td><td>Not issued</td><td><span class="procurement-badge is-warning">Awaiting Approval</span></td><td><a href="{% url 'dashboard:purchase_order_detail' 'PO-2607-0053' %}">Open</a></td></tr>
+</tbody></table></div>
+{% endblock %}

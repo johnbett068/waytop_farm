@@ -1,0 +1,39 @@
+{% extends "staff_base.html" %}
+{% block title %}Operations Dashboard | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-dashboard" data-staff-dashboard data-state-mode="{{ state_mode }}" aria-labelledby="dashboard-title">
+  <header class="staff-page-header"><div><p class="staff-eyebrow">Thursday, 16 July 2026 · Mock operational view</p><h1 id="dashboard-title">Good afternoon, Operations team</h1><p>Prioritise exceptions, releases and customer commitments across today’s nursery work.</p></div><div class="staff-page-header__actions"><button class="staff-button staff-button--secondary" type="button" data-open-drawer>View notifications <span class="staff-count">3</span></button><button class="staff-button staff-button--primary" type="button" data-open-confirmation>Start daily handover</button></div></header>
+
+  <div class="staff-state staff-state--loading" data-dashboard-loading hidden role="status"><span class="staff-spinner"></span><h2>Preparing operations</h2><p>Loading customer-safe and staff-authorised projections.</p></div>
+  <div class="staff-state" data-dashboard-empty hidden><span aria-hidden="true">□</span><h2>No operational items for this view</h2><p>Change the date or filters. Empty does not imply missing historical records.</p></div>
+  <div class="staff-state staff-state--error" data-dashboard-error hidden role="alert"><span aria-hidden="true">!</span><h2>Dashboard could not be prepared</h2><p>No operational record has changed. Retry the read projection.</p><button class="staff-button staff-button--primary" type="button" data-dashboard-retry>Try again</button></div>
+  <div class="staff-state staff-state--error" data-dashboard-permission hidden role="alert"><span aria-hidden="true">⌧</span><h2>Operations access required</h2><p>Your future role does not include permission to view this dashboard.</p></div>
+  <div class="staff-state staff-state--offline" data-dashboard-offline hidden role="status"><span aria-hidden="true">↯</span><h2>You’re working offline</h2><p>Cached information may be stale. Operational mutations must remain unavailable until authoritative services reconnect.</p></div>
+
+  <div data-dashboard-success>
+    <section aria-labelledby="overview-title"><div class="staff-section-heading"><div><p>At a glance</p><h2 id="overview-title">Today’s overview</h2></div><span>Updated 3:10 pm</span></div><div class="metric-grid">
+      {% include "dashboard/components/metric-card.html" with label="Orders received" value="8" meta="3 need review" tone="info" %}
+      {% include "dashboard/components/metric-card.html" with label="Awaiting assignment" value="3" meta="Oldest: 1 hr 20 min" tone="warning" %}
+      {% include "dashboard/components/metric-card.html" with label="Batches on hold" value="2" meta="Quality decision needed" tone="danger" %}
+      {% include "dashboard/components/metric-card.html" with label="Ready for release" value="4" meta="Awaiting approval" tone="success" %}
+    </div></section>
+
+    <div class="staff-dashboard-grid">
+      <div class="staff-dashboard-column staff-dashboard-column--main">
+        <section class="staff-panel" aria-labelledby="today-orders-title"><div class="staff-panel__header"><div><p>Order operations</p><h2 id="today-orders-title">Today’s orders</h2></div><a class="staff-text-button" href="{% url 'dashboard:orders' %}">View all orders</a></div>{% include "dashboard/components/order-table.html" %}</section>
+        <section class="staff-panel" aria-labelledby="assignment-title"><div class="staff-panel__header"><div><p>Customer commitments</p><h2 id="assignment-title">Awaiting fulfillment assignment</h2></div><span class="staff-status staff-status--warning">3 orders</span></div><div class="compact-list"><article><div><strong>WTF-260716-1042</strong><span>Jane Chebet · Home Delivery · M-Pesa confirmed</span></div><small>Received 2:35 pm</small></article><article><div><strong>WTF-260716-1039</strong><span>David Kiprotich · Farm Pickup · Cash due at pickup</span></div><small>Received 1:50 pm</small></article><article><div><strong>WTF-260716-1037</strong><span>Mary Chepng’etich · Home Delivery · Payment pending</span></div><small>Received 1:18 pm</small></article></div></section>
+        <section class="staff-panel" aria-labelledby="preparation-title"><div class="staff-panel__header"><div><p>Fulfillment queue</p><h2 id="preparation-title">Orders in preparation</h2></div><span class="staff-status staff-status--info">4 active</span></div><div class="preparation-list"><article><div><strong>WTF-260716-1034</strong><span>Anna F1 Tomato · 2 trays</span></div><div class="staff-progress"><span style="--progress: 70%"></span></div><small>Preparing</small></article><article><div><strong>WTF-260716-1031</strong><span>Hass Avocado · 12 grafted seedlings</span></div><div class="staff-progress"><span style="--progress: 45%"></span></div><small>Picking</small></article></div></section>
+        {% include "dashboard/components/production-alerts.html" %}
+        <section class="staff-panel" aria-labelledby="activity-title" data-activity-timeline><div class="staff-panel__header"><div><p>Audit-aware feed</p><h2 id="activity-title">Recent activity</h2></div></div><ol class="staff-activity"><li><span></span><div><strong>Quality hold recorded</strong><p>Batch PB-AVO-2606-04 · Grafted Hass Avocado</p><small>3:02 pm · Mock Production Supervisor</small></div></li><li><span></span><div><strong>Inventory receipt prepared</strong><p>128 Anna F1 Tomato seedlings released from production</p><small>2:46 pm · Awaiting authorised posting</small></div></li><li><span></span><div><strong>Order payment confirmed</strong><p>WTF-260716-1042 · M-Pesa</p><small>2:38 pm · Payment event projection</small></div></li></ol></section>
+      </div>
+      <aside class="staff-dashboard-column">
+        {% include "dashboard/components/inventory-alerts.html" %}
+        {% include "dashboard/components/task-list.html" %}
+        {% include "dashboard/components/notifications.html" %}
+        {% include "dashboard/components/quick-actions.html" %}
+      </aside>
+    </div>
+    <footer class="staff-preview-note">Frontend architecture preview. No task, order, stock, production or financial record is changed by this dashboard.</footer>
+  </div>
+</section>
+{% endblock %}

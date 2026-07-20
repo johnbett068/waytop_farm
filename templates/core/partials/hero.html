@@ -1,0 +1,49 @@
+{% load static %}
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container hero__layout">
+    <div class="hero__copy">
+      <p class="caption hero__eyebrow">
+        <span class="hero__eyebrow-line" aria-hidden="true"></span>
+        <span class="hero__eyebrow-brand">WayTop Farm &amp; Nurseries</span>
+        <b aria-hidden="true">•</b>
+        <span class="hero__eyebrow-message">Growing with care in Bomet</span>
+      </p>
+      <h1 class="hero__title" id="hero-title">
+        <span>Healthy seedlings.</span>
+        <span>Stronger harvests.</span>
+      </h1>
+      <p class="hero__text">
+        <strong>WayTop Farm &amp; Nurseries</strong> raises vegetable, fruit and tree seedlings with careful nursery practice and practical guidance for growers across Kenya.
+      </p>
+      <div class="hero__actions">
+        <a href="{% url 'products:shop' %}" class="btn btn--primary">Explore seedlings <span aria-hidden="true">→</span></a>
+        <a href="tel:{{ business_phone.uri }}" class="btn btn--outline">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3 4 5c0 8 7 15 15 15l2-3-4-3-2 2c-3-1-6-4-7-7l2-2-3-4Z"/></svg>
+          Talk to our nursery team
+        </a>
+      </div>
+      <ul class="hero__chips" aria-label="WayTop nursery highlights">
+        <li><span aria-hidden="true">✓</span> Nursery-raised</li>
+        <li><span aria-hidden="true">✓</span> Practical guidance</li>
+        <li><span aria-hidden="true">✓</span> Delivery coordination</li>
+      </ul>
+    </div>
+
+    <div class="hero__visual" aria-label="WayTop nursery showcase">
+      <div class="hero__visual-accent" aria-hidden="true"></div>
+      <picture>
+        <source media="(max-width: 767px)" srcset="{% static 'images/home/hero-640.webp' %}">
+        <img src="{% static 'images/home/hero-editorial-720.webp' %}" width="720" height="900" alt="Healthy vegetable seedlings growing on benches in a sunlit shade-net nursery" fetchpriority="high">
+      </picture>
+      <div class="hero__visual-badge hero__visual-badge--branch">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s6-5 6-11a6 6 0 1 0-12 0c0 6 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>
+        <span><strong>Based in Bomet</strong><small>WayTop Farm &amp; Nurseries</small></span>
+      </div>
+      <div class="hero__visual-badge hero__visual-badge--nursery">
+        <span class="hero__visual-status" aria-hidden="true"></span>
+        <span><strong>Nursery-raised</strong><small>Vegetable, fruit &amp; tree seedlings</small></span>
+      </div>
+    </div>
+  </div>
+</section>

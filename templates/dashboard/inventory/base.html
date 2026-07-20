@@ -1,0 +1,28 @@
+{% extends "staff_base.html" %}{% load static %}
+{% block title %}{% block inventory_title %}Inventory{% endblock %} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-inventory.css' %}">{% endblock %}
+{% block content %}
+<section class="inventory-page" data-inventory-page data-state-mode="{{ state_mode }}" aria-labelledby="inventory-page-title">
+  <aside class="inventory-simulation-banner" aria-label="Authorization simulation" data-inventory-simulator>
+    <div><strong>Authorization simulation — not secure</strong><span data-simulator-summary>Sarah Wanjiku · Inventory Clerk · Bomet Main Store</span></div>
+    <label for="inventory-identity">Simulated staff</label>
+    <select id="inventory-identity" data-simulator-select>
+      <option value="sarah">Sarah Wanjiku — Inventory Clerk</option>
+      <option value="john">John Bett — Operations Manager</option>
+      <option value="peter">Peter Kiptoo — Nursery Supervisor</option>
+      <option value="amina">Amina Noor — Administrator</option>
+    </select>
+  </aside>
+  <div class="sr-only" aria-live="polite" data-simulator-live></div>
+  <header class="staff-page-header inventory-page-header">
+    <div><p class="staff-eyebrow">{% block inventory_eyebrow %}Inventory authority · Mock projection{% endblock %}</p><h1 id="inventory-page-title">{% block inventory_heading %}Inventory{% endblock %}</h1><p>{% block inventory_intro %}Authoritative stock visibility through governed, immutable movement projections.{% endblock %}</p></div>
+    <div class="staff-page-header__actions">{% block inventory_actions %}{% endblock %}</div>
+  </header>
+  {% include "dashboard/inventory/components/module-nav.html" %}
+  {% include "dashboard/inventory/components/states.html" %}
+  <div data-inventory-success>{% block inventory_content %}{% endblock %}
+    <p class="staff-preview-note">Frontend Inventory preview only. No stock, lot, balance, reservation, movement, receipt, transfer, count, adjustment, Procurement, Accounting or POS record is created, calculated, persisted, or changed.</p>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/staff-inventory.js' %}"></script>{% endblock %}

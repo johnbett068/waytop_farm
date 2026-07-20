@@ -1,0 +1,8 @@
+<div class="page-state page-state--error" role="alert">
+  <span class="page-state__icon" aria-hidden="true">!</span>
+  <div>
+    <h2 class="heading-3">{{ state_title|default:"Something went wrong" }}</h2>
+    <p class="body">{{ state_message|default:"We could not load this information. Please try again." }}</p>
+    {% if retry_url %}<a class="btn btn--primary" href="{{ retry_url }}">Try again</a>{% endif %}
+  </div>
+</div>
