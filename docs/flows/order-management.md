@@ -1,5 +1,7 @@
 # Staff Order Management flow
 
+> **Superseded for V1.** See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Purpose
 
 Define the staff journey from order discovery to domain-owned operational decisions while preserving independent lifecycles.

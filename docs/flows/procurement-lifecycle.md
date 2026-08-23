@@ -1,5 +1,7 @@
 # Procurement lifecycle
 
+> **Superseded and out of V1 scope.** Retained as historical design. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Primary lifecycle
 
 `Department/Production need → Purchase Request → independent approval → quotation/sourcing decision → Purchase Order approval/issue → supplier delivery → Procurement inspection → Inventory receipt → future Accounting match`

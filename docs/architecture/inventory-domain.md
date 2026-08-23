@@ -1,5 +1,9 @@
 # Inventory domain architecture
 
+> **HISTORICAL / SUPERSEDED FOR V1 IMPLEMENTATION.** The ratified
+> [Availability and Commitment contract](availability-commitment-contract.md) controls current
+> Inventory behavior. This broader design remains future context only.
+
 ## Purpose and authority
 
 Inventory is the single source of truth for **stock** owned or controlled by WayTop Farm: what item and lot exists, in what quantity and unit, at which inventory location, in what condition, under which availability restriction, and through which posted movements it arrived there.

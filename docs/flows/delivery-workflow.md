@@ -1,5 +1,7 @@
 # Delivery workflow
 
+> **Superseded and out of V1 scope.** Detailed Delivery jobs are not active in V1. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Home delivery
 
 `Awaiting Customer Confirmation → Customer Confirmed → Ready for Dispatch (Fulfillment projection) → Out for Delivery → Delivered`

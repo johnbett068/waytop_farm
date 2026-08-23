@@ -1,35 +1,29 @@
-{% load static %}
 <section class="featured-products section" id="featured" aria-labelledby="featured-title">
   <div class="container">
     <div class="section-heading">
-      <p class="caption">Available from our nursery</p>
-      <h2 class="heading-2" id="featured-title">Healthy seedlings ready for planting</h2>
-      <p class="body-large">A preview of popular varieties. Availability is confirmed by our nursery team before an order is accepted.</p>
+      <p class="caption">Published catalog</p>
+      <h2 class="heading-2" id="featured-title">WayTop products</h2>
+      <p class="body-large">A preview of products with their current commercial sale units and selling prices.</p>
     </div>
-
     {% if featured_products %}
       <div class="grid-4 featured-products__grid">
         {% for product in featured_products %}
           <article class="product-card featured-products__card" data-commerce-product="{{ product.slug }}">
-            <img class="featured-products__media" src="{% static product.image_filename %}" width="362" height="362" loading="lazy" alt="{{ product.name }} nursery seedlings">
+            <div class="featured-products__media catalog-product-placeholder" aria-hidden="true">WT</div>
             <button class="commerce-heart" type="button" data-wishlist-toggle="{{ product.slug }}" aria-label="Save {{ product.name }} to wishlist" aria-pressed="false"><span aria-hidden="true">♡</span></button>
             <div class="featured-products__content">
-              <span class="floating-badge">{{ product.category }}</span>
-              <div>
-                <h3 class="heading-3">{{ product.name }}</h3>
-                <p class="body">{{ product.description }}</p>
-              </div>
-              <p class="availability"><span aria-hidden="true"></span>{{ product.stock_label }}</p>
+              <span class="floating-badge">{{ product.sku }}</span>
+              <div><h3 class="heading-3">{{ product.name }}</h3><p class="body">{{ product.description }}</p></div>
               <div class="featured-products__footer">
-                <p class="featured-products__price"><span>KES {{ product.price_display }}</span><small>per {{ product.unit }}</small></p>
-                <div class="featured-products__actions"><a href="{% url 'products:product_detail' product.slug %}" class="btn btn--outline featured-products__button">Details</a><button class="btn btn--primary" type="button" data-cart-add="{{ product.slug }}"{% if product.stock == 'out-of-stock' %} disabled aria-disabled="true"{% endif %}>Add to cart</button></div>
+                <p class="featured-products__price">{% if product.catalog_lowest_price is not None %}<span>From KES {{ product.catalog_lowest_price|floatformat:2 }}</span><small>View sale units</small>{% else %}<span>Price not published</span>{% endif %}</p>
+                <div class="featured-products__actions"><a href="{% url 'products:product_detail' product.slug %}" class="btn btn--outline featured-products__button">Details</a></div>
               </div>
             </div>
           </article>
         {% endfor %}
       </div>
     {% else %}
-      {% include "components/page-states/empty.html" with state_title="Fresh stock is being updated" state_message="Call our nursery team to confirm today's available seedlings." %}
+      {% include "components/page-states/empty.html" with state_title="No products published yet" state_message="The WayTop catalog will appear here after authorised staff publish products." %}
     {% endif %}
   </div>
 </section>

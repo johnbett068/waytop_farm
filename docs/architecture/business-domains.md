@@ -1,5 +1,7 @@
 # WayTop Farm business domains
 
+> **Superseded for V1.** Retained as historical prototype design. The [ratified V1 business contract](v1-business-contract.md) is authoritative.
+
 ## Purpose
 
 This is the canonical modular boundary map for WayTop’s future Django backend and staff application. It prevents Orders, Production, Inventory, POS and finance concerns from becoming one coupled application. Phase 3A implements documentation and frontend projections only.

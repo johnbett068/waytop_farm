@@ -1,5 +1,9 @@
 # Capability permission catalogue and matrices
 
+> **DEFERRED / FUTURE CATALOGUE.** Only permissions installed and required by the current ratified
+> Phase 1 services are runtime authority. This broader matrix must not create permissions, roles,
+> Branch scope or behavior. See [Documentation Authority](../document-authority.md).
+
 ## Conventions
 
 Canonical capability names use lowercase `domain.verb[_object]`. They describe authority, not job titles. `view` includes an authorized list/detail projection but not export or sensitive fields. `manage` is reserved for administrative CRUD/configuration where individual commands will be refined later; it never implies another domain.
@@ -13,14 +17,15 @@ Role abbreviations: **ADM** Administrator, **OPS** Operations Manager, **SAL** S
 | Domain | Capabilities |
 |---|---|
 | Dashboard | `dashboard.view` |
-| Orders | `orders.view`, `orders.accept`, `orders.cancel`, `orders.assign`, `orders.export` |
+| Orders | `orders.view`, `orders.accept`, `orders.cancel`, `orders.process`, `orders.assign`, `orders.export` |
+| Payments | `payments.verify` |
 | Customers | `customers.view`, `customers.manage`, `customers.export` |
 | Production | `production.view`, `production.create_batch`, `production.record_activity`, `production.record_quality_review`, `production.manage_hold`, `production.release_batch`, `production.view_cost` |
 | Procurement | `procurement.view`, `procurement.create_request`, `procurement.approve_request`, `procurement.manage_supplier`, `procurement.manage_quotation`, `procurement.create_order`, `procurement.approve_order`, `procurement.issue_order`, `procurement.record_delivery`, `procurement.view_spend`, `procurement.export` |
 | Inventory | `inventory.view`, `inventory.receive`, `inventory.release`, `inventory.adjust`, `inventory.approve_adjustment`, `inventory.transfer`, `inventory.approve_transfer`, `inventory.dispatch_transfer`, `inventory.receive_transfer`, `inventory.count`, `inventory.approve_count_variance`, `inventory.export` |
 | Products | `products.view`, `products.manage`, `products.export` |
 | POS | `pos.view`, `pos.open_register`, `pos.process_sale`, `pos.close_register`, `pos.request_refund`, `pos.approve_refund`, `pos.issue_refund`, `pos.request_void`, `pos.approve_void`, `pos.void_sale`, `pos.view_reconciliation` |
-| Fulfillment | `fulfillment.view`, `fulfillment.assign`, `fulfillment.dispatch`, `fulfillment.record_delivery` |
+| Fulfillment | `fulfillment.view`, `fulfillment.assign`, `fulfillment.dispatch`, `fulfillment.record_delivery`, `fulfillment.complete` |
 | Branches | `branches.view`, `branches.manage` |
 | Reports | `reports.view`, `reports.export` |
 | Notifications | `notifications.view`, `notifications.manage_own` |
@@ -59,6 +64,7 @@ Administrator intentionally receives administration rather than automatic operat
 |---|---:|---:|---:|---:|---:|---:|---:|---|
 | Accept order / `orders.accept` | — | ✓ | ✓ | — | — | — | — | None within policy; OPS for exception |
 | Cancel order / `orders.cancel` | — | ✓ | R | — | — | — | — | OPS after fulfillment/payment threshold |
+| Start processing / `orders.process` | — | ✓ | R | — | — | — | — | Explicit CONFIRMED to PROCESSING command |
 | Assign order / `orders.assign` | — | ✓ | — | — | — | — | — | None |
 | Export orders / `orders.export` | — | ✓ | ✓ | — | — | — | — | Data-classification policy |
 | Create production batch / `production.create_batch` | — | ✓ | — | ✓ | — | — | — | None within plan |

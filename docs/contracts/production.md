@@ -1,5 +1,9 @@
 # Production Backend Contract (Future)
 
+> **DEFERRED.** This document is not implementation authority. Production, Production capacity and
+> PRE_ORDER remain unavailable until separately ratified. See
+> [Documentation Authority](../document-authority.md).
+
 ## Scope
 Documentation only. Phase 3C supplies read-only mock projections and disabled commands. No Django models, API, persistence, calculations or inventory behavior exist.
 

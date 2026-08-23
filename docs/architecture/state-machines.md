@@ -1,5 +1,7 @@
 # Canonical Business State Machines
 
+> **Superseded for V1.** The active V1 states are defined by the [ratified V1 business contract](v1-business-contract.md).
+
 This is the future backend reference. Each aggregate owns its transitions, audit log and permissions. A composed screen may display multiple states but cannot mutate another domain. Commands are atomic, authorised, version-checked and auditable; domain events inform other services without cross-domain status writes.
 
 ## Approved commercial lifecycles

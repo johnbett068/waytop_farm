@@ -1,27 +1,7 @@
 {% extends "staff_base.html" %}{% load static %}
 {% block title %}{{ order_number }} | Order Management{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-orders.css' %}">{% endblock %}
-{% block content %}
-<section class="staff-order-detail" data-order-detail data-state-mode="{{ state_mode }}" aria-labelledby="order-detail-title">
-  <nav class="staff-breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a><span>/</span><a href="{% url 'dashboard:orders' %}">Orders</a><span>/</span><span aria-current="page">{{ order_number }}</span></nav>
-  {% include "dashboard/orders/components/detail-states.html" %}
-  <div data-order-detail-success>
-    <header class="order-detail-header"><div><div class="order-detail-header__meta"><span class="priority-badge priority-badge--high">High priority</span><span>Placed 16 July 2026 · 2:35 pm</span></div><h1 id="order-detail-title">{{ order_number }}</h1><p>Jane Chebet · Home Delivery · Bomet Town</p></div><div class="order-detail-header__actions"><button class="staff-button staff-button--secondary" type="button" disabled>Print Picking List</button><button class="staff-button staff-button--secondary" type="button" disabled>Print Receipt</button><button class="staff-button staff-button--primary" type="button" data-action-menu-toggle aria-expanded="false" aria-controls="quick-action-menu">Quick Actions</button><div class="order-action-menu" id="quick-action-menu" data-action-menu hidden><button type="button" data-order-command="assign">Assign fulfillment</button><button type="button" data-order-command="prepare">Start preparation</button><button type="button" data-order-command="quality">Start fulfillment quality check</button><button type="button" data-order-command="ready">Mark ready</button><button type="button" data-order-command="deliver">Record delivery</button><button type="button" data-order-command="cancel" class="is-danger">Cancel order</button><button type="button" data-order-command="refund">Request refund</button></div></div></header>
-    {% include "dashboard/orders/components/lifecycle-summary.html" %}
-    <div class="order-detail-layout"><main class="order-detail-column">
-      {% include "dashboard/orders/components/customer-panel.html" %}
-      {% include "dashboard/orders/components/product-panel.html" %}
-      {% include "dashboard/orders/components/operational-timeline.html" %}
-      {% include "dashboard/orders/components/activity-history.html" %}
-    </main><aside class="order-detail-column">
-      {% include "dashboard/orders/components/payment-panel.html" %}
-      {% include "dashboard/orders/components/fulfillment-panel.html" %}
-      {% include "dashboard/orders/components/internal-notes.html" %}
-      {% include "dashboard/orders/components/placeholders.html" %}
-    </aside></div>
-    <p class="staff-preview-note">Frontend specification only. Actions do not change Order, Fulfillment, Payment, Return, Production or Inventory.</p>
-  </div>
-</section>
-{% include "dashboard/orders/components/action-dialog.html" %}
-{% endblock %}
+{% block content %}<section class="staff-order-detail" data-order-detail data-state-mode="{{ state_mode }}" aria-labelledby="order-detail-title"><nav class="staff-breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a><span>/</span><a href="{% url 'dashboard:orders' %}">Orders</a><span>/</span><span aria-current="page">{{ order_number }}</span></nav>{% include "dashboard/orders/components/detail-states.html" %}<div data-order-detail-success>
+<header class="order-detail-header"><div><div class="order-detail-header__meta"><span class="priority-badge priority-badge--high">High priority</span><span>Placed 16 July 2026 · 2:35 pm</span></div><h1 id="order-detail-title">{{ order_number }}</h1><p>Jane Chebet · Ecommerce · Home Delivery</p></div><div class="order-detail-header__actions"><button class="staff-button staff-button--secondary" type="button" disabled>Print Receipt</button><button class="staff-button staff-button--primary" type="button" data-action-menu-toggle aria-expanded="false" aria-controls="quick-action-menu">Quick Actions</button><div class="order-action-menu" id="quick-action-menu" data-action-menu hidden><button type="button" data-order-command="fulfill">Mark fulfilled</button><button type="button" data-order-command="cancel" class="is-danger">Request authorized cancellation</button></div></div></header>
+{% include "dashboard/orders/components/lifecycle-summary.html" %}<div class="order-detail-layout"><main class="order-detail-column">{% include "dashboard/orders/components/customer-panel.html" %}{% include "dashboard/orders/components/product-panel.html" %}{% include "dashboard/orders/components/operational-timeline.html" %}{% include "dashboard/orders/components/activity-history.html" %}</main><aside class="order-detail-column">{% include "dashboard/orders/components/payment-panel.html" %}{% include "dashboard/orders/components/internal-notes.html" %}</aside></div><p class="staff-preview-note">Frontend specification only. Actions do not change Order, Payment, Production or Inventory.</p></div></section>{% include "dashboard/orders/components/action-dialog.html" %}{% endblock %}
 {% block extra_js %}<script src="{% static 'js/staff-orders.js' %}"></script>{% endblock %}

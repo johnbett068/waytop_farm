@@ -1,5 +1,8 @@
 # WayTop Farm Project Roadmap
 
+> **HISTORICAL / SUPERSEDED STATUS SNAPSHOT.** This frontend-era roadmap is not current Phase 1
+> implementation authority. See [Documentation Authority](document-authority.md).
+
 ## Current status
 
 Phase 4B Delivery & Fulfillment frontend is complete as an executable specification. Delivery, POS, Inventory and Procurement persistence remain unimplemented.

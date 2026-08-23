@@ -1,5 +1,7 @@
 # POS frontend contract
 
+> **Superseded for V1.** POS is an Order-entry channel under the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Projection inputs
 
 Future POS reads must be projections, not shared mutable domain objects:

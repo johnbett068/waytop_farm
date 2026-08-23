@@ -1,5 +1,7 @@
 # Future staff Order Management contracts
 
+> **Superseded for V1.** Retained for historical UI context. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Purpose
 
 Specify query composition and command ownership for the future backend. Phase 3B creates no API, model, database write or business service.

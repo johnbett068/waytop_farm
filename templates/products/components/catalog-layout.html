@@ -1,7 +1,7 @@
 <div class="catalog-layout" data-catalog data-page-size="6" data-mode="{{ catalog_mode }}">
   <div class="catalog-toolbar">
     <button class="btn btn--outline catalog-toolbar__filter" type="button" data-filter-open aria-controls="filter-drawer" aria-expanded="false">Filters</button>
-    <p class="catalog-toolbar__count" role="status" aria-live="polite"><strong data-result-count>{{ products|length }}</strong> seedlings</p>
+    <p class="catalog-toolbar__count" role="status" aria-live="polite"><strong data-result-count>{{ products|length }}</strong> products</p>
     <label class="sort-control">Sort by
       <select class="form-control" data-sort>
         <option value="featured">Featured</option>
@@ -24,13 +24,13 @@
     </div>
   </div>
 
-  <section class="catalog-results" aria-label="Seedling results">
+  <section class="catalog-results" aria-label="Product results">
     {% include "products/components/skeleton-grid.html" %}
     <div class="catalog-grid" data-product-grid>
       {% for product in products %}{% include "products/components/product-card.html" %}{% endfor %}
     </div>
     <div data-empty-state hidden>
-      {% include "components/page-states/empty.html" with state_title="No seedlings match your selection" state_message="Try removing a filter or searching for another variety." %}
+      {% include "components/page-states/empty.html" with state_title="No products match your selection" state_message="Try changing the price filter or searching for another product." %}
     </div>
     <div data-error-state hidden>
       {% include "components/page-states/error.html" with state_title="We could not update these results" state_message="Clear your filters and try again." %}

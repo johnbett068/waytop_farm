@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f5e2d">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Sign in | WayTop Farm Operations</title>
+    {% load static %}
+    <link rel="icon" href="{% static 'images/logo/favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+  </head>
+  <body class="auth-body">
+    <a class="skip-link" href="#login-main">Skip to sign in</a>
+    <main class="auth-shell" id="login-main" tabindex="-1">
+      <section class="auth-panel" aria-labelledby="login-title">
+        <header class="auth-brand" aria-label="WayTop Farm Operations">
+          <img src="{% static 'images/logo/logo.svg' %}" width="360" height="80" alt="WayTop Farm and Nurseries">
+          <p>Operations</p>
+        </header>
+        <div class="auth-card">
+          <div class="auth-card__header">
+            <h1 class="heading-1" id="login-title">Sign in to your account</h1>
+            <p>Use your internally managed staff credentials.</p>
+          </div>
+
+          {% if form.errors %}
+            <div class="auth-error-summary" id="login-errors" role="alert" aria-live="polite">
+              <strong>Sign in unsuccessful</strong>
+              <p>Invalid username or password. Check your details and try again.</p>
+            </div>
+          {% endif %}
+
+          <form class="auth-form" method="post" action="{% url 'accounts:login' %}">
+            {% csrf_token %}
+            <label class="auth-field" for="{{ form.username.id_for_label }}">
+              <span>Username</span>
+              {{ form.username }}
+              {% if form.username.errors %}<ul class="auth-field-errors">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </label>
+            <label class="auth-field" for="{{ form.password.id_for_label }}">
+              <span>Password</span>
+              {{ form.password }}
+              {% if form.password.errors %}<ul class="auth-field-errors">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </label>
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button class="btn btn--primary auth-submit" type="submit">Sign in</button>
+          </form>
+
+          <p class="auth-access-note"><strong>Staff access only.</strong> Accounts are managed internally by WayTop Farm.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

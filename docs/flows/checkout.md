@@ -1,5 +1,7 @@
 # Checkout workflow
 
+> **Superseded for V1.** See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Primary flow
 
 Populated Cart → Contact → Fulfillment → Payment → Review → mock submit → Confirmation.

@@ -5,12 +5,23 @@ Django settings for config project.
 import os
 from pathlib import Path
 
+from config.environment import (
+    allowed_hosts,
+    database_config,
+    env_bool,
+    env_non_negative_int,
+    payment_evidence_encryption_keys,
+    secret_key,
+)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-waytop-farm-dev-key")
-DEBUG = os.getenv("DEBUG", "True").lower() in {"1", "true", "yes", "on"}
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+DEBUG = env_bool("WAYTOP_DEBUG", True)
+SECRET_KEY = secret_key(debug=DEBUG)
+ALLOWED_HOSTS = allowed_hosts(debug=DEBUG)
 WAYTOP_CONTACT_PHONE = os.getenv("WAYTOP_CONTACT_PHONE", "+254724853914")
+PAYMENT_EVIDENCE_ENCRYPTION_KEYS = payment_evidence_encryption_keys()
+PAYMENT_EVIDENCE_ALLOW_DEVELOPMENT_FALLBACK = DEBUG
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -22,11 +33,15 @@ INSTALLED_APPS = [
     # Local apps
     "apps.core",
     "apps.accounts",
+    "apps.customers",
     "apps.products",
+    "apps.inventory",
+    "apps.commitments",
     "apps.cart",
     "apps.wishlist",
     "apps.orders",
     "apps.payments",
+    "apps.fulfillment",
     "apps.branches",
     "apps.blog",
     "apps.reviews",
@@ -66,12 +81,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+DATABASES = database_config(base_dir=BASE_DIR)
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -92,3 +102,16 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "accounts.User"
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "dashboard:dashboard"
+LOGOUT_REDIRECT_URL = "accounts:login"
+SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", not DEBUG)
+SECURE_HSTS_SECONDS = env_non_negative_int(
+    "SECURE_HSTS_SECONDS", 0 if DEBUG else 31536000
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", False)

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Staff profile | WayTop Farm{% endblock %}
+{% block content %}
+<section class="section" aria-labelledby="profile-title"><div class="container">
+  <p class="caption">Authenticated staff identity</p><h1 class="heading-1" id="profile-title">{{ request.user.username }}</h1>
+  <p>Your account is {% if request.user.is_active %}active{% else %}inactive{% endif %}.</p>
+  <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn--outline" type="submit">Sign out</button></form>
+</div></section>
+{% endblock %}

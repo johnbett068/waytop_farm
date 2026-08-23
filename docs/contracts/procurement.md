@@ -1,5 +1,7 @@
 # Procurement contract (future)
 
+> **Superseded and out of V1 scope.** Retained as reusable historical design; V1 permits only simple external/manual Inventory Receipt. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Boundary
 
 This is a future domain/UI contract only. Phase 3E implements no model, migration, API, persistence, purchase posting, Inventory receipt, payable, payment or calculation.

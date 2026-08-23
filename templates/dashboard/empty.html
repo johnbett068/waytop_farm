@@ -1,0 +1,9 @@
+{% extends "staff_base.html" %}
+{% block title %}{{ page_title }} | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-page" data-runtime-empty-state aria-labelledby="empty-page-title">
+  <nav class="staff-breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a><span>/</span><span aria-current="page">{{ page_title }}</span></nav>
+  <header class="staff-page-header"><div><p class="staff-eyebrow">{{ page_eyebrow }}</p><h1 id="empty-page-title">{{ page_title }}</h1><p>{{ empty_message }}</p></div></header>
+  <section class="staff-state" role="status" data-authoritative-empty><span aria-hidden="true">&#9633;</span><h2>{{ empty_message }}</h2><p>Nothing is inferred, seeded, or fabricated for this view.</p></section>
+</section>
+{% endblock %}

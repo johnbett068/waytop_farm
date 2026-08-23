@@ -1,5 +1,7 @@
 # Staff dashboard workflow
 
+> **Superseded for V1 where conflicting.** Daily Handover, deep Procurement, and detailed Delivery are not active workflows. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Purpose
 
 Define how a future authorised staff member moves from operational awareness to a domain-owned decision without using the dashboard as a generic mutation layer.

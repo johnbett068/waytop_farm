@@ -1,5 +1,7 @@
 # Future order tracking backend contract
 
+> **Superseded for V1.** Retained for historical UI context. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Purpose
 
 Define the future customer-safe confirmation and tracking read contract. Phase 2B implements no API, model, query or business transition.

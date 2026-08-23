@@ -1,0 +1,75 @@
+name: PostgreSQL verification
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  postgresql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: waytop_ci_control
+          POSTGRES_USER: waytop_ci
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U waytop_ci -d waytop_ci_control"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      WAYTOP_DATABASE_BACKEND: postgresql
+      POSTGRES_DB: waytop_ci_control
+      POSTGRES_TEST_DB: waytop_ci_test
+      POSTGRES_USER: waytop_ci
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: "5432"
+      PGOPTIONS: "-c lock_timeout=15000 -c statement_timeout=60000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Require CI database credential
+        run: test -n "$POSTGRES_PASSWORD"
+      - name: Install dependencies
+        run: python -m pip install --requirement requirements.txt
+      - name: Verify dependency integrity
+        run: python -m pip check
+      - name: Verify isolated database names
+        run: test "$POSTGRES_TEST_DB" != "$POSTGRES_DB"
+      - name: Run PostgreSQL regression suite
+        shell: bash
+        run: |
+          set -o pipefail
+          python manage.py test --exclude-tag postgresql_concurrency --verbosity 1 2>&1 | tee postgresql-regression.log
+          grep -q 'Found 258 test(s).' postgresql-regression.log
+          grep -q '^OK$' postgresql-regression.log
+      - name: Run PostgreSQL concurrency tests
+        shell: bash
+        run: |
+          set -o pipefail
+          python manage.py test apps.orders.test_postgresql_concurrency --verbosity 2 2>&1 | tee postgresql-concurrency.log
+          test "$(grep -c '^test_' postgresql-concurrency.log)" -eq 9
+          ! grep -q 'skipped=' postgresql-concurrency.log
+      - name: Check migration drift
+        run: python manage.py makemigrations --check --dry-run
+      - name: Run Django system checks
+        run: python manage.py check
+      - name: Run production-shaped deployment checks
+        shell: bash
+        run: |
+          export WAYTOP_DEBUG=false
+          export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(64))')"
+          export ALLOWED_HOSTS=farm.example.test
+          export SECURE_HSTS_INCLUDE_SUBDOMAINS=true
+          export SECURE_HSTS_PRELOAD=true
+          export PAYMENT_EVIDENCE_ENCRYPTION_KEYS="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+          python manage.py check --deploy

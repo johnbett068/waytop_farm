@@ -1,8 +1,8 @@
-from django.test import SimpleTestCase
+from django.test import TestCase
 from django.urls import reverse
 
 
-class CartPageTests(SimpleTestCase):
+class CartPageTests(TestCase):
     def test_cart_page_exposes_frontend_state_and_summary_contract(self):
         response = self.client.get(reverse("cart:cart"))
         self.assertEqual(response.status_code, 200)

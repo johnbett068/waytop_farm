@@ -1,5 +1,9 @@
 # Project governance
 
+> **HISTORICAL GOVERNANCE CONTEXT.** Ratified V1 contracts and current decision records take
+> precedence over frontend executable specifications. See
+> [Documentation Authority](document-authority.md).
+
 The WayTop Farm Project Constitution governs architecture, design, implementation and documentation. The frontend is the executable specification of the final application, while backend services will guarantee security and business integrity.
 
 ## Milestone completion review

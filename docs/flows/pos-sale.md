@@ -1,5 +1,7 @@
 # POS sale flow
 
+> **Superseded for V1.** POS is an Order-entry channel, not a separate commercial lifecycle. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Phase 4A preview flow
 
 1. Cashier views an open-register projection.

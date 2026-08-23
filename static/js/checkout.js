@@ -14,7 +14,6 @@
   function savedCart() {
     try {
       const cart = JSON.parse(localStorage.getItem(storageKey) || '{}').cart || {};
-      if (page && page.dataset.stateMode === 'success' && Object.keys(cart).length === 0) return { 'anna-f1-tomato': { quantity: 2 }, 'hass-avocado': { quantity: 4 } };
       return cart;
     } catch (error) { return {}; }
   }
@@ -33,7 +32,6 @@
         confirmation.querySelector('[data-confirmation-estimate]').textContent = 'Pickup timing confirmed after availability review';
         confirmation.querySelector('[data-confirmation-fulfillment]').textContent = 'Farm Pickup';
       }
-      if (preview.payment === 'cash_pickup') confirmation.querySelector('[data-confirmation-payment]').textContent = 'Due on pickup — mock only';
     } catch (error) { /* Static fallback remains valid. */ }
     const title = confirmation.querySelector('h1'); if (title) title.focus();
     return;
@@ -60,7 +58,7 @@
   function payment() { return (form.elements.payment || {}).value || 'mpesa'; }
   function deliveryFee() { return fulfillment() === 'delivery' ? 350 : 0; }
   function labelForFulfillment() { return fulfillment() === 'delivery' ? 'Home Delivery · ' + money(350) : 'Farm Pickup · Free'; }
-  function labelForPayment() { return payment() === 'cash_pickup' ? 'Cash on Pickup' : 'M-Pesa'; }
+  function labelForPayment() { return 'M-Pesa'; }
 
   function renderSummary() {
     page.querySelector('[data-checkout-summary-items]').innerHTML = cartEntries.map(function (entry) {
@@ -80,9 +78,6 @@
     const delivery = fulfillment() === 'delivery';
     const address = page.querySelector('[data-delivery-address]'); address.hidden = !delivery;
     address.querySelectorAll('input, select, textarea').forEach(function (field) { field.required = delivery; field.disabled = !delivery; });
-    const cash = form.querySelector('[data-payment="cash_pickup"]'); const cashOption = page.querySelector('[data-cash-option]');
-    cash.disabled = delivery; cashOption.classList.toggle('is-disabled', delivery);
-    if (delivery && cash.checked) form.querySelector('[data-payment="mpesa"]').checked = true;
     renderSummary();
   }
 

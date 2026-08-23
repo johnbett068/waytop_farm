@@ -1,31 +1,46 @@
-from django.http import Http404
 from django.shortcuts import render
 
-from .mock_data import CATEGORIES, CATEGORY_BY_SLUG, PRODUCTS, PRODUCT_BY_SLUG, product_page_context
-
+from .catalog import commerce_catalog_projection, public_catalog_products
 
 def shop(request):
-    return render(request, "products/shop.html", {"products": PRODUCTS, "categories": CATEGORIES, "catalog_mode": "shop"})
+    products = public_catalog_products()
+    return render(request, "products/shop.html", {
+        "products": products,
+        "categories": [],
+        "catalog_mode": "shop",
+        "commerce_catalog": commerce_catalog_projection(products),
+    })
 
 
 def product_detail(request, slug):
-    product = PRODUCT_BY_SLUG.get(slug)
-    if not product:
+    products = public_catalog_products()
+    product = next((item for item in products if item.slug == slug), None)
+    if product is None:
+        from django.http import Http404
         raise Http404("Product not found")
-    return render(request, "products/product_detail.html", product_page_context(product))
+    return render(request, "products/product_detail.html", {
+        "product": product,
+        "commerce_catalog": commerce_catalog_projection(products),
+    })
 
 
 def categories(request):
-    return render(request, "products/categories.html", {"categories": CATEGORIES})
+    return render(request, "products/categories.html", {"categories": []})
 
 
 def category(request, slug):
-    category_data = CATEGORY_BY_SLUG.get(slug)
-    if not category_data:
-        raise Http404("Category not found")
-    products = [product for product in PRODUCTS if product["category_slug"] == slug]
-    return render(request, "products/category.html", {"products": products, "categories": CATEGORIES, "category": category_data, "catalog_mode": "category"})
+    from django.http import Http404
+    raise Http404("Category not found")
 
 
 def search(request):
-    return render(request, "products/search.html", {"products": PRODUCTS, "categories": CATEGORIES, "catalog_mode": "search"})
+    query = request.GET.get("q", "").strip()
+    all_products = public_catalog_products()
+    products = public_catalog_products(search=query) if query else all_products
+    return render(request, "products/search.html", {
+        "products": products,
+        "categories": [],
+        "catalog_mode": "search",
+        "search_query": query,
+        "commerce_catalog": commerce_catalog_projection(all_products),
+    })

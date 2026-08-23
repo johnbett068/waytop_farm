@@ -1,5 +1,8 @@
 # Production Lifecycle
 
+> **DEFERRED.** Planning context only; not authority to implement Production, capacity, PRE_ORDER or
+> Inventory behavior. See [Documentation Authority](../document-authority.md).
+
 ## Canonical flow
 `Material Receipt → Source Lot → Production Batch → Propagation Activity → Establishment → Growing → Hardening → Quality Review → Released for Sale → Inventory Movement`
 

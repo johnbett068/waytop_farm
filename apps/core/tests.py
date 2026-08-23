@@ -1,17 +1,19 @@
-from django.test import SimpleTestCase, override_settings
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 
-class HomePageTests(SimpleTestCase):
-    def test_homepage_renders_final_shell_and_mock_catalog_contract(self):
+class HomePageTests(TestCase):
+    def test_homepage_renders_empty_authoritative_catalog(self):
         response = self.client.get(reverse("core:home"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "base.html")
         self.assertTemplateUsed(response, "core/home.html")
-        self.assertEqual(len(response.context["categories"]), 4)
-        self.assertEqual(len(response.context["featured_products"]), 4)
-        self.assertContains(response, "Anna F1 Tomato")
+        self.assertEqual(response.context["categories"], [])
+        self.assertEqual(response.context["featured_products"], [])
+        self.assertContains(response, "No products published yet")
+        self.assertContains(response, "Product categories are not yet available")
+        self.assertNotContains(response, "Anna F1 Tomato")
         self.assertContains(response, "Skip to main content")
 
     def test_homepage_does_not_advertise_unbuilt_routes(self):
@@ -32,8 +34,7 @@ class HomePageTests(SimpleTestCase):
         self.assertContains(response, 'class="home-edge-art__side home-edge-art__side--left"')
         self.assertContains(response, 'class="home-edge-art__side home-edge-art__side--right"')
         self.assertContains(response, "images/home/hero-editorial-720.webp")
-        self.assertContains(response, "images/home/categories/vegetable-seedlings-480.webp")
-        self.assertContains(response, 'loading="lazy"')
+        self.assertNotContains(response, "images/home/categories/vegetable-seedlings-480.webp")
         self.assertNotContains(response, "Real varieties. Ready to explore.")
         self.assertNotContains(response, "certified vegetable")
         self.assertNotContains(response, "5,000+")

@@ -8,7 +8,7 @@
       {% url 'products:shop' as shop_url %}{% include "products/components/breadcrumbs.html" with breadcrumbs=breadcrumbs only %}
       <p class="caption">WayTop seedling catalog</p>
       <h1 class="heading-1">Healthy beginnings for productive farms</h1>
-      <p class="body-large">Explore nursery-raised vegetable, fruit and tree seedlings with transparent units, growing guidance and clear availability.</p>
+      <p class="body-large">Explore published WayTop products with clear commercial units and current selling prices.</p>
       <form class="catalog-search" action="{% url 'products:search' %}" method="get" role="search">
         <label class="sr-only" for="shop-search">Search seedlings and varieties</label>
         <input class="form-control" id="shop-search" type="search" name="q" placeholder="Search tomatoes, Hass avocado, Grevillea…" autocomplete="off">

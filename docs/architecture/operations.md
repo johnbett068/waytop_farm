@@ -1,5 +1,7 @@
 # Canonical operational architecture
 
+> **Superseded for V1.** Retained as historical prototype design. The [ratified V1 business contract](v1-business-contract.md) is authoritative.
+
 ## Purpose
 
 Define how WayTop operates across customer orders, propagation, quality, inventory, fulfillment, POS, finance and audit. This is the governing workflow standard for future frontend specifications and backend contracts.

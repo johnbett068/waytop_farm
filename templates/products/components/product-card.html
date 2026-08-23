@@ -1,21 +1,17 @@
-{% load static %}
-<article class="catalog-card" data-product-card data-commerce-product="{{ product.slug }}" data-name="{{ product.name|lower }} {{ product.variety|lower }}" data-category="{{ product.category_slug }}" data-status="{{ product.stock }}" data-price="{{ product.price }}">
+<article class="catalog-card" data-product-card data-commerce-product="{{ product.slug }}" data-name="{{ product.name|lower }} {{ product.sku|lower }}" data-price="{% if product.catalog_lowest_price is not None %}{{ product.catalog_lowest_price }}{% endif %}">
   <a class="catalog-card__media" href="{% url 'products:product_detail' product.slug %}" aria-label="View {{ product.name }}">
-    <img src="{% static product.image_filename %}" width="362" height="362" loading="lazy" alt="{{ product.name }} nursery seedlings">
-    <span class="stock-badge stock-badge--{{ product.stock }}">{{ product.stock_label }}</span>
+    <span class="catalog-product-placeholder" aria-hidden="true">WT</span>
   </a>
   <button class="commerce-heart" type="button" data-wishlist-toggle="{{ product.slug }}" aria-label="Save {{ product.name }} to wishlist" aria-pressed="false"><span aria-hidden="true">♡</span></button>
   <div class="catalog-card__body">
-    <p class="catalog-card__category">{{ product.category }}</p>
+    <p class="catalog-card__category">{{ product.sku }}</p>
     <h2 class="heading-3 catalog-card__title"><a href="{% url 'products:product_detail' product.slug %}">{{ product.name }}</a></h2>
-    <p class="catalog-card__variety">Variety: {{ product.variety }}</p>
-    <p class="body catalog-card__description">{{ product.short }}</p>
+    <p class="body catalog-card__description">{{ product.description|default:"Product details are being prepared." }}</p>
     <div class="catalog-card__footer">
-      <p class="catalog-price"><strong>KES {{ product.price_display }}</strong><span>per {{ product.unit }}</span></p>
-      <div class="catalog-card__actions">
-        <a class="btn btn--outline btn--compact" href="{% url 'products:product_detail' product.slug %}">Details</a>
-        <button class="btn btn--primary btn--compact" type="button" data-cart-add="{{ product.slug }}"{% if product.stock == 'out-of-stock' %} disabled aria-disabled="true"{% endif %}>Add to cart</button>
+      <div class="catalog-price">
+        {% if product.catalog_lowest_price is not None %}<strong>From KES {{ product.catalog_lowest_price|floatformat:2 }}</strong><span>See active sale units</span>{% else %}<strong>Price not published</strong><span>Contact WayTop for catalog updates</span>{% endif %}
       </div>
+      <div class="catalog-card__actions"><a class="btn btn--outline btn--compact" href="{% url 'products:product_detail' product.slug %}">Details</a></div>
     </div>
   </div>
 </article>

@@ -1,5 +1,7 @@
 # Order lifecycle and customer tracking flow
 
+> **Superseded for V1.** The active lifecycle is `PENDING -> CONFIRMED -> PROCESSING -> FULFILLED`, with authorized cancellation. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Purpose and journey
 
 Checkout acceptance → Order Confirmation → guest Track Order → customer activity timeline → Order Details → support.

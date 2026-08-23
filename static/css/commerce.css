@@ -81,6 +81,7 @@ body.has-commerce-drawer { overflow: hidden; }
 .commerce-total strong { color: var(--color-primary); font-size: var(--text-heading-3); }
 
 .mini-cart-item { display: grid; grid-template-columns: 5rem minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding-block: var(--space-4); border-bottom: 1px solid var(--color-border); }
+.commerce-product-placeholder { display: grid; width: 100%; height: 100%; min-height: 5rem; place-items: center; border-radius: var(--radius-md); background: var(--color-primary-soft); color: var(--color-primary); font-weight: 800; }
 .mini-cart-item img { width: 5rem; height: 5rem; border-radius: var(--radius-md); object-fit: cover; }
 .mini-cart-item h3, .mini-cart-item p { margin: 0; }
 .mini-cart-item p { color: var(--color-gray); font-size: var(--text-caption); }

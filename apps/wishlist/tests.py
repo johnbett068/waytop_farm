@@ -1,8 +1,8 @@
-from django.test import SimpleTestCase
+from django.test import TestCase
 from django.urls import reverse
 
 
-class WishlistPageTests(SimpleTestCase):
+class WishlistPageTests(TestCase):
     def test_wishlist_page_exposes_frontend_state_contract(self):
         response = self.client.get(reverse("wishlist:wishlist"))
         self.assertEqual(response.status_code, 200)

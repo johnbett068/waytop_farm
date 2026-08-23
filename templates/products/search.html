@@ -4,8 +4,8 @@
 {% block content %}
   <section class="catalog-hero section-sm"><div class="container">
     <p class="caption">Catalog search</p><h1 class="heading-1">Find the right seedlings</h1>
-    <form class="catalog-search" role="search" data-search-form><label class="sr-only" for="catalog-search">Search products</label><input class="form-control" id="catalog-search" type="search" name="q" placeholder="Search by crop or variety" autocomplete="off" data-search-input><button class="btn btn--primary" type="submit">Search</button></form>
-    <p class="search-summary" data-search-summary>Enter a crop or variety to search the complete mock catalog.</p>
+    <form class="catalog-search" action="{% url 'products:search' %}" method="get" role="search"><label class="sr-only" for="catalog-search">Search products</label><input class="form-control" id="catalog-search" type="search" name="q" value="{{ search_query }}" placeholder="Search by product name or SKU" autocomplete="off"><button class="btn btn--primary" type="submit">Search</button></form>
+    <p class="search-summary">{% if search_query %}{{ products|length }} result{{ products|length|pluralize }} for “{{ search_query }}”.{% else %}Browse all published products.{% endif %}</p>
   </div></section>
   <section class="section catalog-section"><div class="container">{% include "products/components/catalog-layout.html" %}</div></section>
 {% endblock %}

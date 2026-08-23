@@ -40,7 +40,7 @@
     showState(detailPage, 'order-detail', validMode(detailPage.dataset.stateMode));
     const menu = detailPage.querySelector('[data-action-menu]'); const toggle = detailPage.querySelector('[data-action-menu-toggle]'); const dialog = document.querySelector('[data-order-action-dialog]');
     toggle.addEventListener('click', function () { const open = menu.hidden; menu.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); });
-    const labels = { assign: 'Assign fulfillment?', prepare: 'Start preparation?', quality: 'Start Fulfillment Quality Check?', ready: 'Mark fulfillment ready?', deliver: 'Record delivery?', cancel: 'Cancel order?', refund: 'Request refund?' };
+    const labels = { fulfill: 'Mark order fulfilled?', cancel: 'Request authorized cancellation?' };
     menu.querySelectorAll('[data-order-command]').forEach(function (button) { button.addEventListener('click', function () { menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); dialog.querySelector('[data-order-command-title]').textContent = labels[button.dataset.orderCommand]; if (dialog.showModal) dialog.showModal(); }); });
     detailPage.querySelector('[data-orders-retry]').addEventListener('click', function () { window.location.href = window.location.pathname; });
     document.addEventListener('click', function (event) { if (!menu.hidden && !event.target.closest('[data-action-menu], [data-action-menu-toggle]')) { menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); } });

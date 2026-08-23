@@ -2,8 +2,6 @@
   'use strict';
   const confirmation = document.querySelector('[data-order-confirmation]');
   const page = document.querySelector('[data-order-tracking]');
-  const validOrder = 'WTF-260716-1042';
-  const validPhone = '+254724853914';
 
   if (confirmation) {
     const state = confirmation.dataset.stateMode;
@@ -47,8 +45,7 @@
   function lookup() {
     show('loading', false);
     window.setTimeout(function () {
-      const matches = normalizeOrder(form.elements.order_number.value) === validOrder && normalizePhone(form.elements.phone.value) === validPhone;
-      show(matches ? 'success' : 'notfound', true);
+      show('notfound', true);
     }, 360);
   }
 

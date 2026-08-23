@@ -1,5 +1,7 @@
 # Future Checkout backend contract
 
+> **Superseded for V1.** Retained for historical UI context. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 Status: documentation only; no endpoint, model or service is implemented.
 
 ## Customer request shape

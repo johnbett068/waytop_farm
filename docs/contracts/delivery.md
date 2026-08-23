@@ -1,5 +1,7 @@
 # Delivery & Fulfillment frontend contract
 
+> **Superseded and out of V1 scope.** Detailed Delivery jobs are not an active V1 workflow. See the [ratified V1 business contract](../architecture/v1-business-contract.md).
+
 ## Ownership
 
 Delivery belongs to Fulfillment, which belongs to an Order. It tracks the customer handover process and references immutable Order/Fulfillment lines. It does not own Order acceptance/completion, Payment, Inventory, transport resources, customer master data or Accounting.

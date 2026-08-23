@@ -3,8 +3,8 @@
   const page = document.querySelector('[data-pos-page]');
   if (!page) return;
   const fixtures = {
-    jane: { name: 'Jane Atieno', role: 'Cashier', scope: 'Bomet Register BMT-01', capabilities: ['pos.view', 'pos.open_register', 'pos.process_sale', 'pos.close_register', 'pos.request_refund', 'pos.issue_refund', 'pos.request_void', 'pos.void_sale', 'pos.view_reconciliation'] },
-    john: { name: 'John Bett', role: 'Operations Manager', scope: 'All branches', capabilities: ['pos.view', 'pos.request_refund', 'pos.approve_refund', 'pos.issue_refund', 'pos.request_void', 'pos.approve_void', 'pos.void_sale', 'pos.view_reconciliation'] },
+    jane: { name: 'Jane Atieno', role: 'Cashier', scope: 'Bomet Register BMT-01', capabilities: ['pos.view', 'pos.process_order', 'pos.process_sale'] },
+    john: { name: 'John Bett', role: 'Operations Manager', scope: 'All locations', capabilities: ['pos.view', 'pos.process_order', 'pos.process_sale'] },
     amina: { name: 'Amina Noor', role: 'Administrator', scope: 'Administrative global scope', capabilities: [] }
   };
   const products = {
@@ -38,8 +38,6 @@
   const toast = page.querySelector('[data-pos-toast]');
   function notify(message) { if (!toast) return; toast.textContent = message; toast.hidden = false; window.setTimeout(function () { toast.hidden = true; }, 3200); }
   document.querySelectorAll('[data-pos-placeholder]').forEach(function (button) { button.addEventListener('click', function () { notify(button.dataset.posPlaceholder); }); });
-  document.querySelectorAll('[data-park-sale]').forEach(function (button) { button.addEventListener('click', function () { notify('Sale parking preview only — no cart or Inventory reservation was created.'); }); });
-  document.querySelectorAll('[data-cancel-parked]').forEach(function (button) { button.addEventListener('click', function () { notify('Parked-sale cancellation preview only — no record changed.'); }); });
   const workspace = page.querySelector('[data-pos-sale-workspace]');
   if (!workspace) return;
   const lines = workspace.querySelector('[data-cart-lines]');
@@ -66,8 +64,8 @@
     line.append(info, quantity, total, remove); wireLine(line); return line;
   }
   workspace.querySelectorAll('[data-add-product]').forEach(function (button) { button.addEventListener('click', function () { const code = button.dataset.addProduct; const existing = lines.querySelector('[data-cart-line="' + code + '"]'); if (existing) { const output = existing.querySelector('[data-quantity]'); output.textContent = String(Number(output.textContent) + 1); } else { lines.appendChild(createLine(code)); } updateTotals(); notify(products[code].name + ' added to the local mock cart.'); }); });
-  const clear = workspace.querySelector('[data-clear-cart]'); if (clear) clear.addEventListener('click', function () { lines.replaceChildren(); updateTotals(); notify('Local mock cart cleared. No sale or Inventory record changed.'); });
-  const complete = workspace.querySelector('[data-complete-sale]'); if (complete) complete.addEventListener('click', function () { notify('Sale preview complete — no payment, Inventory issue, receipt or Accounting event was created.'); });
+  const clear = workspace.querySelector('[data-clear-cart]'); if (clear) clear.addEventListener('click', function () { lines.replaceChildren(); updateTotals(); notify('Local mock cart cleared. No Order or Inventory record changed.'); });
+  const complete = workspace.querySelector('[data-complete-sale]'); if (complete) complete.addEventListener('click', function () { notify('POS order preview only — no Order, payment, commitment or Inventory issue was created.'); });
   const search = workspace.querySelector('[data-pos-search]'); if (search) search.addEventListener('input', function () { const query = search.value.trim().toLowerCase(); workspace.querySelectorAll('[data-pos-product]').forEach(function (card) { card.hidden = query && card.dataset.name.toLowerCase().indexOf(query) === -1; }); });
   updateTotals();
 }());

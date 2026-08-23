@@ -1,41 +1,30 @@
 {% extends "base.html" %}{% load static %}
 {% block title %}{{ product.name }} | WayTop Farm{% endblock %}
-{% block meta_description %}{{ product.short }} Available from WayTop Farm & Nurseries in Kenya.{% endblock %}
+{% block meta_description %}{{ product.description }}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
 {% block content %}
   <section class="product-detail section-sm">
     <div class="container">
-      <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><a href="{% url 'products:shop' %}">Shop</a></li><li><a href="{% url 'products:category' product.category_slug %}">{{ product.category }}</a></li><li><span aria-current="page">{{ product.name }}</span></li></ol></nav>
+      <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="{% url 'core:home' %}">Home</a></li><li><a href="{% url 'products:shop' %}">Shop</a></li><li><span aria-current="page">{{ product.name }}</span></li></ol></nav>
       <div class="product-detail__layout" data-commerce-product="{{ product.slug }}">
-        <div class="product-gallery">
-          <img src="{% static product.image_filename %}" width="362" height="362" alt="Healthy {{ product.name }} nursery seedlings">
-          <span class="stock-badge stock-badge--{{ product.stock }}">{{ product.stock_label }}</span>
-        </div>
+        <div class="product-gallery"><span class="catalog-product-placeholder" aria-hidden="true">WT</span></div>
         <div class="product-summary">
-          <p class="caption">{{ product.category }}</p><h1 class="heading-1">{{ product.name }}</h1><p class="product-summary__variety">Variety: <strong>{{ product.variety }}</strong></p>
+          <p class="caption">{{ product.sku }}</p><h1 class="heading-1">{{ product.name }}</h1>
           <p class="body-large">{{ product.description }}</p>
-          <p class="product-summary__price"><strong>KES {{ product.price_display }}</strong><span>per {{ product.unit }}</span></p>
-          <div class="product-summary__notice" role="note"><strong>Availability is confirmed after checkout.</strong><span>Your cart is a planning estimate. Our team assigns fulfillment internally based on stock and operations.</span></div>
-          <div class="product-summary__commerce-actions">
-            <button class="btn btn--primary" type="button" data-cart-add="{{ product.slug }}"{% if product.stock == 'out-of-stock' %} disabled aria-disabled="true"{% endif %}>Add to cart</button>
-            <button class="btn btn--outline" type="button" data-wishlist-toggle="{{ product.slug }}" aria-label="Save {{ product.name }} to wishlist" aria-pressed="false"><span aria-hidden="true">♡</span> Save to wishlist</button>
-          </div>
+          <p class="product-summary__base-unit">Base inventory unit: <strong>{{ product.base_inventory_unit }}</strong></p>
+          <button class="btn btn--outline" type="button" data-wishlist-toggle="{{ product.slug }}" aria-label="Save {{ product.name }} to wishlist" aria-pressed="false"><span aria-hidden="true">♡</span> Save to wishlist</button>
         </div>
       </div>
     </div>
   </section>
-
-  <section class="section product-information" aria-labelledby="product-information-title"><div class="container">
-    <div class="section-heading"><p class="caption">Plan before you plant</p><h2 class="heading-2" id="product-information-title">Product specifications</h2></div>
-    <dl class="specification-grid">{% for label, value in product.specs.items %}<div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>{% endfor %}<div><dt>Planting period</dt><dd>{{ product.planting }}</dd></div><div><dt>Growing duration</dt><dd>{{ product.duration }}</dd></div></dl>
+  <section class="section product-information" aria-labelledby="sale-units-title"><div class="container">
+    <div class="section-heading"><p class="caption">Commercial options</p><h2 class="heading-2" id="sale-units-title">Sale units and prices</h2></div>
+    <div class="specification-grid">
+      {% for sale_unit in product.catalog_sale_units %}
+        <div><h3 class="heading-4">{{ sale_unit.name }}</h3><p>{{ sale_unit.base_quantity|floatformat:"-3" }} {{ product.base_inventory_unit }}</p>{% if sale_unit.catalog_price %}<p class="catalog-price"><strong>{{ sale_unit.catalog_price.currency }} {{ sale_unit.catalog_price.amount|floatformat:2 }}</strong></p><button class="btn btn--primary" type="button" data-cart-add="{{ product.slug }}:{{ sale_unit.pk }}">Add {{ sale_unit.name }} to cart</button>{% else %}<p>Price not currently published.</p>{% endif %}</div>
+      {% empty %}
+        {% include "components/page-states/empty.html" with state_title="No sale units published" state_message="This product has no active commercial unit yet." %}
+      {% endfor %}
+    </div>
   </div></section>
-
-  <section class="section planting-guide" aria-labelledby="planting-guide-title"><div class="container planting-guide__layout">
-    <div><p class="caption">Practical guidance</p><h2 class="heading-2" id="planting-guide-title">Planting guide</h2><p class="body-large">Use this overview for planning. Final recommendations should consider your soil test, altitude, season and production system.</p></div>
-    <ol class="planting-steps">{% for step in product.planting_guide %}<li><span aria-hidden="true">{{ forloop.counter }}</span><p>{{ step }}</p></li>{% endfor %}</ol>
-  </div></section>
-
-
-  <section class="section product-rail" aria-labelledby="related-title"><div class="container"><div class="rail-heading"><div><p class="caption">You may also consider</p><h2 class="heading-2" id="related-title">Related seedlings</h2></div><a href="{% url 'products:category' product.category_slug %}">View category</a></div><div class="catalog-grid catalog-grid--rail">{% for product in related_products %}{% include "products/components/product-card.html" %}{% endfor %}</div></div></section>
-  <section class="section product-rail product-rail--muted" aria-labelledby="recent-title"><div class="container"><div class="rail-heading"><div><p class="caption">Continue exploring</p><h2 class="heading-2" id="recent-title">Recently viewed</h2></div></div><div class="catalog-grid catalog-grid--rail">{% for product in recently_viewed %}{% include "products/components/product-card.html" %}{% endfor %}</div><p class="data-note">Recently viewed products are representative mock data in Phase 1B.</p></div></section>
 {% endblock %}
