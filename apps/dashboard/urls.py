@@ -1,14 +1,25 @@
 from django.urls import path
 from . import views
+from apps.products import staff_views as product_staff_views
+from apps.procurement import staff_views as procurement_staff_views
+from apps.inventory import staff_views as inventory_staff_views
 app_name = "dashboard"
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("orders/", views.orders, name="orders"),
     path("orders/<str:order_number>/", views.order_detail, name="order_detail"),
+    path("products/", product_staff_views.product_list, name="catalog_products"),
+    path("products/new/", product_staff_views.product_create, name="catalog_product_create"),
     path("production/", views.production, name="production"),
+    path("production/batches/new/", views.production_batch_create, name="production_batch_create"),
     path("production/source-lots/", views.source_lots, name="source_lots"),
     path("production/batches/", views.production_batches, name="production_batches"),
     path("production/batches/<str:batch_number>/", views.production_batch_detail, name="production_batch_detail"),
+    path("production/batches/<str:batch_number>/update/", views.production_batch_update, name="production_batch_update"),
+    path("production/batches/<str:batch_number>/transition/", views.production_batch_transition, name="production_batch_transition"),
+    path("production/purchases/new/", views.production_purchase_create, name="production_purchase_create"),
+    path("production/labour/new/", views.production_labour_create, name="production_labour_create"),
+    path("production/activities/new/", views.production_activity_create, name="production_activity_create"),
     path("production/tasks/", views.production_tasks, name="production_tasks"),
     path("production/exceptions/", views.production_exceptions, name="production_exceptions"),
     path("inventory/", views.inventory, name="inventory"),
@@ -19,7 +30,23 @@ urlpatterns = [
     path("inventory/receiving/", views.inventory_receiving, name="inventory_receiving"),
     path("inventory/transfers/", views.inventory_transfers, name="inventory_transfers"),
     path("inventory/counts/", views.inventory_counts, name="inventory_counts"),
-    path("inventory/adjustments/", views.inventory_adjustments, name="inventory_adjustments"),
+    path("inventory/supplies/", inventory_staff_views.supply_list, name="inventory_supply_list"),
+    path("inventory/supplies/new/", inventory_staff_views.supply_create, name="inventory_supply_create"),
+    path("inventory/supplies/<str:code>/edit/", inventory_staff_views.supply_edit, name="inventory_supply_edit"),
+    path("inventory/supplies/<str:code>/", inventory_staff_views.supply_detail, name="inventory_supply_detail"),
+    path("inventory/receipts/new/", inventory_staff_views.receipt_create, name="inventory_receipt_create"),
+    path("inventory/stock/", inventory_staff_views.stock, name="inventory_stock"),
+    path("inventory/history/", inventory_staff_views.history, name="inventory_history"),
+    path("inventory/adjustments/", inventory_staff_views.adjustments, name="inventory_adjustments"),
+    path("inventory/adjustments/request/", inventory_staff_views.adjustment_request, name="inventory_adjustment_request"),
+    path("inventory/adjustments/approve/", inventory_staff_views.adjustment_approve, name="inventory_adjustment_approve"),
+    path("procurement/suppliers/", procurement_staff_views.supplier_list, name="procurement_supplier_list"),
+    path("procurement/suppliers/new/", procurement_staff_views.supplier_form, name="procurement_supplier_create"),
+    path("procurement/suppliers/<uuid:supplier_id>/edit/", procurement_staff_views.supplier_form, name="procurement_supplier_edit"),
+    path("procurement/purchases/", procurement_staff_views.purchase_list, name="procurement_purchase_list"),
+    path("procurement/purchases/new/", procurement_staff_views.purchase_create, name="procurement_purchase_create"),
+    path("procurement/purchases/<str:number>/", procurement_staff_views.purchase_detail, name="procurement_purchase_detail"),
+    path("procurement/purchases/<str:number>/<str:action>/", procurement_staff_views.purchase_transition, name="procurement_purchase_transition"),
     path("pos/", views.pos, name="pos"),
     path("pos/sale/", views.pos_sale, name="pos_sale"),
 ]

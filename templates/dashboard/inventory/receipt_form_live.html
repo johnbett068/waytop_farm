@@ -1,0 +1,51 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}{{ title }} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}">{% endblock %}
+{% block content %}
+<section class="staff-workspace purchase-order-workspace">
+  <header class="staff-page-heading"><p>Inventory</p><h1>{{ title }}</h1></header>
+  <p class="staff-rule-note">Post only stock physically received from an ordered supplier line. Accepted quantity creates the official Inventory receipt movement; rejected quantity does not enter stock.</p>
+  <form method="post" class="staff-form purchase-order-form" novalidate>
+    {% csrf_token %}{{ form.non_field_errors }}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+    <fieldset class="purchase-order-form__section">
+      <legend>Receipt identity</legend>
+      <div class="purchase-order-form__grid">
+        {% for field in form.visible_fields %}{% if field.name == 'reason' or field.name == 'number' or field.name == 'delivery_note_reference' or field.name == 'receipt_date' %}
+          <div class="purchase-order-form__field{% if field.name == 'reason' %} purchase-order-form__field--full{% endif %}">
+            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="purchase-order-form__section">
+      <legend>Supply and quantities</legend>
+      <div class="purchase-order-form__grid">
+        {% for field in form.visible_fields %}{% if field.name == 'purchase_order_line' or field.name == 'accepted_base_quantity' or field.name == 'rejected_base_quantity' or field.name == 'rejection_reason' %}
+          <div class="purchase-order-form__field{% if field.name == 'purchase_order_line' or field.name == 'rejection_reason' %} purchase-order-form__field--full{% endif %}">
+            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="purchase-order-form__section">
+      <legend>Lot and destination</legend>
+      <div class="purchase-order-form__grid">
+        {% for field in form.visible_fields %}{% if field.name == 'lot_code' or field.name == 'destination_location' %}
+          <div class="purchase-order-form__field">
+            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </fieldset>
+    <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Post receipt</button><a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

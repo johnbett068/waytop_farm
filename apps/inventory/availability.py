@@ -85,6 +85,7 @@ def eligible_stock_positions(*, inventory_item, business_date):
     return (
         StockPosition.objects.filter(
             item=inventory_item,
+            item__kind=InventoryItem.Kind.PRODUCT,
             item__is_active=True,
             location__is_active=True,
             location__allows_saleable_stock=True,
@@ -154,7 +155,9 @@ def get_ready_availability(
             "READY availability requires an active Sale Unit for the Product.",
         ) from error
     try:
-        inventory_item = InventoryItem.objects.select_related("product").get(product=product)
+        inventory_item = InventoryItem.objects.select_related("product").get(
+            product=product, kind=InventoryItem.Kind.PRODUCT, supply__isnull=True
+        )
     except InventoryItem.DoesNotExist as error:
         raise AvailabilityUnavailable(
             "INVENTORY_PROVIDER_UNAVAILABLE",

@@ -188,7 +188,9 @@ def supply_ready_commitment(
 
     # Inventory Item is the canonical lock root for every physical mutation.
     inventory_item = InventoryItem.objects.select_for_update().get(
-        pk=preliminary.inventory_item_id
+        pk=preliminary.inventory_item_id,
+        kind=InventoryItem.Kind.PRODUCT,
+        supply__isnull=True,
     )
     commitment = (
         Commitment.objects.select_for_update(of=("self",))

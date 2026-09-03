@@ -201,13 +201,13 @@ def start_order_processing(*, order_id, actor, correlation_id, idempotency_key, 
         key=str,
     )
     items = list(
-        InventoryItem.objects.select_for_update()
+        InventoryItem.objects.select_for_update(of=("self",))
         .filter(pk__in=item_ids)
         .select_related("product")
         .order_by("pk")
     )
     commitments = tuple(
-        Commitment.objects.select_for_update()
+        Commitment.objects.select_for_update(of=("self",))
         .filter(order=order)
         .select_related("inventory_item__product")
         .order_by("order_line__line_number")

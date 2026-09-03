@@ -1,0 +1,11 @@
+{% extends "staff_base.html" %}
+{% block title %}{{ purchase.number }} | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Purchase Order</p><h1>{{ purchase.number }}</h1><span>{{ purchase.supplier.name }} · {{ purchase.get_status_display }}</span></header>
+  <p class="staff-rule-note">This Purchase Order records commercial intent only. Stock changes only when a separate Goods Receipt is posted.</p>
+  <table><thead><tr><th>Supply</th><th>Ordered</th><th>Base ordered</th><th>Received</th><th>Unit cost</th><th>Line total</th></tr></thead><tbody>{% for line in purchase.lines.all %}<tr><td>{{ line.supply_name }}</td><td>{{ line.ordered_quantity }} {{ line.purchase_unit }}</td><td>{{ line.ordered_base_quantity }} {{ line.supply.base_unit }}</td><td>{{ line.received_base_quantity }}</td><td>KES {{ line.unit_cost }}</td><td>KES {{ line.line_total }}</td></tr>{% endfor %}</tbody></table>
+  {% if purchase.status == 'DRAFT' or purchase.status == 'ORDERED' %}<form method="post" action="{% url 'dashboard:procurement_purchase_transition' purchase.number 'place' %}">{% csrf_token %}{{ transition_form.as_p }}{% if purchase.status == 'DRAFT' %}<button class="staff-button staff-button--primary">Place Order</button>{% endif %}</form><form method="post" action="{% url 'dashboard:procurement_purchase_transition' purchase.number 'cancel' %}">{% csrf_token %}{{ transition_form.as_p }}<button class="staff-button staff-button--secondary">Cancel Order</button></form>{% endif %}
+  <a href="{% url 'dashboard:procurement_purchase_list' %}">Back to Purchase Orders</a>
+</section>
+{% endblock %}

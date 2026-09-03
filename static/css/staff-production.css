@@ -110,6 +110,34 @@
 @media (max-width: 760px) { .production-metrics, .batch-summary-grid { grid-template-columns: repeat(2, 1fr); } .batch-card-grid, .production-exception-grid, .production-dashboard-grid > aside { grid-template-columns: 1fr; } .care-grid { grid-template-columns: 1fr; } .record-table > div { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 480px) { .production-metrics, .batch-summary-grid, .production-filter, .production-batch-card dl { grid-template-columns: 1fr; } .batch-queue > a { grid-template-columns: 1fr; } .record-table > div { grid-template-columns: 1fr; } .production-detail-header > div:last-child, .production-detail-header .staff-button { width: 100%; } .exception-table article { grid-template-columns: 1fr; } .exception-table p, .exception-table small { grid-column: 1; } }
 
+/* Authoritative Simple Production Operations */
+.production-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+.production-detail-header > div:first-child > span:not(.production-status) { color: var(--color-gray); }
+.production-record-list { display: grid; }
+.production-record-list article { display: flex; justify-content: space-between; gap: var(--space-4); padding-block: var(--space-3); border-top: 1px solid var(--color-border); }
+.production-record-list article > div { display: grid; gap: var(--space-1); min-width: 0; }
+.production-record-list article > div:last-child { flex: 0 0 auto; text-align: right; }
+.production-record-list p, .production-record-list small, .production-inline-empty { margin: 0; color: var(--color-gray); font-size: var(--text-small); }
+.production-record-list a { color: var(--color-primary); font-weight: 700; }
+.production-definition-list { display: grid; margin: 0; }
+.production-definition-list div { display: grid; grid-template-columns: minmax(8rem, .6fr) 1fr; gap: var(--space-3); padding-block: var(--space-3); border-top: 1px solid var(--color-border); }
+.production-definition-list dt { color: var(--color-gray); }
+.production-definition-list dd { margin: 0; font-weight: 650; }
+.production-boundary-note { padding: var(--space-3); border-radius: var(--radius-sm); background: var(--color-info-surface); color: var(--color-info-text); font-size: var(--text-small); }
+.production-messages { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.production-message { margin: 0; padding: var(--space-3); border-radius: var(--radius-sm); background: var(--color-info-surface); }
+.production-message--success { background: var(--color-success-surface); color: var(--color-success-text); }
+.production-message--error { background: var(--color-error-surface); color: var(--color-error); }
+.production-form-page { max-width: 52rem; }
+.production-form { display: grid; gap: var(--space-4); }
+.production-form label { display: grid; gap: var(--space-2); color: var(--color-gray); font-size: var(--text-small); font-weight: 700; }
+.production-form input, .production-form select, .production-form textarea { width: 100%; min-height: 2.75rem; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-white); color: var(--color-text); font: inherit; }
+.production-form textarea { resize: vertical; }
+.production-form label em, .production-form-errors { color: var(--color-error); font-size: var(--text-small); font-style: normal; }
+.production-form-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.production-form--compact { gap: var(--space-3); }
+@media (max-width: 640px) { .production-actions, .production-form-actions { display: grid; width: 100%; } .production-record-list article, .production-definition-list div { grid-template-columns: 1fr; } .production-record-list article { display: grid; } .production-record-list article > div:last-child { text-align: left; } }
+
 /* Production batch operational workspace */
 .production-workspace-header { display: flex; justify-content: space-between; gap: var(--space-5); margin-bottom: var(--space-5); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: linear-gradient(125deg, var(--color-white) 55%, var(--color-nav-sage)); box-shadow: var(--shadow-sm); }
 .production-workspace-heading { display: grid; gap: var(--space-2); min-width: 0; }

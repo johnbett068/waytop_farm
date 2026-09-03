@@ -1,0 +1,15 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}Create Product | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-catalog.css' %}">{% endblock %}
+{% block content %}
+<section class="catalog-form-page" aria-labelledby="product-form-title">
+  <header class="catalog-staff__header"><div><p>Products</p><h1 id="product-form-title">Create Product</h1><span>Create one seedling Product and its first sale unit.</span></div></header>
+  <form class="catalog-form" method="post" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="catalog-form__errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <fieldset><legend>Product information</legend>{% for field in form %}{% if field.name == 'sale_unit_name' %}</fieldset><fieldset><legend>How this Product is sold</legend>{% endif %}<label{% if field.field.widget.input_type == 'checkbox' %} class="catalog-checkbox"{% endif %}>{{ field }}<span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</label>{% endfor %}</fieldset>
+    <p class="catalog-boundary">Saving creates catalog records only. It does not create Inventory or a Production batch.</p>
+    <div class="catalog-form__actions"><button class="staff-button staff-button--primary" type="submit">Save Product</button><a class="staff-button staff-button--secondary" href="{% url 'dashboard:catalog_products' %}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

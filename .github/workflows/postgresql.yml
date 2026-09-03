@@ -50,14 +50,13 @@ jobs:
         run: |
           set -o pipefail
           python manage.py test --exclude-tag postgresql_concurrency --verbosity 1 2>&1 | tee postgresql-regression.log
-          grep -q 'Found 258 test(s).' postgresql-regression.log
           grep -q '^OK$' postgresql-regression.log
       - name: Run PostgreSQL concurrency tests
         shell: bash
         run: |
           set -o pipefail
-          python manage.py test apps.orders.test_postgresql_concurrency --verbosity 2 2>&1 | tee postgresql-concurrency.log
-          test "$(grep -c '^test_' postgresql-concurrency.log)" -eq 9
+          python manage.py test apps.orders.test_postgresql_concurrency apps.procurement.test_postgresql_concurrency --verbosity 2 2>&1 | tee postgresql-concurrency.log
+          grep -q '^OK$' postgresql-concurrency.log
           ! grep -q 'skipped=' postgresql-concurrency.log
       - name: Check migration drift
         run: python manage.py makemigrations --check --dry-run

@@ -1,5 +1,9 @@
 # WayTop Farm deployment and verification configuration
 
+Status: **AUTHORITATIVE — TECHNICAL ENVIRONMENT POLICY**
+
+Local SQLite policy ratified: 28 August 2026
+
 This document describes technical environment configuration only. It does not authorize or change
 business behavior.
 
@@ -8,6 +12,21 @@ business behavior.
 Local development defaults to `DEBUG=True`, SQLite at `db.sqlite3`, non-secure local cookies and a
 development-only SECRET_KEY fallback. Raw Payment evidence still uses encrypted storage; in local
 development/tests only, its fallback key is derived from the development SECRET_KEY.
+
+The repository-local `db.sqlite3` is an allowed local development database. It may be non-empty and
+may contain legitimate developer-created or local runtime data; neither its presence nor its size is
+by itself a defect. A zero-byte database is not a repository invariant. Do not delete, truncate,
+recreate, migrate, flush, seed or otherwise modify this file merely to make it empty or to satisfy a
+historical audit condition.
+
+This permission is local-only. The SQLite file must never be represented as, connected to, or
+confused with a production database. Production-oriented migration and regression verification, and
+all PostgreSQL-specific concurrency guarantees, require PostgreSQL. SQLite results are only local
+development or ordinary regression evidence and never PostgreSQL concurrency evidence.
+
+This policy does not require fixtures, seeds, demo records or fabricated business data. Developers
+remain responsible for protecting legitimate local data before any separately authorized destructive
+database operation.
 
 Do not use those fallbacks for production or real Payment evidence.
 

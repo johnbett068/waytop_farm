@@ -12,6 +12,7 @@ from apps.core.idempotency import lock_idempotency_key
 
 from .models import (
     InventoryItem,
+    InventoryAdjustmentRequest,
     InventoryLocation,
     InventoryMovement,
     InventoryMovementLine,
@@ -21,6 +22,7 @@ from .models import (
 
 
 BASE_QUANTITY_QUANTUM = Decimal("0.001")
+_ADJUSTMENT_APPROVAL_TOKEN = object()
 
 
 @dataclass(frozen=True)
@@ -36,8 +38,8 @@ PERMISSION_BY_MOVEMENT_TYPE = {
     InventoryMovement.Type.RECEIPT: "inventory.receive",
     InventoryMovement.Type.ISSUE: "inventory.release",
     InventoryMovement.Type.TRANSFER: "inventory.transfer",
-    InventoryMovement.Type.ADJUSTMENT_IN: "inventory.adjust",
-    InventoryMovement.Type.ADJUSTMENT_OUT: "inventory.adjust",
+    InventoryMovement.Type.ADJUSTMENT_IN: "inventory.approve_adjustment",
+    InventoryMovement.Type.ADJUSTMENT_OUT: "inventory.approve_adjustment",
     InventoryMovement.Type.REVERSAL: "inventory.adjust",
 }
 
@@ -174,19 +176,29 @@ def post_inventory_movement(
     correlation_id=None,
     effective_at=None,
     reverses=None,
+    adjustment_request=None,
+    _adjustment_approval_token=None,
 ):
     """Post an immutable movement and update affected Stock Positions atomically."""
     if movement_type not in InventoryMovement.Type.values:
         raise ValidationError("Unsupported Inventory movement type.")
     _require_permission(actor, PERMISSION_BY_MOVEMENT_TYPE[movement_type])
-    if movement_type in {
+    adjustment_types = {
         InventoryMovement.Type.ADJUSTMENT_IN,
         InventoryMovement.Type.ADJUSTMENT_OUT,
-        InventoryMovement.Type.REVERSAL,
-    }:
+    }
+    if movement_type == InventoryMovement.Type.REVERSAL:
         raise ValidationError(
-            "Adjustment and reversal posting remain unavailable until their approval workflow exists."
+            "Reversal posting remains unavailable until its correction workflow exists."
         )
+    if movement_type in adjustment_types:
+        if (
+            not isinstance(adjustment_request, InventoryAdjustmentRequest)
+            or _adjustment_approval_token is not _ADJUSTMENT_APPROVAL_TOKEN
+            or adjustment_request.state != InventoryAdjustmentRequest.State.PENDING
+            or adjustment_request.requester_id == actor.pk
+        ):
+            raise ValidationError("Adjustment posting requires a pending request and distinct approver.")
 
     reason = (reason or "").strip()
     source_type = (source_type or "").strip()
@@ -231,8 +243,8 @@ def post_inventory_movement(
     item_ids = sorted({line.item_id for line in normalized_lines}, key=str)
     items = {
         item.pk: item
-        for item in InventoryItem.objects.select_for_update()
-        .select_related("product")
+        for item in InventoryItem.objects.select_for_update(of=("self",))
+        .select_related("product", "supply")
         .filter(pk__in=item_ids)
         .order_by("pk")
     }
@@ -276,8 +288,11 @@ def post_inventory_movement(
     for item in items.values():
         if not item.is_active:
             raise ValidationError("Inactive Inventory Items cannot receive new movements.")
-        if item.base_unit != item.product.base_inventory_unit:
-            raise ValidationError("Inventory Item and Product base units no longer agree.")
+        if item.kind == InventoryItem.Kind.PRODUCT:
+            if not item.product_id or item.base_unit != item.product.base_inventory_unit:
+                raise ValidationError("Inventory Item and Product base units no longer agree.")
+        elif not item.supply_id or item.base_unit != item.supply.base_unit:
+            raise ValidationError("Inventory Item and Supply base units no longer agree.")
     if any(not lot.is_active for lot in lots.values()):
         raise ValidationError("Inactive Stock Lots cannot receive new movements.")
     if any(not location.is_active for location in locations.values()):
@@ -285,6 +300,33 @@ def post_inventory_movement(
     for line in normalized_lines:
         if lots[line.lot_id].item_id != line.item_id:
             raise ValidationError("Movement lot must belong to its Inventory Item.")
+        item = items[line.item_id]
+        if (
+            item.kind == InventoryItem.Kind.SUPPLY
+            and not item.supply.allows_fractional_quantity
+            and line.quantity != line.quantity.to_integral_value()
+        ):
+            raise ValidationError("This discrete Supply requires a whole base quantity.")
+
+    if movement_type in adjustment_types:
+        line = normalized_lines[0] if len(normalized_lines) == 1 else None
+        expected_type = (
+            InventoryMovement.Type.ADJUSTMENT_IN
+            if adjustment_request.direction == InventoryAdjustmentRequest.Direction.IN
+            else InventoryMovement.Type.ADJUSTMENT_OUT
+        )
+        if (
+            line is None
+            or movement_type != expected_type
+            or line.item_id != adjustment_request.item_id
+            or line.lot_id != adjustment_request.lot_id
+            or line.quantity != adjustment_request.base_quantity
+            or (line.source_location_id or line.destination_location_id)
+            != adjustment_request.location_id
+            or source_type != "INVENTORY_ADJUSTMENT"
+            or source_reference != str(adjustment_request.pk)
+        ):
+            raise ValidationError("Adjustment movement must exactly match its approved request.")
 
     position_keys = {
         (line.item_id, location_id, line.lot_id)

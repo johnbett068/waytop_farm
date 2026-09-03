@@ -1,1 +1,33 @@
-{% load static %}<aside class="staff-sidebar" data-staff-navigation aria-label="Staff application navigation"><div class="staff-sidebar__brand"><img src="{% static 'images/logo/logo.svg' %}" alt="WayTop Farm" width="174" height="52"><span>Operations</span></div><nav><p>Workspace</p><a href="{% url 'dashboard:dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#8962;</span>Dashboard</a><a href="{% url 'dashboard:pos' %}"{% if '/pos/' in request.path %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9635;</span>POS</a><a href="{% url 'dashboard:orders' %}"{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order_detail' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9636;</span>Orders</a><p>Farm Operations</p><a href="{% url 'dashboard:production' %}"{% if 'production' in request.resolver_match.url_name or request.resolver_match.url_name == 'source_lots' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9827;</span>Production</a><a href="{% url 'dashboard:inventory' %}"{% if 'inventory' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9638;</span>Inventory</a><p>Customers &amp; Catalog</p><a href="{% url 'products:shop' %}"><span aria-hidden="true">&#9671;</span>Products</a><p>System</p><a href="#staff-notification-drawer" data-open-drawer><span aria-hidden="true">&#9826;</span>Notifications</a></nav><div class="staff-sidebar__profile"><span aria-hidden="true">{{ request.user.username|first|upper }}</span><div><strong>{{ request.user.username }}</strong><small>{% if request.user.is_superuser %}Superuser{% else %}Staff{% endif %}</small></div><form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit">Sign out</button></form></div></aside>
+{% load static %}
+<aside class="staff-sidebar" id="staff-mobile-nav" data-staff-navigation aria-label="Staff application navigation">
+  <div class="staff-sidebar__brand">
+    <img src="{% static 'images/logo/logo.svg' %}" alt="WayTop Farm" width="174" height="52">
+    <span>Operations</span>
+  </div>
+  <nav>
+    <p>Workspace</p>
+    <a href="{% url 'dashboard:dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#8962;</span>Dashboard</a>
+    <a href="{% url 'dashboard:pos' %}"{% if '/pos/' in request.path %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9635;</span>POS</a>
+    <a href="{% url 'dashboard:orders' %}"{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order_detail' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9636;</span>Orders</a>
+    <p>Farm Operations</p>
+    {% if perms.production.view_operations %}<a href="{% url 'dashboard:production' %}"{% if 'production' in request.resolver_match.url_name or request.resolver_match.url_name == 'source_lots' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9827;</span>Production</a>{% endif %}
+    <a href="{% url 'dashboard:inventory' %}"{% if 'inventory' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9638;</span>Inventory</a>
+    {% if perms.procurement.view %}<a href="{% url 'dashboard:procurement_purchase_list' %}"{% if 'procurement' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9636;</span>Suppliers &amp; Purchases</a>{% endif %}
+    <p>Customers &amp; Catalog</p>
+    {% if perms.products.view_product %}<a href="{% url 'dashboard:catalog_products' %}"{% if request.resolver_match.url_name == 'catalog_products' or request.resolver_match.url_name == 'catalog_product_create' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9671;</span>Products</a>{% endif %}
+    <a href="{% url 'products:shop' %}"><span aria-hidden="true">&#9671;</span>View public catalog</a>
+    <p>System</p>
+    <a href="#staff-notification-drawer" data-open-drawer><span aria-hidden="true">&#9826;</span>Notifications</a>
+  </nav>
+  <div class="staff-sidebar__profile">
+    <span aria-hidden="true">{{ request.user.username|first|upper }}</span>
+    <div>
+      <strong>{{ request.user.username }}</strong>
+      <small>{% if request.user.is_superuser %}Superuser{% else %}Staff{% endif %}</small>
+    </div>
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit">Sign out</button>
+    </form>
+  </div>
+</aside>

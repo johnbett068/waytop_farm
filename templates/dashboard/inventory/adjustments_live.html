@@ -1,0 +1,33 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}Inventory Adjustments | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}">{% endblock %}
+{% block content %}
+<section class="staff-workspace purchase-order-workspace">
+  <header class="staff-page-heading"><p>Inventory</p><h1>Supply Adjustments</h1></header>
+  <div class="staff-grid">
+    <article>
+      <h2>Request adjustment</h2>
+      <form method="post" action="{% url 'dashboard:inventory_adjustment_request' %}" class="purchase-order-form" novalidate>
+        {% csrf_token %}{{ request_form.non_field_errors }}{% for hidden in request_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="purchase-order-form__grid">
+          {% for field in request_form.visible_fields %}<div class="purchase-order-form__field purchase-order-form__field--full"><label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}</div>{% endfor %}
+        </div>
+        <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Request</button></div>
+      </form>
+    </article>
+    <article>
+      <h2>Approve adjustment</h2>
+      <form method="post" action="{% url 'dashboard:inventory_adjustment_approve' %}" class="purchase-order-form" novalidate>
+        {% csrf_token %}{{ approval_form.non_field_errors }}{% for hidden in approval_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="purchase-order-form__grid">
+          {% for field in approval_form.visible_fields %}<div class="purchase-order-form__field purchase-order-form__field--full"><label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}</div>{% endfor %}
+        </div>
+        <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Approve and post</button></div>
+      </form>
+    </article>
+  </div>
+  <h2>History</h2>
+  {% if adjustments %}<table><thead><tr><th>Supply</th><th>Direction</th><th>Quantity</th><th>Requester</th><th>State</th><th>Approver</th></tr></thead><tbody>{% for adjustment in adjustments %}<tr><td>{{ adjustment.item.supply.name }}</td><td>{{ adjustment.get_direction_display }}</td><td>{{ adjustment.base_quantity }}</td><td>{{ adjustment.requester }}</td><td>{{ adjustment.get_state_display }}</td><td>{{ adjustment.approver|default:"—" }}</td></tr>{% endfor %}</tbody></table>{% else %}<p data-authoritative-empty>No adjustments recorded yet.</p>{% endif %}
+</section>
+{% endblock %}

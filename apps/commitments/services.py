@@ -128,9 +128,13 @@ def _create_commitment_for_confirmation(
             .get(pk=normalized_line_id)
         )
         item = (
-            InventoryItem.objects.select_for_update()
+            InventoryItem.objects.select_for_update(of=("self",))
             .select_related("product")
-            .get(product_id=line.product_id)
+            .get(
+                product_id=line.product_id,
+                kind=InventoryItem.Kind.PRODUCT,
+                supply__isnull=True,
+            )
         )
     except OrderLine.DoesNotExist as error:
         raise ValidationError("Commitment creation references an unknown Order Line.") from error
@@ -138,7 +142,10 @@ def _create_commitment_for_confirmation(
         raise ValidationError(
             "Order Line Product does not have an Inventory Item."
         ) from error
-    if not item.is_active or item.base_unit != item.product.base_inventory_unit:
+    if (
+        not item.is_active or item.kind != InventoryItem.Kind.PRODUCT
+        or item.base_unit != item.product.base_inventory_unit
+    ):
         raise ValidationError("Order Line does not map to an active compatible Inventory Item.")
 
     existing = Commitment.objects.filter(

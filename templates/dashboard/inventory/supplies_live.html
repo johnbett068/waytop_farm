@@ -1,0 +1,9 @@
+{% extends "staff_base.html" %}
+{% block title %}Inventory Supplies | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Inventory</p><h1>Operational Supplies</h1>{% if perms.inventory.manage_supplies %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_supply_create' %}">New Supply</a>{% endif %}</header>
+  <p class="staff-rule-note">A Supply is used by the nursery or farm and never appears in the customer Product catalog.</p>
+  {% if supplies %}<table><thead><tr><th>Code</th><th>Name</th><th>Category</th><th>Base unit</th><th>Quantity policy</th><th>Status</th></tr></thead><tbody>{% for supply in supplies %}<tr><td><a href="{% url 'dashboard:inventory_supply_detail' supply.code %}">{{ supply.code }}</a></td><td>{{ supply.name }}</td><td>{{ supply.get_category_display }}</td><td>{{ supply.base_unit }}</td><td>{% if supply.allows_fractional_quantity %}Fractional{% else %}Discrete{% endif %}</td><td>{% if supply.is_active %}Active{% else %}Inactive{% endif %}</td></tr>{% endfor %}</tbody></table>{% else %}<p data-authoritative-empty>No operational Supplies recorded yet.</p>{% endif %}
+</section>
+{% endblock %}

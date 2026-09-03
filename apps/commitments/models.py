@@ -170,7 +170,11 @@ class Commitment(models.Model):
         if (
             self.inventory_item_id
             and self.order_line_id
-            and self.inventory_item.product_id != self.order_line.product_id
+            and (
+                self.inventory_item.kind != "PRODUCT"
+                or self.inventory_item.supply_id is not None
+                or self.inventory_item.product_id != self.order_line.product_id
+            )
         ):
             errors["inventory_item"] = "Commitment Inventory Item must map to the Order Line Product."
         if self.order_line_id:

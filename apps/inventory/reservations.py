@@ -313,7 +313,9 @@ def reserve_and_allocate_ready_commitment(
         raise ValidationError("Only a new fully outstanding ACTIVE Commitment can be reserved.")
 
     inventory_item = InventoryItem.objects.select_for_update().get(
-        pk=commitment.inventory_item_id
+        pk=commitment.inventory_item_id,
+        kind=InventoryItem.Kind.PRODUCT,
+        supply__isnull=True,
     )
     fifo_pool_query = Commitment.objects.select_for_update().filter(
             inventory_item=inventory_item,
@@ -478,7 +480,9 @@ def reallocate_ready_reservation(
     except Reservation.DoesNotExist as error:
         raise ValidationError("Reallocation references an unknown Reservation.") from error
     inventory_item = InventoryItem.objects.select_for_update().get(
-        pk=preliminary.inventory_item_id
+        pk=preliminary.inventory_item_id,
+        kind=InventoryItem.Kind.PRODUCT,
+        supply__isnull=True,
     )
     positions, reservations, allocations = _locked_supply_pool(inventory_item)
     reservation = next(

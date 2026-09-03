@@ -1,0 +1,138 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}New Purchase Order | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}">{% endblock %}
+{% block content %}
+<section class="staff-workspace purchase-order-workspace">
+  <header class="staff-page-heading">
+    <p>Supplier Inventory</p>
+    <h1>New Purchase Order</h1>
+  </header>
+  <p class="staff-rule-note">Record what was ordered from a supplier. Creating a purchase order does not add stock to Inventory.</p>
+
+  <form method="post" class="staff-form purchase-order-form" novalidate data-purchase-order-form>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+    <fieldset class="purchase-order-form__section">
+      <legend>Purchase order</legend>
+      <div class="purchase-order-form__grid">
+        <div class="purchase-order-form__field purchase-order-form__field--full">
+          <label class="purchase-order-form__label" for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+          {{ form.reason }}
+          {% if form.reason.help_text %}<small class="purchase-order-form__help">{{ form.reason.help_text }}</small>{% endif %}
+          {{ form.reason.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.number.id_for_label }}">{{ form.number.label }}</label>
+          {{ form.number }}
+          {% if form.number.help_text %}<small class="purchase-order-form__help">{{ form.number.help_text }}</small>{% endif %}
+          {{ form.number.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.supplier.id_for_label }}">{{ form.supplier.label }}</label>
+          {{ form.supplier }}
+          {% if form.supplier.help_text %}<small class="purchase-order-form__help">{{ form.supplier.help_text }}</small>{% endif %}
+          {{ form.supplier.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.order_date.id_for_label }}">{{ form.order_date.label }}</label>
+          {{ form.order_date }}
+          {% if form.order_date.help_text %}<small class="purchase-order-form__help">{{ form.order_date.help_text }}</small>{% endif %}
+          {{ form.order_date.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.expected_date.id_for_label }}">{{ form.expected_date.label }}</label>
+          {{ form.expected_date }}
+          {% if form.expected_date.help_text %}<small class="purchase-order-form__help">{{ form.expected_date.help_text }}</small>{% endif %}
+          {{ form.expected_date.errors }}
+        </div>
+
+        <div class="purchase-order-form__field purchase-order-form__field--full">
+          <label class="purchase-order-form__label" for="{{ form.reference.id_for_label }}">{{ form.reference.label }}</label>
+          {{ form.reference }}
+          {% if form.reference.help_text %}<small class="purchase-order-form__help">{{ form.reference.help_text }}</small>{% endif %}
+          {{ form.reference.errors }}
+        </div>
+
+        <div class="purchase-order-form__field purchase-order-form__field--full purchase-order-form__field--notes">
+          <label class="purchase-order-form__label" for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+          {{ form.notes }}
+          {% if form.notes.help_text %}<small class="purchase-order-form__help">{{ form.notes.help_text }}</small>{% endif %}
+          {{ form.notes.errors }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="purchase-order-form__section">
+      <legend>Supply being ordered</legend>
+      <div class="purchase-order-form__grid">
+        <div class="purchase-order-form__field purchase-order-form__field--full">
+          <label class="purchase-order-form__label" for="{{ form.supply.id_for_label }}">{{ form.supply.label }}</label>
+          {{ form.supply }}
+          {% if form.supply.help_text %}<small class="purchase-order-form__help">{{ form.supply.help_text }}</small>{% endif %}
+          {{ form.supply.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.ordered_quantity.id_for_label }}">{{ form.ordered_quantity.label }}</label>
+          {{ form.ordered_quantity }}
+          {% if form.ordered_quantity.help_text %}<small class="purchase-order-form__help">{{ form.ordered_quantity.help_text }}</small>{% endif %}
+          {{ form.ordered_quantity.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.purchase_unit.id_for_label }}">{{ form.purchase_unit.label }}</label>
+          {{ form.purchase_unit }}
+          {% if form.purchase_unit.help_text %}<small class="purchase-order-form__help">{{ form.purchase_unit.help_text }}</small>{% endif %}
+          {{ form.purchase_unit.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.base_quantity_per_purchase_unit.id_for_label }}">{{ form.base_quantity_per_purchase_unit.label }}</label>
+          {{ form.base_quantity_per_purchase_unit }}
+          {% if form.base_quantity_per_purchase_unit.help_text %}<small class="purchase-order-form__help">{{ form.base_quantity_per_purchase_unit.help_text }}</small>{% endif %}
+          {{ form.base_quantity_per_purchase_unit.errors }}
+        </div>
+
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.unit_cost.id_for_label }}">{{ form.unit_cost.label }}</label>
+          {{ form.unit_cost }}
+          {% if form.unit_cost.help_text %}<small class="purchase-order-form__help">{{ form.unit_cost.help_text }}</small>{% endif %}
+          {{ form.unit_cost.errors }}
+        </div>
+
+        <p class="staff-rule-note purchase-order-form__total"><strong>Total ordered cost:</strong> Ordered quantity × unit cost = <output data-purchase-total>KES 0.00</output></p>
+      </div>
+    </fieldset>
+
+    <div class="purchase-order-form__actions">
+      <button class="staff-button staff-button--primary" type="submit">Create purchase order</button>
+      <a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+(() => {
+  const form = document.querySelector('[data-purchase-order-form]');
+  if (!form) return;
+  const quantity = form.querySelector('[data-purchase-quantity]');
+  const cost = form.querySelector('[data-purchase-unit-cost]');
+  const output = form.querySelector('[data-purchase-total]');
+  const refresh = () => {
+    const total = Number(quantity.value || 0) * Number(cost.value || 0);
+    output.textContent = `KES ${Number.isFinite(total) ? total.toLocaleString('en-KE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}`;
+  };
+  quantity.addEventListener('input', refresh);
+  cost.addEventListener('input', refresh);
+  refresh();
+})();
+</script>
+{% endblock %}

@@ -35,18 +35,123 @@ class StockPositionQuerySet(ServiceWriteQuerySet):
     error_message = "Stock Positions may be changed only by the Inventory movement service."
 
 
+class InventorySupply(models.Model):
+    class Category(models.TextChoices):
+        SEEDS = "SEEDS", "Seeds"
+        GROWING_MEDIA = "GROWING_MEDIA", "Growing media"
+        NURSERY_TRAYS = "NURSERY_TRAYS", "Nursery trays"
+        FERTILIZER = "FERTILIZER", "Fertilizer"
+        PESTICIDE = "PESTICIDE", "Pesticide"
+        FUNGICIDE = "FUNGICIDE", "Fungicide"
+        HERBICIDE = "HERBICIDE", "Herbicide"
+        PACKAGING = "PACKAGING", "Packaging"
+        NURSERY_SUPPLIES = "NURSERY_SUPPLIES", "Nursery supplies"
+        OTHER = "OTHER", "Other operational supply"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=200)
+    category = models.CharField(max_length=30, choices=Category.choices)
+    base_unit = models.CharField(max_length=50)
+    allows_fractional_quantity = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("code",)
+        default_permissions = ()
+        permissions = (("manage_supplies", "Can manage Inventory supply definitions"),)
+        constraints = [
+            models.CheckConstraint(condition=~Q(code=""), name="inventory_supply_code_not_empty"),
+            models.CheckConstraint(condition=~Q(name=""), name="inventory_supply_name_not_empty"),
+            models.CheckConstraint(condition=~Q(base_unit=""), name="inventory_supply_unit_not_empty"),
+        ]
+
+    def clean(self):
+        super().clean()
+        self.code = (self.code or "").strip().upper()
+        self.name = (self.name or "").strip()
+        self.base_unit = (self.base_unit or "").strip().lower()
+        errors = {}
+        for field in ("code", "name", "base_unit"):
+            if not getattr(self, field):
+                errors[field] = "This Supply definition field is required."
+        if self.pk:
+            original = type(self).objects.filter(pk=self.pk).first()
+            if original is not None and (
+                original.code != self.code
+                or original.base_unit != self.base_unit
+                or original.allows_fractional_quantity != self.allows_fractional_quantity
+            ):
+                errors["code"] = "Supply code, base unit, and quantity policy are immutable."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        if not kwargs.pop("_inventory_supply_service_write", False):
+            raise ValidationError("Inventory Supply definitions require the Inventory Supply service.")
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Inventory Supply definitions cannot be deleted; deactivate them instead.")
+
+    def __str__(self):
+        return f"{self.code} — {self.name}"
+
+
+class InventorySupplyEvent(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    supply = models.ForeignKey(InventorySupply, on_delete=models.PROTECT, related_name="history")
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="inventory_supply_events"
+    )
+    reason = models.TextField()
+    correlation_id = models.UUIDField(editable=False)
+    idempotency_key = models.UUIDField(unique=True, editable=False)
+    request_fingerprint = models.CharField(max_length=64, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at", "id")
+        default_permissions = ()
+        constraints = [
+            models.CheckConstraint(condition=~Q(reason=""), name="inventory_supply_event_reason_not_empty"),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not kwargs.pop("_inventory_supply_service_write", False) or not self._state.adding:
+            raise ValidationError("Inventory Supply history is append-only service evidence.")
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Inventory Supply history cannot be deleted.")
+
+
 class InventoryItem(models.Model):
+    class Kind(models.TextChoices):
+        PRODUCT = "PRODUCT", "Product"
+        SUPPLY = "SUPPLY", "Supply"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.OneToOneField(
-        "products.Product", on_delete=models.PROTECT, related_name="inventory_item"
+        "products.Product", on_delete=models.PROTECT, related_name="inventory_item",
+        null=True, blank=True,
     )
+    supply = models.OneToOneField(
+        InventorySupply, on_delete=models.PROTECT, related_name="inventory_item",
+        null=True, blank=True,
+    )
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.PRODUCT)
     base_unit = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ("product__sku",)
+        ordering = ("kind", "product__sku", "supply__code")
         permissions = (
             ("view", "Can view inventory"),
             ("receive", "Can receive inventory"),
@@ -59,6 +164,13 @@ class InventoryItem(models.Model):
             models.CheckConstraint(
                 condition=~Q(base_unit=""), name="inventory_item_base_unit_not_empty"
             ),
+            models.CheckConstraint(
+                condition=(
+                    Q(kind="PRODUCT", product__isnull=False, supply__isnull=True)
+                    | Q(kind="SUPPLY", product__isnull=True, supply__isnull=False)
+                ),
+                name="inventory_item_exactly_one_owner",
+            ),
         ]
 
     def clean(self):
@@ -66,8 +178,14 @@ class InventoryItem(models.Model):
         self.base_unit = (self.base_unit or "").strip()
         if not self.base_unit:
             raise ValidationError({"base_unit": "Inventory base unit is required."})
-        if self.product_id and self.base_unit != self.product.base_inventory_unit:
+        if self.kind == self.Kind.PRODUCT and self.product_id and self.base_unit != self.product.base_inventory_unit:
             raise ValidationError({"base_unit": "Inventory base unit must match the Product base unit."})
+        if self.kind == self.Kind.SUPPLY and self.supply_id and self.base_unit != self.supply.base_unit:
+            raise ValidationError({"base_unit": "Inventory base unit must match the Supply base unit."})
+        if self.kind == self.Kind.PRODUCT and (not self.product_id or self.supply_id):
+            raise ValidationError("A Product Inventory Item must have only a Product owner.")
+        if self.kind == self.Kind.SUPPLY and (not self.supply_id or self.product_id):
+            raise ValidationError("A Supply Inventory Item must have only a Supply owner.")
         if self.pk:
             original = type(self).objects.filter(pk=self.pk).first()
             if original is not None:
@@ -83,6 +201,10 @@ class InventoryItem(models.Model):
                     raise ValidationError(
                         {"product": "A used Inventory Item's Product is immutable."}
                     )
+                if is_used and (
+                    original.kind != self.kind or original.supply_id != self.supply_id
+                ):
+                    raise ValidationError("A used Inventory Item's kind and owner are immutable.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -92,7 +214,8 @@ class InventoryItem(models.Model):
         raise ValidationError("Inventory Items cannot be deleted; deactivate them instead.")
 
     def __str__(self):
-        return f"{self.product.sku} ({self.base_unit})"
+        code = self.product.sku if self.kind == self.Kind.PRODUCT else self.supply.code
+        return f"{code} ({self.base_unit})"
 
 
 class InventoryLocation(models.Model):
@@ -190,7 +313,7 @@ class StockLot(models.Model):
         raise ValidationError("Stock Lots cannot be deleted; deactivate them instead.")
 
     def __str__(self):
-        return f"{self.item.product.sku} lot {self.lot_code}"
+        return f"{self.item} lot {self.lot_code}"
 
 
 class StockPosition(models.Model):
@@ -235,7 +358,7 @@ class StockPosition(models.Model):
         raise ValidationError("Stock Positions cannot be deleted.")
 
     def __str__(self):
-        return f"{self.item.product.sku} at {self.location.code}: {self.on_hand_base_quantity}"
+        return f"{self.item} at {self.location.code}: {self.on_hand_base_quantity}"
 
 
 class InventoryMovement(models.Model):
@@ -927,3 +1050,93 @@ class SourceAllocationConsumption(models.Model):
 
     def delete(self, *args, **kwargs):
         raise ValidationError("Allocation consumption history cannot be deleted.")
+
+
+class InventoryAdjustmentRequest(models.Model):
+    class Direction(models.TextChoices):
+        IN = "IN", "Increase"
+        OUT = "OUT", "Decrease"
+
+    class State(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        APPROVED = "APPROVED", "Approved"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    item = models.ForeignKey(InventoryItem, on_delete=models.PROTECT, related_name="adjustments")
+    lot = models.ForeignKey(StockLot, on_delete=models.PROTECT, related_name="adjustments")
+    location = models.ForeignKey(
+        InventoryLocation, on_delete=models.PROTECT, related_name="adjustments"
+    )
+    direction = models.CharField(max_length=3, choices=Direction.choices)
+    base_quantity = models.DecimalField(max_digits=32, decimal_places=3)
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="requested_inventory_adjustments"
+    )
+    request_reason = models.TextField()
+    state = models.CharField(max_length=10, choices=State.choices, default=State.PENDING)
+    approver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="approved_inventory_adjustments",
+        null=True, blank=True,
+    )
+    approval_reason = models.TextField(blank=True)
+    movement = models.OneToOneField(
+        InventoryMovement, on_delete=models.PROTECT, related_name="adjustment_request",
+        null=True, blank=True,
+    )
+    correlation_id = models.UUIDField(editable=False)
+    request_idempotency_key = models.UUIDField(unique=True, editable=False)
+    request_fingerprint = models.CharField(max_length=64, editable=False)
+    approval_idempotency_key = models.UUIDField(unique=True, editable=False, null=True, blank=True)
+    approval_fingerprint = models.CharField(max_length=64, editable=False, blank=True)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    objects = StockPositionQuerySet.as_manager()
+
+    class Meta:
+        ordering = ("-requested_at", "id")
+        default_permissions = ()
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(base_quantity__gt=0), name="inventory_adjustment_quantity_positive"
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        state="PENDING", approver__isnull=True, movement__isnull=True,
+                        approved_at__isnull=True, approval_idempotency_key__isnull=True,
+                        approval_reason="", approval_fingerprint="",
+                    )
+                    | Q(
+                        state="APPROVED", approver__isnull=False, movement__isnull=False,
+                        approved_at__isnull=False, approval_idempotency_key__isnull=False,
+                    )
+                ),
+                name="inventory_adjustment_state_consistent",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        self.request_reason = (self.request_reason or "").strip()
+        self.approval_reason = (self.approval_reason or "").strip()
+        errors = {}
+        if not self.request_reason:
+            errors["request_reason"] = "An adjustment request reason is required."
+        if self.lot_id and self.item_id and self.lot.item_id != self.item_id:
+            errors["lot"] = "Adjustment lot must belong to its Inventory Item."
+        if self.approver_id and self.approver_id == self.requester_id:
+            errors["approver"] = "The requester cannot approve their own adjustment."
+        if self.state == self.State.APPROVED and not self.approval_reason:
+            errors["approval_reason"] = "An approval reason is required."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        if not kwargs.pop("_inventory_adjustment_service_write", False):
+            raise ValidationError("Inventory adjustments require the adjustment service.")
+        self.full_clean()
+        return models.Model.save(self, *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Inventory adjustment history cannot be deleted.")

@@ -1,0 +1,14 @@
+<nav class="inventory-shortcuts" aria-label="Inventory and procurement shortcuts">
+  <a class="inventory-shortcuts__home" href="{% url 'dashboard:inventory' %}">
+    <span aria-hidden="true">&#9638;</span><strong>Inventory</strong><span aria-hidden="true">/</span><small>Supplier stock operations</small>
+  </a>
+  <div class="inventory-shortcuts__links">
+    <a href="{% url 'dashboard:inventory' %}"{% if request.resolver_match.url_name == 'inventory' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#128202;</span>Overview</a>
+    <a href="{% url 'dashboard:inventory_stock' %}"{% if request.resolver_match.url_name == 'inventory_stock' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#128230;</span>On-Hand Stock</a>
+    <a href="{% url 'dashboard:inventory_receipt_create' %}"{% if request.resolver_match.url_name == 'inventory_receipt_create' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#128666;</span>Receive Stock</a>
+    <a href="{% url 'dashboard:inventory_supply_list' %}"{% if 'inventory_supply' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#128209;</span>Supply Definitions</a>
+    <a href="{% url 'dashboard:procurement_purchase_list' %}"{% if 'procurement_purchase' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#128203;</span>Purchase Orders</a>
+    <a href="{% url 'dashboard:procurement_supplier_list' %}"{% if 'procurement_supplier' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#127970;</span>Suppliers</a>
+    <a href="{% url 'dashboard:inventory_history' %}"{% if request.resolver_match.url_name == 'inventory_history' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#128220;</span>Ledger History</a>
+  </div>
+</nav>

@@ -1,7 +1,7 @@
 # WayTop Farm Documentation Authority Index
 
 Status: **IMPLEMENTATION STATUS — CURRENT CLASSIFICATION INDEX**
-Updated: 21 August 2026
+Updated: 28 August 2026
 
 This index classifies documentation; it does not change business behavior or rewrite historical
 decisions. When prose conflicts, use the highest applicable authority below and then the most recent
@@ -9,7 +9,8 @@ ratified refinement within that scope.
 
 ## Marker convention
 
-- **AUTHORITATIVE:** ratified business contract currently controlling implementation.
+- **AUTHORITATIVE:** ratified business contract or technical policy currently controlling its
+  stated scope.
 - **IMPLEMENTATION STATUS:** evidence of what code/tests implement; not authority to invent rules.
 - **DECISION GATE:** an unresolved question or a retained record of its ratification.
 - **HISTORICAL / SUPERSEDED:** preserved provenance that cannot authorize current V1 behavior.
@@ -24,10 +25,27 @@ ratified refinement within that scope.
    Commitment, Reservation, Allocation, Supply and concurrency refinement.
 4. Ratified decision records, including `reviews/phase-1e-e-decision-gate.md` and
    `reviews/phase-1g-processing-decision-gate.md`, only within their stated scope.
+5. `reviews/phase-2a-simple-production-decision-gate.md` — ratified Simple Production Operations
+   authority for SP-01 through SP-05 only. It authorizes seedling Production batches, purchases,
+   labour, nursery activities, staff operations UI, and their audit/permission rules; it does not
+   authorize Inventory, PRE_ORDER, customer, payroll, accounting, or other cross-domain behavior.
+6. `reviews/phase-2c-supplier-inventory-decision-gate.md` — ratified Supplier Inventory authority
+   for INV-01 through INV-12. It authorizes first-class Suppliers and Inventory Supplies, simple
+   Purchase Orders, partial Goods Receipts through the Inventory ledger, governed adjustments, and
+   staff workflows; it preserves Product-only commerce and zero automatic Production side effects.
 
 The READY lifecycle is `PENDING -> CONFIRMED -> PROCESSING -> FULFILLED`; cancellation is permitted
 only from CONFIRMED or PROCESSING. Cash on Pickup, customer Branch/source selection and the older
 reservation-before-allocation flow are not current V1 rules.
+
+## AUTHORITATIVE TECHNICAL POLICY
+
+1. `deployment-configuration.md` — environment, local SQLite, production security and PostgreSQL
+   verification policy. Its local-database policy was ratified on 28 August 2026: `db.sqlite3` is
+   an allowed non-empty local development database, while PostgreSQL remains required for
+   production-oriented and PostgreSQL-specific concurrency verification.
+
+Technical policy does not authorize or change business behavior.
 
 ## IMPLEMENTATION STATUS
 
@@ -43,6 +61,10 @@ reservation-before-allocation flow are not current V1 rules.
 - Resolved gates remain in `reviews/` as decision history and must be read with their status line.
 - `reviews/phase-1h-route-decision-gate.md` records the ratified DEFER disposition for seven
   informational routes; it authorizes no page content or redirect.
+- `reviews/phase-2a-nursery-expansion-decision-gate.md` is an open gate for any Nursery Operations
+  expansion beyond ratified Simple Phase 2A, including structured loss/output quantities,
+  Production input consumption, and a Production-to-Inventory handoff. It does not change current
+  runtime authority.
 - Open product decisions remain listed in the Post-Phase-1 Closure Audit.
 
 ## HISTORICAL / SUPERSEDED
@@ -58,8 +80,9 @@ reservation-before-allocation flow are not current V1 rules.
 
 ## DEFERRED
 
-- Production, Procurement, detailed Delivery, Tracking, Return, Refund and other future contracts,
-  flows and frontend documents remain planning inputs only.
+- Production outside the ratified Phase 2A Simple Production boundary, Procurement, detailed
+  Delivery, Tracking, Return, Refund and other future contracts, flows and frontend documents remain
+  planning inputs only.
 - `contracts/production.md` and `flows/production-lifecycle.md` do not authorize Production or
   PRE_ORDER implementation.
 - `architecture/permissions.md`, roles, scopes, delegation and separation-of-duties documents are a

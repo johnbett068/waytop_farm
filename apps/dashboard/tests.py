@@ -1,23 +1,23 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import SimpleTestCase, TestCase
+from django.contrib.auth.models import Permission
+from django.core.exceptions import PermissionDenied
+from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
+
+from .views import dashboard
 
 
 class EmptyOperationsRuntimeTests(TestCase):
     routes = (
-        ("dashboard:dashboard", (), "No operational data yet"),
         ("dashboard:orders", (), "No orders yet"),
         ("dashboard:order_detail", ("WTF-260716-1042",), "No persisted order"),
-        ("dashboard:production", (), "No production batches yet"),
         ("dashboard:source_lots", (), "No production source lots yet"),
-        ("dashboard:production_batches", (), "No production batches yet"),
-        ("dashboard:production_batch_detail", ("PB-AVO-2606-02",), "No persisted production batch"),
         ("dashboard:production_tasks", (), "No production tasks yet"),
         ("dashboard:production_exceptions", (), "No production exceptions yet"),
-        ("dashboard:inventory", (), "No inventory records yet"),
         ("dashboard:inventory_items", (), "No inventory items yet"),
         ("dashboard:inventory_item_detail", ("PLT-AVO-HASS",), "No persisted inventory item"),
         ("dashboard:inventory_lots", (), "No inventory lots yet"),
@@ -25,7 +25,6 @@ class EmptyOperationsRuntimeTests(TestCase):
         ("dashboard:inventory_receiving", (), "No inventory receipts yet"),
         ("dashboard:inventory_transfers", (), "No inventory transfers yet"),
         ("dashboard:inventory_counts", (), "No inventory counts yet"),
-        ("dashboard:inventory_adjustments", (), "No inventory adjustments yet"),
         ("dashboard:pos", (), "No POS orders or transactions yet"),
         ("dashboard:pos_sale", (), "No authoritative products or stock"),
     )
@@ -34,6 +33,32 @@ class EmptyOperationsRuntimeTests(TestCase):
     def setUpTestData(cls):
         cls.staff_user = get_user_model().objects.create_user(
             username="operations-test", password="strong-test-password", is_staff=True
+        )
+        cls.non_staff_user = get_user_model().objects.create_user(
+            username="customer-test", password="strong-test-password"
+        )
+        cls.unprivileged_staff_user = get_user_model().objects.create_user(
+            username="unprivileged-operations-test",
+            password="strong-test-password",
+            is_staff=True,
+        )
+        cls.staff_user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="orders",
+                codename="view",
+            )
+        )
+        cls.staff_user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="production",
+                codename="view_operations",
+            )
+        )
+        cls.staff_user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="inventory",
+                codename="view",
+            )
         )
 
     def setUp(self):
@@ -49,6 +74,25 @@ class EmptyOperationsRuntimeTests(TestCase):
                 self.assertContains(response, copy)
                 self.assertContains(response, "Nothing is inferred, seeded, or fabricated")
 
+    def test_dashboard_renders_truthful_empty_projection_without_records(self):
+        response = self.client.get(reverse("dashboard:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard/dashboard.html")
+        self.assertContains(response, "data-authoritative-empty")
+        self.assertContains(response, "No operational data yet")
+        self.assertContains(response, "Nothing is inferred, seeded, or fabricated")
+        self.assertNotContains(response, "data-metric-card")
+
+    def test_inventory_dashboard_is_live_and_truthful_without_stock(self):
+        response = self.client.get(reverse("dashboard:inventory"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard/inventory/dashboard_live.html")
+        self.assertContains(response, "Saleable seedling stock")
+        self.assertContains(response, "Operational supplies")
+        self.assertContains(response, "No operational supplies recorded yet")
+        self.assertContains(response, "Low-stock thresholds are not configured")
+        self.assertContains(response, "Creating a Purchase Order does not add stock")
+
     def test_state_query_cannot_reenable_populated_prototypes(self):
         fabricated = (
             "Jane Chebet", "WTF-260716-1042", "PB-AVO-2606-02",
@@ -63,6 +107,9 @@ class EmptyOperationsRuntimeTests(TestCase):
         response = self.client.get(reverse("dashboard:dashboard"))
         self.assertContains(response, "Notifications")
         self.assertContains(response, "No notifications yet")
+        self.assertContains(response, 'aria-controls="staff-mobile-nav"')
+        self.assertContains(response, 'id="staff-mobile-nav"')
+        self.assertContains(response, "View public catalog")
         for fabricated in (
             "Notifications, 3 unread", "POS <small>2</small>",
             "Orders <small>8</small>", "Production <small>6</small>",
@@ -72,9 +119,49 @@ class EmptyOperationsRuntimeTests(TestCase):
         self.assertNotContains(response, "Daily Handover")
         self.assertNotContains(response, "daily handover")
 
+    def test_primary_staff_navigation_has_valid_active_routes(self):
+        for route, label in (
+            ("dashboard:dashboard", "Dashboard"),
+            ("dashboard:pos", "POS"),
+            ("dashboard:orders", "Orders"),
+            ("dashboard:production", "Production"),
+            ("dashboard:inventory", "Inventory"),
+        ):
+            with self.subTest(route=route):
+                url = reverse(route)
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(
+                    response,
+                    f'href="{url}" class="is-active" aria-current="page"',
+                )
+                self.assertContains(response, label)
+
+        catalog_url = reverse("products:shop")
+        response = self.client.get(catalog_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_staff_workspace_requires_authentication_and_staff_status(self):
+        self.client.logout()
+        response = self.client.get(reverse("dashboard:dashboard"))
+        self.assertRedirects(
+            response,
+            f'{reverse("accounts:login")}?next={reverse("dashboard:dashboard")}',
+        )
+        self.client.force_login(self.non_staff_user)
+        self.assertEqual(
+            self.client.get(reverse("dashboard:dashboard")).status_code,
+            403,
+        )
+        self.client.force_login(self.unprivileged_staff_user)
+        response = self.client.get(reverse("dashboard:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No operational data yet")
+        self.assertNotContains(response, "data-metric-card")
+
     def test_out_of_scope_workflow_routes_remain_inactive(self):
         for path in (
-            "/dashboard/procurement/", "/dashboard/procurement/suppliers/",
+            "/dashboard/procurement/",
             "/dashboard/delivery/", "/dashboard/delivery/jobs/",
             "/dashboard/pos/parked/", "/dashboard/pos/transactions/",
         ):
@@ -89,6 +176,16 @@ class EmptyOperationsRuntimeTests(TestCase):
             "procurement/dashboard.html", "delivery/dashboard.html",
         ):
             self.assertTrue((templates / relative).exists(), relative)
+
+    def test_inactive_staff_identity_is_denied_explicitly(self):
+        request = RequestFactory().get(reverse("dashboard:dashboard"))
+        request.user = SimpleNamespace(
+            is_authenticated=True,
+            is_active=False,
+            is_staff=True,
+        )
+        with self.assertRaises(PermissionDenied):
+            dashboard(request)
 
 
 class EmptyStandaloneRuntimeTests(SimpleTestCase):

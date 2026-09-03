@@ -214,15 +214,22 @@ def _confirm_ready_order(*, values, actor, attempt):
 
     product_ids = sorted({line.product_id for line in lines}, key=str)
     items = list(
-        InventoryItem.objects.select_for_update()
-        .filter(product_id__in=product_ids)
+        InventoryItem.objects.select_for_update(of=("self",))
+        .filter(
+            product_id__in=product_ids,
+            kind=InventoryItem.Kind.PRODUCT,
+            supply__isnull=True,
+        )
         .select_related("product")
         .order_by("pk")
     )
     if len(items) != len(product_ids):
         raise ValidationError("Every Order Line Product requires an Inventory Item.")
     for item in items:
-        if not item.is_active or item.base_unit != item.product.base_inventory_unit:
+        if (
+            not item.is_active or item.kind != InventoryItem.Kind.PRODUCT
+            or item.base_unit != item.product.base_inventory_unit
+        ):
             raise ValidationError("Every Order Line requires an active compatible Inventory Item.")
     for item in items:
         list(

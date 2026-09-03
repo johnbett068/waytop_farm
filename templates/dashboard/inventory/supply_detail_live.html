@@ -1,0 +1,10 @@
+{% extends "staff_base.html" %}
+{% block title %}{{ supply.code }} | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Inventory Supply</p><h1>{{ supply.name }}</h1><span>{{ supply.code }} · {{ supply.base_unit }} · {% if supply.is_active %}Active{% else %}Inactive{% endif %}</span>{% if perms.inventory.manage_supplies %}<a class="staff-button staff-button--secondary" href="{% url 'dashboard:inventory_supply_edit' supply.code %}">Edit or deactivate</a>{% endif %}</header>
+  <p class="staff-rule-note">This is an operational Supply, not a customer-saleable Product.</p>
+  <h2>On hand by lot and location</h2>{% if positions %}<table><thead><tr><th>Lot</th><th>Location</th><th>On hand</th></tr></thead><tbody>{% for position in positions %}<tr><td>{{ position.lot.lot_code }}</td><td>{{ position.location.name }}</td><td>{{ position.on_hand_base_quantity }} {{ supply.base_unit }}</td></tr>{% endfor %}</tbody></table>{% else %}<p>No stock received yet.</p>{% endif %}
+  <h2>Definition history</h2>{% if supply.history.all %}<ul>{% for event in supply.history.all %}<li>{{ event.created_at }} — {{ event.reason }} — {{ event.actor }}</li>{% endfor %}</ul>{% endif %}
+</section>
+{% endblock %}

@@ -1,5 +1,3 @@
-.staff-breadcrumbs { display: flex; gap: var(--space-2); margin-bottom: var(--space-5); color: var(--color-gray); font-size: var(--text-small); }
-.staff-breadcrumbs a { color: var(--color-primary); text-decoration: underline; text-underline-offset: .2em; }
 .order-filter-panel, .lifecycle-summary, .order-workspace-panel { margin-bottom: var(--space-5); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-white); box-shadow: var(--shadow-sm); }
 .order-filter-panel__head { display: flex; align-items: start; justify-content: space-between; gap: var(--space-3); }
 .order-filter-panel__head p, .order-section-heading p { margin: 0; color: var(--color-gray); font-size: var(--text-caption); font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }

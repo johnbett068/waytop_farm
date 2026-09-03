@@ -1,0 +1,77 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}{{ title }} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}">{% endblock %}
+{% block content %}
+<section class="staff-workspace purchase-order-workspace supply-form-workspace">
+  <header class="staff-page-heading"><p>Inventory</p><h1>{{ title }}</h1></header>
+  <p class="supply-form__notice"><span aria-hidden="true">&#9432;</span><strong>Operational supply</strong> — not a customer-saleable Product.</p>
+  <form method="post" class="staff-form purchase-order-form supply-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="supply-form__form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+    <fieldset class="purchase-order-form__section">
+      <legend>Supply information</legend>
+      <p class="supply-form__section-copy">Define an operational item that the nursery or farm purchases and keeps in stock. Supplies are not customer-saleable seedlings.</p>
+      <div class="purchase-order-form__grid">
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="supply-form__required" aria-hidden="true">*</span><span class="sr-only"> required</span></label>
+          {{ form.name }}
+          <small class="purchase-order-form__help" id="{{ form.name.id_for_label }}_helptext">{{ form.name.help_text }}</small>
+          {{ form.name.errors }}
+        </div>
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.code.id_for_label }}">{{ form.code.label }} <span class="supply-form__required" aria-hidden="true">*</span><span class="sr-only"> required</span></label>
+          {{ form.code }}
+          <small class="purchase-order-form__help" id="{{ form.code.id_for_label }}_helptext">{{ form.code.help_text }}</small>
+          {{ form.code.errors }}
+        </div>
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.category.id_for_label }}">{{ form.category.label }} <span class="supply-form__required" aria-hidden="true">*</span><span class="sr-only"> required</span></label>
+          {{ form.category }}
+          <small class="purchase-order-form__help" id="{{ form.category.id_for_label }}_helptext">{{ form.category.help_text }}</small>
+          {{ form.category.errors }}
+        </div>
+        <div class="purchase-order-form__field">
+          <label class="purchase-order-form__label" for="{{ form.base_unit.id_for_label }}">{{ form.base_unit.label }} <span class="supply-form__required" aria-hidden="true">*</span><span class="sr-only"> required</span></label>
+          {{ form.base_unit }}
+          <small class="purchase-order-form__help" id="{{ form.base_unit.id_for_label }}_helptext">{{ form.base_unit.help_text }}</small>
+          {{ form.base_unit.errors }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="purchase-order-form__section supply-form__settings-section">
+      <legend>Inventory settings</legend>
+      <div class="supply-form__settings">
+        <div class="supply-form__setting">
+          {{ form.allows_fractional_quantity }}
+          <label for="{{ form.allows_fractional_quantity.id_for_label }}"><strong>{{ form.allows_fractional_quantity.label }}</strong><small id="{{ form.allows_fractional_quantity.id_for_label }}_helptext">{{ form.allows_fractional_quantity.help_text }}</small></label>
+          {{ form.allows_fractional_quantity.errors }}
+        </div>
+        <div class="supply-form__setting">
+          {{ form.is_active }}
+          <label for="{{ form.is_active.id_for_label }}"><strong>{{ form.is_active.label }}</strong><small id="{{ form.is_active.id_for_label }}_helptext">{{ form.is_active.help_text }}</small></label>
+          {{ form.is_active.errors }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="purchase-order-form__section supply-form__reason-section">
+      <legend>Record reason</legend>
+      <div class="purchase-order-form__field purchase-order-form__field--full">
+        <label class="purchase-order-form__label" for="{{ form.reason.id_for_label }}">{{ form.reason.label }} <span class="supply-form__required" aria-hidden="true">*</span><span class="sr-only"> required</span></label>
+        {{ form.reason }}
+        <small class="purchase-order-form__help" id="{{ form.reason.id_for_label }}_helptext">{{ form.reason.help_text }}</small>
+        {{ form.reason.errors }}
+      </div>
+    </fieldset>
+
+    <div class="purchase-order-form__actions">
+      <button class="staff-button staff-button--primary" type="submit">Save Supply</button>
+      {% if cancel_arg %}<a class="staff-button staff-button--secondary" href="{% url cancel_url cancel_arg %}">Cancel</a>{% else %}<a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a>{% endif %}
+    </div>
+  </form>
+</section>
+{% endblock %}

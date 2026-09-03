@@ -2,6 +2,9 @@ from django.contrib import admin
 
 from .models import (
     InventoryItem,
+    InventorySupply,
+    InventorySupplyEvent,
+    InventoryAdjustmentRequest,
     InventoryLocation,
     InventoryMovement,
     InventoryMovementLine,
@@ -37,6 +40,21 @@ class InventoryItemAdmin(ReadOnlyInventoryAdmin):
     list_display = ("product", "base_unit", "is_active", "updated_at")
     search_fields = ("product__sku", "product__name", "base_unit")
     list_filter = ("is_active",)
+
+
+@admin.register(InventorySupply)
+class InventorySupplyAdmin(ReadOnlyInventoryAdmin):
+    list_display = ("code", "name", "category", "base_unit", "is_active")
+
+
+@admin.register(InventorySupplyEvent)
+class InventorySupplyEventAdmin(ReadOnlyInventoryAdmin):
+    list_display = ("supply", "actor", "created_at")
+
+
+@admin.register(InventoryAdjustmentRequest)
+class InventoryAdjustmentRequestAdmin(ReadOnlyInventoryAdmin):
+    list_display = ("item", "direction", "base_quantity", "state", "requester", "approver")
 
 
 @admin.register(InventoryLocation)

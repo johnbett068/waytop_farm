@@ -1,0 +1,15 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}{{ title }} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-production.css' %}">{% endblock %}
+{% block content %}
+<section class="production-form-page" aria-labelledby="record-title">
+  <header class="production-detail-header"><div><p>{{ eyebrow }}</p><h1 id="record-title">{{ title }}</h1><span>Authoritative staff operational record.</span></div></header>
+  {% if show_catalog_link %}<p class="production-boundary-note">Products are managed in the WayTop Farm catalog. {% if perms.products.add_product and perms.products.add_productsaleunit and perms.products.add_productprice %}If the seedling is missing, <a href="{% url 'dashboard:catalog_product_create' %}">create the Product first</a>.{% else %}Ask an authorized catalog staff member to create a missing Product.{% endif %}</p>{% endif %}
+  <form class="production-panel production-form" method="post" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="production-form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}{% if not field.is_hidden %}<label>{{ field.label }}{% if field.field.required %}<span aria-hidden="true"> *</span>{% endif %}{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</label>{% else %}{{ field }}{% endif %}{% endfor %}
+    <div class="production-form-actions"><button class="staff-button staff-button--primary" type="submit">{{ submit_label }}</button>{% if cancel_arg %}<a class="staff-button staff-button--secondary" href="{% url cancel_url cancel_arg %}">Cancel</a>{% else %}<a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a>{% endif %}</div>
+  </form>
+</section>
+{% endblock %}
