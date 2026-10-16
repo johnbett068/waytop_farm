@@ -1,6 +1,34 @@
 from django import forms
 from django.utils import timezone
 
+from .models import Product, ProductSaleUnit
+from .image_validation import MAX_IMAGE_BYTES, validate_product_image
+
+
+class ProductImageMetadataForm(forms.Form):
+    alt_text = forms.CharField(max_length=250, required=False, label="Alt text",
+                               help_text="Describe the photograph for accessibility. Blank uses the Product name.")
+    sort_order = forms.IntegerField(min_value=0, max_value=2147483647, initial=0, label="Display order",
+                                    help_text="Lower numbers appear first. The first image is the main image.")
+
+
+class ProductImageUploadForm(ProductImageMetadataForm):
+    max_image_bytes = MAX_IMAGE_BYTES
+    max_image_mib = MAX_IMAGE_BYTES / (1024 * 1024)
+    image = forms.ImageField(validators=[validate_product_image], label="Image",
+                             help_text="Use a valid JPG/JPEG, PNG, WebP or GIF file with its matching extension.",
+                             widget=forms.FileInput(attrs={"accept": "image/jpeg,image/png,image/webp,image/gif"}))
+
+
+class ProductFirstImageForm(ProductImageUploadForm):
+    """Reuse upload validation; creation needs only an optional first image."""
+    sort_order = None
+    field_order = ("image", "alt_text")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["image"].required = False
+
 
 class StaffProductCreateForm(forms.Form):
     name = forms.CharField(
@@ -8,16 +36,10 @@ class StaffProductCreateForm(forms.Form):
         label="Product name",
         help_text="Use the seedling name customers and nursery staff recognize.",
     )
-    sku = forms.CharField(
-        max_length=64,
-        label="SKU",
-        help_text="A unique internal catalog code, for example WTP-VEG-001.",
-    )
-    slug = forms.SlugField(
-        max_length=160,
-        required=False,
-        label="Web address slug",
-        help_text="Optional. Leave blank to generate it from the product name.",
+    category = forms.ChoiceField(
+        choices=Product.Category.choices,
+        label="Product category",
+        help_text="Used to generate the Product SKU automatically.",
     )
     description = forms.CharField(
         required=False,
@@ -26,7 +48,7 @@ class StaffProductCreateForm(forms.Form):
     )
     base_inventory_unit = forms.CharField(
         max_length=50,
-        label="Base unit",
+        label="Stock unit",
         initial="seedling",
         help_text="The smallest counted unit, usually seedling.",
     )
@@ -82,3 +104,41 @@ class StaffProductCreateForm(forms.Form):
             cleaned["price_effective_start"] = None
         return cleaned
 
+
+class StaffProductEditForm(forms.ModelForm):
+    def __init__(self, data=None, *args, **kwargs):
+        # Older callers omit the stock unit; omission must preserve it.
+        if data is not None and "base_inventory_unit" not in data:
+            data = data.copy()
+            data["base_inventory_unit"] = kwargs["instance"].base_inventory_unit
+        super().__init__(data, *args, **kwargs)
+
+    class Meta:
+        model = Product
+        fields = ("name", "description", "category", "base_inventory_unit", "is_active", "is_published")
+        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+        labels = {"is_published": "Show in public catalog", "is_active": "Active product",
+                  "base_inventory_unit": "Stock unit"}
+        help_texts = {"category": "Existing SKU and web address are preserved.",
+                      "base_inventory_unit": "Cannot change after Inventory use."}
+
+
+class StaffSaleUnitEditForm(forms.ModelForm):
+    class Meta:
+        model = ProductSaleUnit
+        fields = ("name", "base_quantity", "is_active")
+        labels = {"name": "Sale unit", "base_quantity": "Seedlings per sale unit", "is_active": "Active sale unit"}
+
+
+class StaffPriceForm(forms.Form):
+    sale_unit_id = forms.ModelChoiceField(queryset=ProductSaleUnit.objects.none(), label="Sale Unit")
+
+    def __init__(self, *args, product, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["sale_unit_id"].queryset = product.sale_units.all()
+        self.fields["sale_unit_id"].label_from_instance = lambda unit: f"{unit.name} / {unit.base_quantity} {product.base_inventory_unit}"
+
+    amount = forms.DecimalField(max_digits=12, decimal_places=2, min_value=0, label="Price per Sale Unit (KES)")
+    effective_start = forms.DateTimeField(initial=timezone.now, widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"))
+    effective_end = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"))
+    is_active = forms.BooleanField(required=False, initial=True, label="Active price")

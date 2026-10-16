@@ -53,6 +53,7 @@ from apps.products.models import Product, ProductPrice, ProductSaleUnit
 class StartOrderProcessingTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-PROCESS", slug="processing-product", name="Processing Product",
             base_inventory_unit="seedling", is_active=True, is_published=True,
         )

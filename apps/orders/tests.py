@@ -56,6 +56,7 @@ class EmptyOrderRuntimeTests(SimpleTestCase):
 class PendingOrderCreationTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-ORD-001",
             slug="order-product",
             name="Order Product",
@@ -150,7 +151,7 @@ class PendingOrderCreationTests(TestCase):
         self.assertEqual(order.status_events.get().new_status, Order.Status.PENDING)
         self.assertEqual(order.payment.status_events.get().new_state, Payment.State.PENDING)
 
-    def test_pos_requires_native_permission_and_supports_anonymous_ready_collection(self):
+    def test_pos_requires_native_permission_and_explicit_location(self):
         actor = get_user_model().objects.create_user(
             username="cashier", password="safe-password", is_staff=True
         )
@@ -168,11 +169,8 @@ class PendingOrderCreationTests(TestCase):
         )
         for cache_name in ("_perm_cache", "_user_perm_cache", "_group_perm_cache"):
             actor.__dict__.pop(cache_name, None)
-        order = create_pending_order(**values)
-        self.assertIsNone(order.customer)
-        self.assertEqual(order.contact_snapshot.name, "")
-        self.assertEqual(order.contact_snapshot.phone, "")
-        self.assertEqual(order.status_events.get().actor, actor)
+        with self.assertRaisesMessage(ValidationError, "Select a Location / Branch"):
+            create_pending_order(**values)
 
     def test_customer_link_is_explicit_protected_and_snapshotted(self):
         customer = Customer.objects.create(
@@ -252,6 +250,7 @@ class PendingOrderCreationTests(TestCase):
 
     def test_catalog_chain_publication_and_current_price_are_enforced(self):
         other = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-ORD-002", slug="other", name="Other", base_inventory_unit="seedling"
         )
         with self.assertRaises(ValidationError):
@@ -323,10 +322,10 @@ class PendingOrderCreationTests(TestCase):
             )
         self.assertEqual(Order.objects.get(pk=order.pk).status, Order.Status.PENDING)
 
-    def test_order_model_contains_no_branch_inventory_or_production_fields(self):
+    def test_order_location_reuses_inventory_without_duplicate_domain_fields(self):
         fields = {field.name for field in Order._meta.get_fields()}
         self.assertTrue(
-            {"branch", "location", "inventory", "availability", "commitment", "production"}.isdisjoint(fields)
+            {"branch", "inventory", "availability", "commitment", "production"}.isdisjoint(fields)
         )
 
     def test_ratified_native_permissions_exist(self):

@@ -5,14 +5,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
-from apps.procurement.forms import GoodsReceiptForm
-from apps.procurement.services import ReceiptLineInput, post_goods_receipt
-
+from .acquisitions import acquire_external_stock
 from .adjustments import approve_inventory_adjustment, request_inventory_adjustment
-from .forms import AdjustmentApprovalForm, AdjustmentRequestForm, SupplyForm
+from .forms import AdjustmentApprovalForm, AdjustmentRequestForm, LocationForm, StockAcquisitionForm, SupplyForm
+from .location_services import save_location
+from .services import _require_permission
 from .models import (
-    InventoryAdjustmentRequest, InventoryMovement, InventorySupply, StockPosition,
+    InventoryAdjustmentRequest, InventoryLocation, InventoryMovement, InventorySupply, StockPosition,
 )
 from .supply_services import create_inventory_supply, require_supply_view, update_inventory_supply
 
@@ -25,6 +26,36 @@ def _errors(form, error):
         for field, values in error.message_dict.items():
             for value in values: form.add_error(field if field in form.fields else None, value)
     else: form.add_error(None, error)
+
+
+@login_required(login_url="accounts:login")
+def location_list(request):
+    require_supply_view(request.user)
+    return render(request, "dashboard/inventory/locations_live.html", {
+        "locations": InventoryLocation.objects.order_by("name", "pk"),
+    })
+
+
+@login_required(login_url="accounts:login")
+def location_form(request, location_id=None):
+    require_supply_view(request.user)
+    _require_permission(request.user, "inventory.change_inventorylocation" if location_id else "inventory.add_inventorylocation")
+    location = get_object_or_404(InventoryLocation, pk=location_id) if location_id else None
+    form = LocationForm(request.POST or None, initial={
+        "name": location.name if location else "", "idempotency_key": uuid.uuid4(),
+    })
+    if request.method == "POST" and form.is_valid():
+        try:
+            saved = save_location(location_id=location.pk if location else None,
+                                  actor=request.user, **form.cleaned_data)
+        except ValidationError as error:
+            _errors(form, error)
+        else:
+            messages.success(request, f"Location {saved.name} saved.")
+            return redirect("dashboard:inventory_location_list")
+    return render(request, "dashboard/inventory/location_form_live.html", {
+        "form": form, "title": "Edit Location" if location else "Add Location",
+    })
 
 
 @login_required(login_url="accounts:login")
@@ -101,45 +132,44 @@ def supply_detail(request, code):
 @login_required(login_url="accounts:login")
 def receipt_create(request):
     require_supply_view(request.user)
-    form = GoodsReceiptForm(request.POST or None, initial=_audit_initial())
+    initial = _audit_initial()
+    initial["acquisition_date"] = timezone.localdate()
+    form = StockAcquisitionForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
-        line = data["purchase_order_line"]
         try:
-            receipt = post_goods_receipt(
-                number=data["number"], purchase_order_id=line.purchase_order_id,
-                delivery_note_reference=data["delivery_note_reference"], receipt_date=data["receipt_date"],
-                lines=(ReceiptLineInput(
-                    purchase_order_line_id=line.pk,
-                    accepted_base_quantity=data["accepted_base_quantity"],
-                    rejected_base_quantity=data["rejected_base_quantity"],
-                    rejection_reason=data["rejection_reason"], lot_code=data["lot_code"],
-                    destination_location_id=data["destination_location"].pk,
-                ),), actor=request.user, reason=data["reason"],
+            acquisition = acquire_external_stock(
+                product_id=data["product"].pk, quantity=data["quantity"],
+                unit_cost=data["unit_cost"], acquisition_date=data["acquisition_date"],
+                supplier_id=data["supplier"].pk if data["supplier"] else None,
+                location_id=data["location"].pk, supplier_batch_reference=data["supplier_batch_reference"],
+                condition=data["condition"],
+                reference=data["reference"], note=data["note"], actor=request.user,
                 correlation_id=data["correlation_id"], idempotency_key=data["idempotency_key"],
             )
         except ValidationError as error: _errors(form, error)
         else:
-            messages.success(request, f"Goods Receipt {receipt.number} posted.")
-            return redirect("dashboard:inventory_history")
+            messages.success(request, f"Acquired {acquisition.movement_line.quantity} {acquisition.movement_line.item.base_unit} of {acquisition.movement_line.item.product.name}.")
+            return redirect("dashboard:inventory_stock")
     return render(request, "dashboard/inventory/receipt_form_live.html", {
-        "form": form, "title": "Receive Supplier Stock", "cancel_url": "dashboard:inventory_stock",
+        "form": form, "title": "Acquire Stock", "cancel_url": "dashboard:inventory_stock",
     })
 
 
 @login_required(login_url="accounts:login")
 def stock(request):
     require_supply_view(request.user)
-    positions = StockPosition.objects.filter(item__kind="SUPPLY").select_related("item__supply", "lot", "location")
+    positions = StockPosition.objects.select_related("item__product", "item__supply", "lot", "location")
     return render(request, "dashboard/inventory/stock_live.html", {"positions": positions})
 
 
 @login_required(login_url="accounts:login")
 def history(request):
     require_supply_view(request.user)
-    movements = InventoryMovement.objects.filter(lines__item__kind="SUPPLY").distinct().prefetch_related(
-        "lines__item__supply", "lines__lot", "lines__source_location", "lines__destination_location"
-    ).select_related("actor")
+    movements = InventoryMovement.objects.prefetch_related(
+        "lines__item__product", "lines__item__supply", "lines__lot",
+        "lines__source_location", "lines__destination_location",
+    ).select_related("actor", "external_acquisition__supplier")
     return render(request, "dashboard/inventory/history_live.html", {"movements": movements})
 
 

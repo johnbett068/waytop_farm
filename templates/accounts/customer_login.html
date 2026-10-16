@@ -1,0 +1,6 @@
+{% extends "accounts/customer_base.html" %}
+{% block title %}Customer sign in | WayTop Farm{% endblock %}
+{% block account_content %}<h1>Customer sign in</h1><p>Sign in to manage your buyer details and picking preference.</p>
+<form method="post" class="customer-account__form">{% csrf_token %}{{ form.as_div }}<button class="btn btn--primary" type="submit">Sign in</button></form>
+<p>New here? <a href="{% url 'accounts:customer_register' %}">Create account</a></p>
+<p>Working at WayTop? <a href="{% url 'accounts:login' %}">Staff sign in</a></p>{% endblock %}

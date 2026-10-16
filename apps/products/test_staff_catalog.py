@@ -49,8 +49,7 @@ class StaffCatalogWorkflowTests(TestCase):
     def service_values(self, **overrides):
         values = {
             "name": "Anna F1 Tomato Seedling",
-            "sku": "WTP-VEG-101",
-            "slug": "anna-f1-tomato-seedling",
+            "category": Product.Category.VEGETABLE,
             "description": "A legitimate nursery seedling Product.",
             "base_inventory_unit": "seedling",
             "is_active": True,
@@ -67,6 +66,8 @@ class StaffCatalogWorkflowTests(TestCase):
     def test_authoritative_workflow_creates_product_sale_unit_and_price_atomically(self):
         product, unit, price = create_seedling_product(**self.service_values())
         self.assertEqual(product.base_inventory_unit, "seedling")
+        self.assertEqual(product.category, Product.Category.VEGETABLE)
+        self.assertEqual(product.sku, "WTP-VEG-001")
         self.assertTrue(product.is_active)
         self.assertEqual(unit.product, product)
         self.assertEqual(unit.base_quantity, Decimal("128.000"))
@@ -78,8 +79,6 @@ class StaffCatalogWorkflowTests(TestCase):
         product, unit, price = create_seedling_product(
             **self.service_values(
                 name="Cabbage Seedling",
-                sku="WTP-VEG-102",
-                slug="",
                 is_published=False,
                 price_amount=None,
                 price_effective_start=None,
@@ -94,8 +93,6 @@ class StaffCatalogWorkflowTests(TestCase):
         inactive, _unit, _price = create_seedling_product(
             **self.service_values(
                 name="Inactive Seedling",
-                sku="WTP-VEG-103",
-                slug="inactive-seedling",
                 is_active=False,
                 is_published=False,
             )
@@ -137,6 +134,7 @@ class StaffCatalogWorkflowTests(TestCase):
     def test_existing_products_remain_unchanged_when_new_product_is_created(self):
         existing = Product.objects.create(
             sku="WTP-EXISTING-001", slug="existing-seedling", name="Existing Seedling",
+            category=Product.Category.FRUIT,
             description="Preserve exactly", base_inventory_unit="seedling",
             is_active=True, is_published=False,
         )
@@ -145,6 +143,8 @@ class StaffCatalogWorkflowTests(TestCase):
         self.assertEqual(existing.name, "Existing Seedling")
         self.assertEqual(existing.description, "Preserve exactly")
         self.assertTrue(existing.is_active)
+        self.assertEqual(existing.category, Product.Category.FRUIT)
+        self.assertEqual(existing.sku, "WTP-EXISTING-001")
 
     def test_product_creation_requires_existing_exact_permissions_and_active_staff(self):
         for actor in (None, self.view_only_staff, self.unprivileged_staff, self.inactive_staff):
@@ -152,7 +152,7 @@ class StaffCatalogWorkflowTests(TestCase):
                 create_seedling_product(**self.service_values(actor=actor))
         superuser = get_user_model().objects.create_superuser("catalog-superuser", password=None)
         product, _unit, _price = create_seedling_product(
-            **self.service_values(actor=superuser, sku="WTP-SUPER-001", slug="super-seedling")
+            **self.service_values(actor=superuser)
         )
         self.assertEqual(product.name, "Anna F1 Tomato Seedling")
 
@@ -173,8 +173,7 @@ class StaffCatalogWorkflowTests(TestCase):
         self.client.force_login(self.catalog_staff)
         response = self.client.post(reverse("dashboard:catalog_product_create"), {
             "name": "Sukuma Wiki Seedling",
-            "sku": "WTP-VEG-104",
-            "slug": "sukuma-wiki-seedling",
+            "category": Product.Category.VEGETABLE,
             "description": "Nursery-raised seedling.",
             "base_inventory_unit": "seedling",
             "is_active": "on",
@@ -184,11 +183,57 @@ class StaffCatalogWorkflowTests(TestCase):
             "price_amount": "1800.00",
             "price_effective_start": timezone.localtime().strftime("%Y-%m-%dT%H:%M"),
         })
-        self.assertRedirects(response, reverse("dashboard:catalog_products"))
-        product = Product.objects.get(sku="WTP-VEG-104")
+        product = Product.objects.get(sku="WTP-VEG-001")
+        self.assertRedirects(response, reverse("dashboard:catalog_product_detail", args=[product.pk]))
+        self.assertContains(self.client.get(response.url), "Product Images")
         listing = self.client.get(reverse("dashboard:catalog_products"))
         self.assertContains(listing, product.name)
         self.assertContains(listing, "Available for new batches")
+
+    def test_staff_form_requires_category_and_hides_generated_identifiers(self):
+        self.client.force_login(self.catalog_staff)
+        response = self.client.get(reverse("dashboard:catalog_product_create"))
+        self.assertContains(response, "Product category")
+        self.assertContains(response, "Stock unit")
+        self.assertNotContains(response, 'name="sku"')
+        self.assertNotContains(response, 'name="slug"')
+
+    def test_category_sequences_are_independent_and_use_the_ratified_codes(self):
+        vegetable, _unit, _price = create_seedling_product(**self.service_values())
+        fruit, _unit, _price = create_seedling_product(
+            **self.service_values(name="Passion Fruit", category=Product.Category.FRUIT)
+        )
+        tree, _unit, _price = create_seedling_product(
+            **self.service_values(name="Grevillea", category=Product.Category.TREE)
+        )
+        self.assertEqual(vegetable.sku, "WTP-VEG-001")
+        self.assertEqual(fruit.sku, "WTP-FRT-001")
+        self.assertEqual(tree.sku, "WTP-TRE-001")
+
+    def test_sequence_uses_highest_suffix_respects_gaps_and_expands_past_999(self):
+        Product.objects.create(
+            sku="WTP-VEG-007", slug="existing-seven", name="Existing Seven",
+            category=Product.Category.VEGETABLE, base_inventory_unit="seedling",
+        )
+        vegetable, _unit, _price = create_seedling_product(**self.service_values())
+        self.assertEqual(vegetable.sku, "WTP-VEG-008")
+
+        Product.objects.create(
+            sku="WTP-FRT-999", slug="existing-999", name="Existing 999",
+            category=Product.Category.FRUIT, base_inventory_unit="seedling",
+        )
+        fruit, _unit, _price = create_seedling_product(
+            **self.service_values(name="Fruit 1000", category=Product.Category.FRUIT)
+        )
+        self.assertEqual(fruit.sku, "WTP-FRT-1000")
+
+    def test_generated_slugs_remain_unique(self):
+        first, _unit, _price = create_seedling_product(**self.service_values())
+        second, _unit, _price = create_seedling_product(
+            **self.service_values(category=Product.Category.FRUIT)
+        )
+        self.assertEqual(first.slug, "anna-f1-tomato-seedling")
+        self.assertEqual(second.slug, "anna-f1-tomato-seedling-2")
 
     def test_staff_routes_enforce_view_and_create_permissions(self):
         self.client.force_login(self.view_only_staff)
@@ -220,4 +265,3 @@ class StaffCatalogWorkflowTests(TestCase):
         self.assertContains(shop, product.name)
         self.assertContains(detail, "Tray of 128")
         self.assertContains(detail, "KES 2500.00")
-

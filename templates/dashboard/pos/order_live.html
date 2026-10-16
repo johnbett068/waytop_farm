@@ -1,0 +1,24 @@
+{% extends "staff_base.html" %}{% load static %}
+{% block title %}{{ order.order_number }} | POS{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-pos-live.css' %}">{% endblock %}
+{% block content %}<section class="staff-workspace pos-workspace">
+<header class="staff-page-heading"><p>POS</p><h1>{{ order.order_number }}</h1></header>
+{% for message in messages %}<p role="alert">{{ message }}</p>{% endfor %}
+<p>Location / Branch: {{ order.location.name|default:"Not recorded" }}</p><p>Customer: {{ order.customer.display_name|default:"Anonymous walk-in" }}</p>
+<p>Order: <strong>{{ order.status }}</strong> · Payment: <strong>{{ order.payment.state }}</strong></p>
+<div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Product</th><th>Quantity</th><th>Unit price</th><th>Line total</th></tr></thead><tbody>{% for line in order.lines.all %}<tr><td>{{ line.product_name }} · {{ line.sale_unit_name }}</td><td>{{ line.quantity }}</td><td>KES {{ line.unit_price }}</td><td>KES {{ line.line_total }}</td></tr>{% endfor %}</tbody></table></div>
+<p><strong>Total: KES {{ order.total_amount }}</strong></p>
+{% if order.status == 'PENDING' %}
+<section class="staff-panel"><h2>Confirm payment</h2><p>Payment method: {{ order.payment.get_method_display }}</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="confirm">
+{% if order.payment.method == 'MPESA' %}<label for="reference">M-Pesa Reference</label><input id="reference" name="reference" maxlength="64" required>{% endif %}
+<button class="staff-button staff-button--primary">Confirm Payment</button></form></section>
+{% endif %}
+{% if is_booking %}<p>Production booking for future supply. Expected readiness: {{ order.required_date|date:"j F Y" }}.</p>{% endif %}
+{% if order.status == 'CONFIRMED' and perms.orders.process and not is_booking %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="process"><input type="hidden" name="idempotency_key" value="{{ key }}"><input type="hidden" name="correlation_id" value="{{ correlation }}"><button class="staff-button staff-button--primary">Start processing</button></form>{% endif %}
+{% if is_booking and order.status == 'CONFIRMED' and perms.orders.cancel %}
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="cancel_booking"><input type="hidden" name="idempotency_key" value="{{ key }}"><input type="hidden" name="correlation_id" value="{{ correlation }}">
+<label for="cancel-reason">Cancellation reason</label><input id="cancel-reason" name="reason" required><button class="staff-button staff-button--secondary">Cancel booking</button><p>Releases future capacity. Payment remains recorded; this does not issue a refund.</p></form>
+{% endif %}
+<a href="{% url 'dashboard:pos' %}">Back to POS</a>
+</section>{% endblock %}

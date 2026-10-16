@@ -50,6 +50,10 @@ class ImmutableRecordMixin(models.Model):
 
 
 class Order(models.Model):
+    location = models.ForeignKey(
+        "inventory.InventoryLocation", on_delete=models.PROTECT,
+        related_name="orders", null=True, blank=True,
+    )
     class Channel(models.TextChoices):
         ECOMMERCE = "ECOMMERCE", "Ecommerce"
         POS = "POS", "Point of Sale"
@@ -99,6 +103,8 @@ class Order(models.Model):
 
     def clean(self):
         super().clean()
+        if self._state.adding and self.channel == self.Channel.POS and not self.location_id:
+            raise ValidationError({"location": "POS requires a Location / Branch."})
         if self._state.adding and self.customer_id and not self.customer.is_active:
             raise ValidationError({"customer": "An inactive customer cannot be attached to a new order."})
         if self._state.adding and self.status != self.Status.PENDING:
@@ -110,7 +116,9 @@ class Order(models.Model):
         cancellation_write = kwargs.pop("_cancellation_service_write", False)
         fulfillment_write = kwargs.pop("_fulfillment_service_write", False)
         if not self._state.adding:
-            original = type(self).objects.only("status").get(pk=self.pk)
+            original = type(self).objects.only("status", "location_id").get(pk=self.pk)
+            if original.location_id != self.location_id:
+                raise ValidationError("Order Location is immutable.")
             valid_transition = (
                 confirmation_write
                 and original.status == self.Status.PENDING
@@ -195,6 +203,11 @@ class OrderAddressSnapshot(ImmutableRecordMixin):
 
 
 class OrderLine(ImmutableRecordMixin):
+    production_batch = models.ForeignKey(
+        "production.ProductionBatch", on_delete=models.PROTECT,
+        related_name="booking_lines", null=True, blank=True,
+    )
+    expected_ready_date = models.DateField(null=True, blank=True)
     class SupplyMode(models.TextChoices):
         READY = "READY", "Ready"
         PRE_ORDER = "PRE_ORDER", "Pre-order"
@@ -227,6 +240,11 @@ class OrderLine(ImmutableRecordMixin):
         ordering = ("line_number",)
         constraints = [
             models.UniqueConstraint(fields=("order", "line_number"), name="order_line_number_unique"),
+            models.CheckConstraint(
+                condition=Q(production_batch__isnull=True, expected_ready_date__isnull=True)
+                | Q(production_batch__isnull=False, expected_ready_date__isnull=False, supply_mode="PRE_ORDER"),
+                name="order_line_production_booking_metadata",
+            ),
             models.CheckConstraint(condition=Q(line_number__gt=0), name="order_line_number_positive"),
             models.CheckConstraint(condition=Q(quantity__gt=0), name="order_line_quantity_positive"),
             models.CheckConstraint(condition=Q(base_quantity__gt=0), name="order_line_base_quantity_positive"),
@@ -245,6 +263,13 @@ class OrderLine(ImmutableRecordMixin):
     def clean(self):
         super().clean()
         errors = {}
+        if self.production_batch_id:
+            if self.supply_mode != self.SupplyMode.PRE_ORDER:
+                errors["production_batch"] = "Production bookings must be PRE_ORDER."
+            if self.production_batch.product_id != self.product_id:
+                errors["production_batch"] = "Production batch must match the Product."
+            if self.production_batch.location_id != self.order.location_id:
+                errors["production_batch"] = "Production batch must match the Order Location."
         if self.sale_unit_id and self.product_id and self.sale_unit.product_id != self.product_id:
             errors["sale_unit"] = "The sale unit must belong to the selected product."
         if self.source_price_id and self.sale_unit_id and self.source_price.sale_unit_id != self.sale_unit_id:
@@ -271,6 +296,7 @@ class OrderLine(ImmutableRecordMixin):
                 "order_id", "line_number", "product_id", "sale_unit_id", "source_price_id",
                 "product_sku", "product_name", "sale_unit_name", "base_quantity", "quantity",
                 "unit_price", "line_total", "supply_mode", "created_at",
+                "production_batch_id", "expected_ready_date",
             )
             if any(getattr(self, field) != getattr(original, field) for field in immutable_fields):
                 raise ValidationError("Order Line commercial snapshots are immutable.")

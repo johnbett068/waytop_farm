@@ -151,6 +151,7 @@ class SupplierInventoryFoundationTests(SupplierInventoryTestCase):
 
     def test_product_and_supply_inventory_items_work_and_database_xor_is_enforced(self):
         product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="SEEDLING-001", slug="seedling-001", name="Tomato Seedling",
             base_inventory_unit="seedling", is_active=True, is_published=False,
         )
@@ -162,6 +163,7 @@ class SupplierInventoryFoundationTests(SupplierInventoryTestCase):
         self.assertEqual(self.supply.inventory_item.supply, self.supply)
 
         second_product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="SEEDLING-002", slug="seedling-002", name="Cabbage Seedling",
             base_inventory_unit="seedling", is_active=True, is_published=False,
         )
@@ -330,7 +332,7 @@ class SupplierInventoryStaffUITests(SupplierInventoryTestCase):
         self.assertEqual(self.client.get(reverse("dashboard:inventory_stock")).status_code, 403)
         self.assertEqual(self.client.get(reverse("dashboard:procurement_supplier_list")).status_code, 403)
 
-    def test_inventory_shortcuts_cover_every_inventory_and_procurement_screen(self):
+    def test_inventory_shortcuts_are_simplified_and_inventory_only(self):
         self.client.force_login(self.manager)
         purchase_order = self._po()
         paths = (
@@ -349,12 +351,6 @@ class SupplierInventoryStaffUITests(SupplierInventoryTestCase):
             reverse("dashboard:inventory_stock"),
             reverse("dashboard:inventory_history"),
             reverse("dashboard:inventory_adjustments"),
-            reverse("dashboard:procurement_supplier_list"),
-            reverse("dashboard:procurement_supplier_create"),
-            reverse("dashboard:procurement_supplier_edit", args=(self.supplier.pk,)),
-            reverse("dashboard:procurement_purchase_list"),
-            reverse("dashboard:procurement_purchase_create"),
-            reverse("dashboard:procurement_purchase_detail", args=(purchase_order.number,)),
         )
         for path in paths:
             with self.subTest(path=path):
@@ -362,23 +358,40 @@ class SupplierInventoryStaffUITests(SupplierInventoryTestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, 'class="inventory-shortcuts"')
                 self.assertContains(response, 'class="inventory-shortcuts__home"')
+                self.assertContains(response, 'class="inventory-shortcuts__row"', count=1)
 
         response = self.client.get(reverse("dashboard:inventory"))
         expected_links = (
             ("dashboard:inventory", "Overview"),
             ("dashboard:inventory_stock", "On-Hand Stock"),
-            ("dashboard:inventory_receipt_create", "Receive Stock"),
-            ("dashboard:inventory_supply_list", "Supply Definitions"),
-            ("dashboard:procurement_purchase_list", "Purchase Orders"),
-            ("dashboard:procurement_supplier_list", "Suppliers"),
-            ("dashboard:inventory_history", "Ledger History"),
+            ("dashboard:inventory_receipt_create", "Acquire Stock"),
+            ("dashboard:inventory_history", "History"),
         )
         for route, label in expected_links:
             with self.subTest(route=route):
                 self.assertContains(response, f'href="{reverse(route)}"')
                 self.assertContains(response, label)
-        self.assertContains(response, 'aria-label="Inventory and procurement shortcuts"')
+        self.assertContains(response, 'aria-label="Inventory sections"')
+        self.assertContains(response, 'aria-label="Inventory page context"')
         self.assertContains(response, 'aria-current="page"')
+        shortcuts = response.content.decode().split(
+            '<section class="inventory-shortcuts"', 1
+        )[1].split("</section>", 1)[0]
+        for removed_label in ("Supply Definitions", "Purchase Orders", "Suppliers", "Locations"):
+            self.assertNotIn(removed_label, shortcuts)
+
+        for path in (
+            reverse("dashboard:procurement_supplier_list"),
+            reverse("dashboard:procurement_supplier_create"),
+            reverse("dashboard:procurement_supplier_edit", args=(self.supplier.pk,)),
+            reverse("dashboard:procurement_purchase_list"),
+            reverse("dashboard:procurement_purchase_create"),
+            reverse("dashboard:procurement_purchase_detail", args=(purchase_order.number,)),
+        ):
+            with self.subTest(path=path):
+                procurement_response = self.client.get(path)
+                self.assertEqual(procurement_response.status_code, 200)
+                self.assertNotContains(procurement_response, 'class="inventory-shortcuts"')
 
         dashboard_response = self.client.get(reverse("dashboard:dashboard"))
         self.assertNotContains(dashboard_response, 'class="inventory-shortcuts"')
@@ -424,8 +437,8 @@ class SupplierInventoryStaffUITests(SupplierInventoryTestCase):
             ),
             (
                 "dashboard:procurement_supplier_create", "dashboard/procurement/form_live.html",
-                ("reason", "code", "name", "contact_person", "phone", "email", "address",
-                 "notes", "is_active", "correlation_id", "idempotency_key"),
+                ("name", "contact_person", "phone", "email", "address",
+                 "notes", "correlation_id", "idempotency_key"),
             ),
         )
         for route, template, field_names in cases:
@@ -477,20 +490,19 @@ class SupplierInventoryStaffUITests(SupplierInventoryTestCase):
         self.assertContains(invalid, 'aria-invalid="true"')
         self.assertContains(invalid, "This field is required.")
 
-    def test_receipt_form_has_grouped_layout_and_preserves_field_contract(self):
+    def test_acquire_stock_form_has_grouped_layout_and_minimal_field_contract(self):
         self.client.force_login(self.manager)
         response = self.client.get(reverse("dashboard:inventory_receipt_create"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "dashboard/inventory/receipt_form_live.html")
         self.assertContains(response, "staff-procurement.css")
-        self.assertContains(response, 'class="purchase-order-form__grid"', count=3)
-        self.assertContains(response, "Receipt identity")
-        self.assertContains(response, "Supply and quantities")
-        self.assertContains(response, "Lot and destination")
+        self.assertContains(response, 'class="purchase-order-form__grid"', count=2)
+        self.assertContains(response, "Acquire Stock")
+        self.assertContains(response, "Acquired seedlings")
+        self.assertContains(response, "Source and traceability")
         for field_name in (
-            "reason", "number", "purchase_order_line", "delivery_note_reference", "receipt_date",
-            "accepted_base_quantity", "rejected_base_quantity", "rejection_reason", "lot_code",
-            "destination_location", "correlation_id", "idempotency_key",
+            "product", "quantity", "unit_cost", "acquisition_date", "supplier", "location",
+            "supplier_batch_reference", "condition", "reference", "note", "correlation_id", "idempotency_key",
         ):
             with self.subTest(field_name=field_name):
                 self.assertContains(response, f'name="{field_name}"')

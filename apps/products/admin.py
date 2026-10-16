@@ -17,8 +17,8 @@ class ProductSaleUnitInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(PreserveCatalogHistoryAdminMixin, admin.ModelAdmin):
-    list_display = ("sku", "name", "base_inventory_unit", "is_active", "is_published", "updated_at")
-    list_filter = ("is_active", "is_published")
+    list_display = ("sku", "name", "category", "base_inventory_unit", "is_active", "is_published", "updated_at")
+    list_filter = ("category", "is_active", "is_published")
     search_fields = ("sku", "name", "slug")
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("created_at", "updated_at")

@@ -56,6 +56,7 @@ class OrderLineInput:
     sale_unit_id: uuid.UUID
     quantity: int
     supply_mode: str
+    production_batch_id: uuid.UUID | None = None
 
 
 def _require_pos_permission(actor):
@@ -109,6 +110,7 @@ def _normalize_lines(lines):
                 sale_unit_id=uuid.UUID(str(line.sale_unit_id)),
                 quantity=line.quantity,
                 supply_mode=line.supply_mode,
+                production_batch_id=uuid.UUID(str(line.production_batch_id)) if line.production_batch_id else None,
             )
         )
     return tuple(normalized)
@@ -124,7 +126,7 @@ def _validate_channel_rules(channel, fulfillment_method, lines, contact, address
     requires_contact = (
         channel == Order.Channel.ECOMMERCE
         or fulfillment_method == Order.FulfillmentMethod.HOME_DELIVERY
-        or has_preorder
+        or (has_preorder and channel != Order.Channel.POS)
     )
     if requires_contact and (not contact.name or not contact.phone):
         raise ValidationError("This Order requires a customer name and Kenyan phone number.")
@@ -172,11 +174,11 @@ def _request_matches(existing, *, customer, channel, fulfillment_method, require
 
     existing_lines = tuple(
         existing.lines.order_by("line_number").values_list(
-            "product_id", "sale_unit_id", "quantity", "supply_mode"
+            "product_id", "sale_unit_id", "quantity", "supply_mode", "production_batch_id"
         )
     )
     requested_lines = tuple(
-        (line.product_id, line.sale_unit_id, line.quantity, line.supply_mode) for line in lines
+        (line.product_id, line.sale_unit_id, line.quantity, line.supply_mode, line.production_batch_id) for line in lines
     )
     return existing_lines == requested_lines
 
@@ -204,6 +206,68 @@ def _new_order_number():
     raise ValidationError("A unique public Order number could not be generated.")
 
 
+def quote_order_lines(*, lines, channel):
+    """Resolve current catalog prices and exact totals for cart and Order snapshots."""
+    lines = _normalize_lines(lines)
+    at = timezone.now()
+    resolved_lines = []
+    total = Decimal("0.00")
+    for line in lines:
+        try:
+            product = Product.objects.get(pk=line.product_id, is_active=True)
+            sale_unit = ProductSaleUnit.objects.get(
+                pk=line.sale_unit_id, product=product, is_active=True
+            )
+        except (Product.DoesNotExist, ProductSaleUnit.DoesNotExist) as exc:
+            raise ValidationError("The selected Product and Sale Unit are not orderable.") from exc
+        if channel in (Order.Channel.ECOMMERCE, Order.Channel.POS) and not product.is_published:
+            raise ValidationError("This sales channel can order only published Products.")
+        price = _current_price(sale_unit, at)
+        line_total = (Decimal(line.quantity) * price.amount).quantize(
+            MONEY_QUANTUM, rounding=ROUND_HALF_UP
+        )
+        total += line_total
+        resolved_lines.append((line, product, sale_unit, price, line_total))
+
+    total = total.quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
+    if total <= 0:
+        raise ValidationError("V1 Orders must have a positive total.")
+
+    return resolved_lines, total
+
+
+def validate_pos_lines(*, lines, location_id):
+    """Validate the whole READY cart against one authoritative stock scope."""
+    from apps.inventory.models import InventoryItem, InventoryLocation
+    from apps.inventory.availability import get_ready_availability, AvailabilityUnavailable
+    if not location_id or not InventoryLocation.objects.filter(pk=location_id, is_active=True, allows_saleable_stock=True).exists():
+        raise ValidationError("Select an active saleable Location / Branch.")
+    normalized_lines = _normalize_lines(lines)
+    required_by_product = {}
+    for line in normalized_lines:
+        if line.supply_mode != OrderLine.SupplyMode.READY:
+            raise ValidationError("Location-targeted POS currently supports READY stock only.")
+        try:
+            product = Product.objects.get(pk=line.product_id, is_active=True, is_published=True)
+            unit = ProductSaleUnit.objects.get(pk=line.sale_unit_id, product=product, is_active=True)
+            available = get_ready_availability(product=product, sale_unit=unit, location_id=location_id)
+        except (Product.DoesNotExist, ProductSaleUnit.DoesNotExist, AvailabilityUnavailable) as error:
+            raise ValidationError("Product is unavailable at the selected Location.") from error
+        required_by_product[product.pk] = required_by_product.get(product.pk, Decimal("0")) + unit.base_quantity * line.quantity
+        if line.quantity > available.available_sale_units:
+            raise ValidationError("Insufficient stock at the selected Location.")
+    # Mixed Sale Units for the same Product must not oversell its shared base quantity.
+    for product_id, required in required_by_product.items():
+        from apps.inventory.availability import available_ready_base_quantity
+        item = InventoryItem.objects.get(product_id=product_id)
+        try:
+            available_base, _ = available_ready_base_quantity(inventory_item=item, calculated_at=timezone.now(), location_id=location_id)
+        except AvailabilityUnavailable as error:
+            raise ValidationError("Product is unavailable at the selected Location.") from error
+        if required > available_base:
+            raise ValidationError("Combined Sale Units exceed stock at the selected Location.")
+
+
 @transaction.atomic
 def create_pending_order(
     *,
@@ -216,13 +280,29 @@ def create_pending_order(
     customer=None,
     required_date=None,
     actor=None,
+    location_id=None,
+    payment_method="MPESA",
 ):
     """Create one immutable PENDING Order and PENDING Payment aggregate."""
     from apps.payments.models import Payment, PaymentStatusEvent
 
+    if payment_method not in Payment.Method.values or (channel != "POS" and payment_method != "MPESA"):
+        raise ValidationError("Unsupported payment method for this channel.")
     idempotency_key = lock_idempotency_key(creation_idempotency_key)
     if channel == Order.Channel.POS:
         _require_pos_permission(actor)
+        if not location_id:
+            raise ValidationError({"location_id": "Select a Location / Branch."})
+    if location_id is not None:
+        try:
+            location_id = uuid.UUID(str(location_id))
+        except (ValueError, TypeError, AttributeError) as error:
+            raise ValidationError({"location_id": "Select a valid Location / Branch."}) from error
+
+    if channel == Order.Channel.POS:
+        from apps.inventory.models import InventoryLocation
+        if not InventoryLocation.objects.filter(pk=location_id, is_active=True, allows_saleable_stock=True).exists():
+            raise ValidationError({"location_id": "Select an active saleable Location / Branch."})
 
     normalized_lines = _normalize_lines(lines)
     normalized_address = _normalize_address(address)
@@ -233,6 +313,12 @@ def create_pending_order(
         .first()
     )
     if existing is not None:
+        if existing.payment.method != payment_method:
+            raise ValidationError("Idempotency key reused for a different payment method.")
+        if existing.location_id != location_id:
+            raise ValidationError("The creation idempotency key was reused for a different Location.")
+        if required_date is None and any(line.production_batch_id for line in normalized_lines):
+            required_date = existing.required_date
         normalized_contact = (
             ContactInput(
                 name=existing.contact_snapshot.name,
@@ -263,6 +349,15 @@ def create_pending_order(
             raise ValidationError("The creation idempotency key was already used for different input.")
         return existing
 
+    batches = {}
+    if any(line.production_batch_id for line in normalized_lines):
+        if channel != Order.Channel.POS:
+            raise ValidationError("Production bookings require the POS booking channel.")
+        from apps.production.capacity import validate_booking_lines
+        batches = validate_booking_lines(lines=normalized_lines, location_id=location_id, lock=True)
+        if required_date is None:
+            required_date = max(batch.expected_ready_date for batch in batches.values())
+
     if customer is not None:
         customer = Customer.objects.select_for_update().get(pk=customer.pk)
         if not customer.is_active:
@@ -284,35 +379,20 @@ def create_pending_order(
         required_date,
     )
 
-    at = timezone.now()
-    resolved_lines = []
-    total = Decimal("0.00")
-    for line in normalized_lines:
-        try:
-            product = Product.objects.get(pk=line.product_id, is_active=True)
-            sale_unit = ProductSaleUnit.objects.get(
-                pk=line.sale_unit_id, product=product, is_active=True
-            )
-        except (Product.DoesNotExist, ProductSaleUnit.DoesNotExist) as exc:
-            raise ValidationError("The selected Product and Sale Unit are not orderable.") from exc
-        if channel == Order.Channel.ECOMMERCE and not product.is_published:
-            raise ValidationError("Ecommerce can order only published Products.")
-        price = _current_price(sale_unit, at)
-        line_total = (Decimal(line.quantity) * price.amount).quantize(
-            MONEY_QUANTUM, rounding=ROUND_HALF_UP
-        )
-        total += line_total
-        resolved_lines.append((line, product, sale_unit, price, line_total))
-
-    total = total.quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
-    if total <= 0:
-        raise ValidationError("V1 Orders must have a positive total.")
+    if channel == Order.Channel.POS and not batches:
+        from apps.inventory.models import InventoryItem
+        # Match confirmation's per-product serialization. A pending order never reserves stock.
+        list(InventoryItem.objects.select_for_update(of=("self",)).filter(
+            product_id__in=[line.product_id for line in normalized_lines]).order_by("pk"))
+        validate_pos_lines(lines=normalized_lines, location_id=location_id)
+    resolved_lines, total = quote_order_lines(lines=normalized_lines, channel=channel)
 
     order = Order.objects.create(
         order_number=_new_order_number(),
         creation_idempotency_key=idempotency_key,
         customer=customer,
         channel=channel,
+        location_id=location_id,
         fulfillment_method=fulfillment_method,
         required_date=required_date,
         total_amount=total,
@@ -343,6 +423,8 @@ def create_pending_order(
             unit_price=price.amount,
             line_total=line_total,
             supply_mode=line.supply_mode,
+            production_batch_id=line.production_batch_id,
+            expected_ready_date=batches[line.production_batch_id].expected_ready_date if line.production_batch_id else None,
         )
 
     correlation_id = uuid.uuid4()
@@ -356,7 +438,7 @@ def create_pending_order(
         idempotency_key=uuid.uuid5(order.id, "order-created"),
     )
     order_event.save(_creation_service_write=True)
-    payment = Payment.objects.create(order=order, amount=total)
+    payment = Payment.objects.create(order=order, amount=total, method=payment_method)
     payment_event = PaymentStatusEvent(
         payment=payment,
         previous_state=None,

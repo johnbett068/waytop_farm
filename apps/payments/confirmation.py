@@ -212,41 +212,53 @@ def _confirm_ready_order(*, values, actor, attempt):
     if not _attempt_matches(attempt, values, actor):
         raise ValidationError("Accepted verification does not match this confirmation request.")
 
-    product_ids = sorted({line.product_id for line in lines}, key=str)
-    items = list(
-        InventoryItem.objects.select_for_update(of=("self",))
-        .filter(
-            product_id__in=product_ids,
-            kind=InventoryItem.Kind.PRODUCT,
-            supply__isnull=True,
-        )
-        .select_related("product")
-        .order_by("pk")
-    )
-    if len(items) != len(product_ids):
-        raise ValidationError("Every Order Line Product requires an Inventory Item.")
-    for item in items:
-        if (
-            not item.is_active or item.kind != InventoryItem.Kind.PRODUCT
-            or item.base_unit != item.product.base_inventory_unit
-        ):
-            raise ValidationError("Every Order Line requires an active compatible Inventory Item.")
-    for item in items:
-        list(
-            eligible_stock_positions(
-                inventory_item=item,
-                business_date=timezone.localdate(),
-            ).select_for_update().order_by("pk")
-        )
+    return establish_confirmation(order=order, payment=payment, lines=lines, values=values,
+                                  actor=actor, confirmed_at=attempt.created_at)
 
-    confirmed_at = attempt.created_at
+
+def establish_confirmation(*, order, payment, lines, values, actor, confirmed_at, booking=False):
+    """Shared atomic completion: future Commitments or READY reservations, then payment history."""
+    if not connection.in_atomic_block:
+        raise ValidationError("Confirmation requires an atomic transaction.")
+    if booking:
+        from apps.production.capacity import validate_booking_lines
+        validate_booking_lines(lines=lines, location_id=order.location_id, lock=True)
+    else:
+        product_ids = sorted({line.product_id for line in lines}, key=str)
+        items = list(
+            InventoryItem.objects.select_for_update(of=("self",))
+            .filter(
+                product_id__in=product_ids,
+                kind=InventoryItem.Kind.PRODUCT,
+                supply__isnull=True,
+            )
+            .select_related("product")
+            .order_by("pk")
+        )
+        if len(items) != len(product_ids):
+            raise ValidationError("Every Order Line Product requires an Inventory Item.")
+        for item in items:
+            if (
+                not item.is_active or item.kind != InventoryItem.Kind.PRODUCT
+                or item.base_unit != item.product.base_inventory_unit
+            ):
+                raise ValidationError("Every Order Line requires an active compatible Inventory Item.")
+        for item in items:
+            list(
+                eligible_stock_positions(
+                    inventory_item=item,
+                    business_date=timezone.localdate(),
+                ).select_for_update().order_by("pk")
+            )
+
     for line in lines:
-        try:
-            available = get_ready_availability(product=line.product, sale_unit=line.sale_unit)
-        except AvailabilityUnavailable as error:
-            raise ValidationError(str(error)) from error
-        if available.available_sale_units < line.quantity:
-            raise ValidationError("Insufficient READY availability for complete Order confirmation.")
+        if not booking:
+            try:
+                available = get_ready_availability(product=line.product, sale_unit=line.sale_unit, location_id=order.location_id)
+            except AvailabilityUnavailable as error:
+                raise ValidationError(str(error)) from error
+            if available.available_sale_units < line.quantity:
+                raise ValidationError("Insufficient READY availability for complete Order confirmation.")
         commitment = _create_commitment_for_confirmation(
             order_line_id=line.pk,
             actor=actor,
@@ -257,17 +269,18 @@ def _confirm_ready_order(*, values, actor, attempt):
             source_type=SOURCE_TYPE,
             source_reference=order.order_number,
         )
-        reserve_and_allocate_ready_commitment(
-            commitment_id=commitment.id,
-            actor=actor,
-            correlation_id=values["correlation_id"],
-            idempotency_key=_child_key(values["idempotency_key"], "reservation", line.pk),
-            reason=values["reason"],
-            source_type=SOURCE_TYPE,
-            source_reference=order.order_number,
-            approved_sources=None,
-            _confirmation_order_locked=True,
-        )
+        if not booking:
+            reserve_and_allocate_ready_commitment(
+                commitment_id=commitment.id,
+                actor=actor,
+                correlation_id=values["correlation_id"],
+                idempotency_key=_child_key(values["idempotency_key"], "reservation", line.pk),
+                reason=values["reason"],
+                source_type=SOURCE_TYPE,
+                source_reference=order.order_number,
+                approved_sources=None,
+                _confirmation_order_locked=True,
+            )
         line.confirmed_quantity = line.quantity
         line.outstanding_quantity = line.quantity
         line.save(_confirmation_service_write=True)

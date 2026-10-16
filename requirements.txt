@@ -1,4 +1,5 @@
 Django==6.0.1
+Pillow==12.3.0
 cryptography==49.0.0
 phonenumbers==9.0.37
 psycopg[binary]>=3.2,<4

@@ -5,39 +5,14 @@
 {% block content %}
 <section class="staff-workspace purchase-order-workspace">
   <header class="staff-page-heading"><p>Inventory</p><h1>{{ title }}</h1></header>
-  <p class="staff-rule-note">Post only stock physically received from an ordered supplier line. Accepted quantity creates the official Inventory receipt movement; rejected quantity does not enter stock.</p>
+  <p class="staff-rule-note">Record seedlings acquired from outside WayTop Farm. Submitting posts one authoritative Inventory receipt, so the quantity appears in On-Hand Stock and History.</p>
   <form method="post" class="staff-form purchase-order-form" novalidate>
     {% csrf_token %}{{ form.non_field_errors }}
     {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
-
     <fieldset class="purchase-order-form__section">
-      <legend>Receipt identity</legend>
+      <legend>Acquired seedlings</legend>
       <div class="purchase-order-form__grid">
-        {% for field in form.visible_fields %}{% if field.name == 'reason' or field.name == 'number' or field.name == 'delivery_note_reference' or field.name == 'receipt_date' %}
-          <div class="purchase-order-form__field{% if field.name == 'reason' %} purchase-order-form__field--full{% endif %}">
-            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
-            {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
-          </div>
-        {% endif %}{% endfor %}
-      </div>
-    </fieldset>
-
-    <fieldset class="purchase-order-form__section">
-      <legend>Supply and quantities</legend>
-      <div class="purchase-order-form__grid">
-        {% for field in form.visible_fields %}{% if field.name == 'purchase_order_line' or field.name == 'accepted_base_quantity' or field.name == 'rejected_base_quantity' or field.name == 'rejection_reason' %}
-          <div class="purchase-order-form__field{% if field.name == 'purchase_order_line' or field.name == 'rejection_reason' %} purchase-order-form__field--full{% endif %}">
-            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
-            {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
-          </div>
-        {% endif %}{% endfor %}
-      </div>
-    </fieldset>
-
-    <fieldset class="purchase-order-form__section">
-      <legend>Lot and destination</legend>
-      <div class="purchase-order-form__grid">
-        {% for field in form.visible_fields %}{% if field.name == 'lot_code' or field.name == 'destination_location' %}
+        {% for field in form.visible_fields %}{% if field.name == 'product' or field.name == 'quantity' or field.name == 'unit_cost' or field.name == 'acquisition_date' %}
           <div class="purchase-order-form__field">
             <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
             {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
@@ -45,7 +20,19 @@
         {% endif %}{% endfor %}
       </div>
     </fieldset>
-    <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Post receipt</button><a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a></div>
+    <fieldset class="purchase-order-form__section">
+      <legend>Source and traceability</legend>
+      <p><strong>WayTop Lot / Batch</strong><br>Automatically generated for traceability when you submit.</p>
+      <div class="purchase-order-form__grid">
+        {% for field in form.visible_fields %}{% if field.name == 'supplier' or field.name == 'location' or field.name == 'supplier_batch_reference' or field.name == 'condition' or field.name == 'reference' or field.name == 'note' %}
+          <div class="purchase-order-form__field{% if field.name == 'note' %} purchase-order-form__field--full{% endif %}">
+            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}{{ field.errors }}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </fieldset>
+    <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Acquire Stock</button><a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a></div>
   </form>
 </section>
 {% endblock %}

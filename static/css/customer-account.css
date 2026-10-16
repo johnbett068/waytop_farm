@@ -1,0 +1,12 @@
+.customer-account { max-width:42rem; }
+.customer-account h1 { margin-top:0; }
+.customer-account a { text-decoration:underline; }
+.customer-account__form { display:grid; gap:1.25rem; margin:1.5rem 0; }
+.customer-account__form fieldset { display:grid; gap:1rem; min-width:0; margin:0; padding:1.25rem; border:1px solid var(--color-border); border-radius:var(--radius-md); }
+.customer-account__form legend { font-weight:700; padding:0 .4rem; }
+.customer-account__form label { display:block; font-weight:600; margin-bottom:.35rem; }
+.customer-account__form input, .customer-account__form select { width:100%; min-width:0; min-height:2.75rem; padding:.65rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-sm); background:var(--color-white); }
+.customer-account__form .helptext { color:var(--color-gray); font-size:.875rem; margin:.35rem 0; }
+.customer-account__form .errorlist { color:var(--color-error); padding-left:1.25rem; }
+.customer-account__notice { padding:1rem; border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-primary-soft); }
+.customer-account__notice h2 { font-size:1.1rem; margin:0; }

@@ -322,6 +322,12 @@ def reserve_and_allocate_ready_commitment(
             order_line__supply_mode=OrderLine.SupplyMode.READY,
             state=Commitment.State.ACTIVE,
         )
+    if commitment.order.location_id:
+        # Unscoped historical/ecommerce commitments can compete for this branch;
+        # a commitment bound to a different branch cannot use its stock.
+        fifo_pool_query = fifo_pool_query.filter(
+            Q(order__location_id=commitment.order.location_id) | Q(order__location_id__isnull=True)
+        )
     if _confirmation_order_locked:
         fifo_pool_query = fifo_pool_query.filter(
             Q(order__status__in=(Order.Status.CONFIRMED, Order.Status.PROCESSING))
@@ -372,6 +378,8 @@ def reserve_and_allocate_ready_commitment(
         positions=positions,
         allocations=allocations,
     )
+    if commitment.order.location_id:
+        positions = [p for p in positions if p.location_id == commitment.order.location_id]
     selected = _select_sources(
         positions=positions,
         available_by_position=available_by_position,
@@ -520,6 +528,9 @@ def reallocate_ready_reservation(
         allocations=allocations,
         excluded_reservation=reservation,
     )
+    location_id = reservation.commitment.order.location_id
+    if location_id:
+        positions = [p for p in positions if p.location_id == location_id]
     selected = _select_sources(
         positions=positions,
         available_by_position=available_by_position,

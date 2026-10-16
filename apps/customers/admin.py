@@ -20,7 +20,7 @@ class CustomerAdmin(PreserveCustomerHistoryAdminMixin, admin.ModelAdmin):
     list_display = ("display_name", "phone", "email", "is_active", "updated_at")
     list_filter = ("is_active",)
     search_fields = ("display_name", "phone", "email")
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("owner", "created_at", "updated_at")
     inlines = (CustomerAddressInline,)
 
 

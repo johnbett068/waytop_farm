@@ -42,6 +42,7 @@ class ImmutableRecordMixin(models.Model):
 class Payment(models.Model):
     class Method(models.TextChoices):
         MPESA = "MPESA", "M-Pesa"
+        CASH = "CASH", "Cash"
 
     class State(models.TextChoices):
         PENDING = "PENDING", "Pending"
@@ -57,6 +58,8 @@ class Payment(models.Model):
     method = models.CharField(max_length=10, choices=Method.choices, default=Method.MPESA, editable=False)
     state = models.CharField(max_length=10, choices=State.choices, default=State.PENDING, editable=False)
     provider_reference = models.CharField(max_length=64, blank=True, null=True, editable=False)
+    pos_confirmation_key = models.UUIDField(null=True, blank=True, unique=True, editable=False)
+    pos_confirmation_fingerprint = models.CharField(max_length=64, blank=True, default="", editable=False)
     verified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -77,7 +80,7 @@ class Payment(models.Model):
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="payment_amount_positive"),
             models.CheckConstraint(condition=Q(currency="KES"), name="payment_currency_kes"),
-            models.CheckConstraint(condition=Q(method="MPESA"), name="payment_method_mpesa"),
+            models.CheckConstraint(condition=Q(method__in=["MPESA", "CASH"]), name="payment_method_supported"),
             models.CheckConstraint(
                 condition=(
                     Q(
@@ -88,10 +91,13 @@ class Payment(models.Model):
                     )
                     | Q(
                         state="CONFIRMED",
+                        method="MPESA",
                         provider_reference__isnull=False,
                         verified_by__isnull=False,
                         verified_at__isnull=False,
                     )
+                    | Q(state="CONFIRMED", method="CASH", provider_reference__isnull=True,
+                        verified_by__isnull=False, verified_at__isnull=False)
                 ),
                 name="payment_confirmation_metadata_consistent",
             ),
@@ -108,6 +114,10 @@ class Payment(models.Model):
             raise ValidationError({"amount": "Payment amount must equal the Order total."})
         if self.provider_reference:
             self.provider_reference = self.provider_reference.strip().upper()
+        if self.method == self.Method.CASH and self.provider_reference is not None:
+            raise ValidationError({"provider_reference": "Cash does not use an M-Pesa reference."})
+        if self.state == self.State.CONFIRMED and self.method == self.Method.MPESA and not self.provider_reference:
+            raise ValidationError({"provider_reference": "Confirmed M-Pesa requires a reference."})
         if self._state.adding and self.state != self.State.PENDING:
             raise ValidationError({"state": "A new payment must be pending."})
 

@@ -4,12 +4,20 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 
+from .image_validation import product_image_upload_path, validate_product_image
+
 
 class Product(models.Model):
+    class Category(models.TextChoices):
+        VEGETABLE = "VEG", "Vegetable"
+        FRUIT = "FRT", "Fruit"
+        TREE = "TRE", "Tree"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sku = models.CharField(max_length=64, unique=True)
     slug = models.SlugField(max_length=160, unique=True)
     name = models.CharField(max_length=200)
+    category = models.CharField(max_length=3, choices=Category.choices)
     description = models.TextField(blank=True)
     base_inventory_unit = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
@@ -20,6 +28,10 @@ class Product(models.Model):
     class Meta:
         ordering = ("name", "sku")
         constraints = [
+            models.CheckConstraint(
+                condition=Q(category__in=("VEG", "FRT", "TRE")),
+                name="product_category_supported",
+            ),
             models.CheckConstraint(
                 condition=Q(is_active=True) | Q(is_published=False),
                 name="product_published_requires_active",
@@ -71,6 +83,71 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.sku} — {self.name}"
+
+
+class ProductImage(models.Model):
+    """Customer-facing photographs. The first ordered image is the main image."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to=product_image_upload_path, max_length=255)
+    alt_text = models.CharField(max_length=250, blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("sort_order", "created_at", "id")
+        default_permissions = ()
+
+    @property
+    def display_alt_text(self):
+        return self.alt_text or self.product.name
+
+    @property
+    def display_url(self):
+        if self.image and self.image.storage.exists(self.image.name):
+            return self.image.url
+        return ""
+
+    def clean(self):
+        super().clean()
+        self.alt_text = (self.alt_text or "").strip()
+        original = type(self).objects.filter(pk=self.pk).first() if not self._state.adding else None
+        if original and (original.product_id != self.product_id or original.image.name != self.image.name):
+            raise ValidationError("An existing image cannot move Product or replace its stored file. Upload another image instead.")
+        if self._state.adding and self.image and self.image._committed:
+            raise ValidationError({"image": "Upload a new image file; stored paths cannot be attached directly."})
+        if self.image and not self.image._committed:
+            validate_product_image(self.image)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product.name} image ({self.sort_order})"
+
+
+class ProductSkuSequence(models.Model):
+    """Service-controlled counter used to allocate Product SKUs safely."""
+
+    category = models.CharField(
+        max_length=3,
+        choices=Product.Category.choices,
+        primary_key=True,
+    )
+    last_value = models.PositiveBigIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(last_value__gte=0),
+                name="product_sku_sequence_non_negative",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.category}: {self.last_value}"
 
 
 class ProductSaleUnit(models.Model):

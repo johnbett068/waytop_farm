@@ -1,5 +1,7 @@
 # WayTop Farm V1 Order, Customer and Payment Contract
 
+> POS extension: [Sales + Production Bookings](../reviews/pos-sales-production-bookings.md) now permits anonymous POS collection bookings, batch/location-backed PRE_ORDER capacity, Cash and single-action cashier payment confirmation. Earlier restrictions below remain historical outside that extension.
+
 Status: **Ratified**
 Effective: Phase 1D
 Scope: Order, Customer snapshot, Payment and the minimum completion boundary
@@ -124,7 +126,7 @@ A single Order may mix READY and PRE_ORDER lines.
 - Neither mode creates availability, allocation or commitment when the PENDING Order is created.
 - PRE_ORDER never creates negative physical Inventory.
 - A PRE_ORDER line requires the Order's `required_date`.
-- Internal location allocation is neither stored on public Order fields nor exposed to customers.
+- Internal stock allocations are not exposed to customers. Staff POS Orders persist the explicitly selected InventoryLocation as Order.location; this field is excluded from customer-facing projections.
 
 Availability and commitment models are prerequisites for confirmation and belong to later implementation.
 
@@ -370,3 +372,37 @@ This document authorizes **Phase 1D Order + Payment Persistence Foundation**:
 8. verify fresh migrations, drift, system checks, focused tests and the full regression suite.
 
 `VerifyPaymentAndConfirmOrder` belongs to the later Commitment + Availability implementation and must remain unavailable until its complete atomic transaction can be built.
+
+
+## Location-specific staff POS (September 2026)
+
+The authorized POS slice is READY-only, active published catalog Products, existing
+Sale Unit prices, and the existing M-Pesa verification path. A valid active,
+saleable InventoryLocation must be explicitly submitted on every checkout in all
+environments. The initial session and HTML form select the unique eligible location
+named Bomet (case-insensitive), if present; checkout has no Bomet fallback.
+
+Order.location is a protected, immutable foreign key. Historical Orders remain
+nullable without inferred branch assignments. OrderLine, Payment and Commitment
+inherit the sale location through their Order; SourceAllocation and inventory
+movements retain their existing physical StockPosition/location relationships.
+
+Availability accepts an optional location scope, preserving aggregate non-POS
+behavior. Scoped availability subtracts each active Reservation's remaining source
+allocation share at that location exactly once. Eligibility, Decimal arithmetic and
+whole Sale Units remain shared. Mixed Sale Units are checked together in base units.
+Changing location retains and revalidates the cart; invalid carts cannot check out.
+The authoritative service repeats validation independently of the rendered form.
+
+Confirmation scopes source selection to Order.location and retains the existing
+transaction, InventoryItem locks and idempotency infrastructure. FIFO ordering
+remains confirmed_at then fifo_sequence: earlier commitments at the same location,
+and unscoped commitments competing for that stock, retain priority. Reallocation
+and supply cannot use StockPositions outside Order.location. No POS inventory
+ledger or independent consumption path is introduced.
+
+Cart and pending Order creation do not reserve or consume stock. M-Pesa acceptance
+ends at CONFIRMED with Reservations/Allocations and no ISSUE. PROCESSING remains an
+explicit authorized action; existing supply/fulfillment services consume the
+allocated branch stock. Anonymous collection uses customer=None. Exact retries
+reuse the Order; an idempotency key reused with another location is rejected.

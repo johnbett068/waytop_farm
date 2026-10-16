@@ -110,7 +110,7 @@ def _event_retry(idempotency_key, fingerprint, operation):
 @transaction.atomic
 def create_batch(
     *, batch_number, product_id, start_date, expected_ready_date, quantity_started,
-    notes, actor, correlation_id, idempotency_key
+    notes, actor, correlation_id, idempotency_key, location_id=None
 ):
     _require_permission(actor, "production.manage_batches")
     idempotency_key = lock_idempotency_key(idempotency_key)
@@ -120,9 +120,11 @@ def create_batch(
         quantity_started, "quantity_started", QUANTITY_QUANTUM, positive=True
     )
     product_id = _uuid(product_id, "product_id")
+    location_id = _booking_location(location_id)
     payload = {
         "batch_number": batch_number,
         "product_id": str(product_id),
+        "location_id": str(location_id) if location_id else None,
         "start_date": start_date.isoformat(),
         "expected_ready_date": expected_ready_date.isoformat(),
         "quantity_started": format(quantity_started, "f"),
@@ -140,6 +142,7 @@ def create_batch(
     if expected_ready_date < start_date:
         raise ValidationError({"expected_ready_date": "Expected ready date cannot precede start date."})
     batch = ProductionBatch(
+        location_id=location_id,
         batch_number=batch_number,
         product=product,
         start_date=start_date,
@@ -157,6 +160,7 @@ def create_batch(
         actor=actor,
         reason="Batch created.",
         to_status=batch.status,
+        location_id=batch.location_id,
         current_quantity=batch.current_quantity,
         correlation_id=correlation_id,
         idempotency_key=idempotency_key,
@@ -168,7 +172,7 @@ def create_batch(
 @transaction.atomic
 def update_batch(
     *, batch_id, current_quantity, expected_ready_date, notes, reason, actor,
-    correlation_id, idempotency_key
+    correlation_id, idempotency_key, location_id=None
 ):
     _require_permission(actor, "production.manage_batches")
     idempotency_key = lock_idempotency_key(idempotency_key)
@@ -178,9 +182,11 @@ def update_batch(
         current_quantity, "current_quantity", QUANTITY_QUANTUM, non_negative=True
     )
     reason = _text(reason, "reason")
+    location_id = _booking_location(location_id)
     payload = {
         "batch_id": str(batch_id),
         "current_quantity": format(current_quantity, "f"),
+        "location_id": str(location_id) if location_id else None,
         "expected_ready_date": expected_ready_date.isoformat(),
         "notes": (notes or "").strip(),
         "reason": reason,
@@ -199,6 +205,11 @@ def update_batch(
     if expected_ready_date < batch.start_date:
         raise ValidationError({"expected_ready_date": "Expected ready date cannot precede start date."})
     previous_quantity = batch.current_quantity
+    previous_location_id = batch.location_id
+    if location_id is not None and location_id != batch.location_id:
+        if batch.booking_lines.exists():
+            raise ValidationError("A batch referenced by bookings cannot change Location.")
+        batch.location_id = location_id
     batch.current_quantity = current_quantity
     batch.expected_ready_date = expected_ready_date
     batch.notes = (notes or "").strip()
@@ -211,6 +222,8 @@ def update_batch(
         from_status=batch.status,
         to_status=batch.status,
         previous_quantity=previous_quantity,
+        previous_location_id=previous_location_id,
+        location_id=batch.location_id,
         current_quantity=batch.current_quantity,
         correlation_id=correlation_id,
         idempotency_key=idempotency_key,
@@ -261,6 +274,8 @@ def transition_batch(
         to_status=to_status,
         previous_quantity=batch.current_quantity,
         current_quantity=batch.current_quantity,
+        previous_location_id=batch.location_id,
+        location_id=batch.location_id,
         correlation_id=correlation_id,
         idempotency_key=idempotency_key,
         request_fingerprint=fingerprint,
@@ -439,3 +454,13 @@ def record_activity(
     )
     record.save(_production_service_write=True)
     return record
+
+
+def _booking_location(location_id):
+    if location_id is None:
+        return None
+    from apps.inventory.models import InventoryLocation
+    location_id = _uuid(location_id, "location_id")
+    if not InventoryLocation.objects.filter(pk=location_id, is_active=True, allows_saleable_stock=True).exists():
+        raise ValidationError({"location_id": "Select an active saleable Location."})
+    return location_id

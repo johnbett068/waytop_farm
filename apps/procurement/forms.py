@@ -11,15 +11,15 @@ class AuditForm(forms.Form):
     idempotency_key = forms.UUIDField(widget=forms.HiddenInput)
 
 
-class SupplierForm(AuditForm):
-    code = forms.CharField(max_length=64)
-    name = forms.CharField(max_length=200)
+class SupplierForm(forms.Form):
+    name = forms.CharField(max_length=200, label="Supplier name")
     contact_person = forms.CharField(max_length=200, required=False)
     phone = forms.CharField(max_length=32, required=False)
     email = forms.EmailField(required=False)
-    address = forms.CharField(widget=forms.Textarea(attrs={"rows": 2}), required=False)
+    address = forms.CharField(label="Address / location", widget=forms.Textarea(attrs={"rows": 2}), required=False)
     notes = forms.CharField(widget=forms.Textarea(attrs={"rows": 2}), required=False)
-    is_active = forms.BooleanField(required=False, initial=True)
+    correlation_id = forms.UUIDField(widget=forms.HiddenInput)
+    idempotency_key = forms.UUIDField(widget=forms.HiddenInput)
 
 
 class PurchaseOrderForm(AuditForm):

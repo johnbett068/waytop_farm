@@ -25,8 +25,6 @@ class EmptyOperationsRuntimeTests(TestCase):
         ("dashboard:inventory_receiving", (), "No inventory receipts yet"),
         ("dashboard:inventory_transfers", (), "No inventory transfers yet"),
         ("dashboard:inventory_counts", (), "No inventory counts yet"),
-        ("dashboard:pos", (), "No POS orders or transactions yet"),
-        ("dashboard:pos_sale", (), "No authoritative products or stock"),
     )
 
     @classmethod
@@ -61,6 +59,8 @@ class EmptyOperationsRuntimeTests(TestCase):
             )
         )
 
+        cls.staff_user.user_permissions.add(Permission.objects.get(content_type__app_label="pos", codename="process_sale"))
+
     def setUp(self):
         self.client.force_login(self.staff_user)
 
@@ -91,7 +91,8 @@ class EmptyOperationsRuntimeTests(TestCase):
         self.assertContains(response, "Operational supplies")
         self.assertContains(response, "No operational supplies recorded yet")
         self.assertContains(response, "Low-stock thresholds are not configured")
-        self.assertContains(response, "Creating a Purchase Order does not add stock")
+        self.assertContains(response, "Stock changes only through authoritative Inventory movements")
+        self.assertContains(response, "does not create Production records or a second stock balance")
 
     def test_state_query_cannot_reenable_populated_prototypes(self):
         fabricated = (

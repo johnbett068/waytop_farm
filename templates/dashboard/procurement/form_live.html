@@ -4,7 +4,7 @@
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}">{% endblock %}
 {% block content %}
 <section class="staff-workspace purchase-order-workspace">
-  <header class="staff-page-heading"><p>Supplier Inventory</p><h1>{{ title }}</h1></header>
+  <header class="staff-page-heading"><p>Setup</p><h1>{{ title }}</h1></header>
   {% if messages %}{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}{% endif %}
   <form method="post" class="staff-form purchase-order-form" novalidate>
     {% csrf_token %}{{ form.non_field_errors }}
@@ -14,7 +14,7 @@
       <div class="purchase-order-form__grid">
         {% for field in form.visible_fields %}
           <div class="purchase-order-form__field{% if field.name == 'reason' or field.name == 'address' or field.name == 'notes' %} purchase-order-form__field--full{% endif %}{% if field.field.widget.input_type == 'checkbox' %} purchase-order-form__field--checkbox{% endif %}">
-            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <label class="purchase-order-form__label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
             {{ field }}
             {% if field.help_text %}<small class="purchase-order-form__help">{{ field.help_text }}</small>{% endif %}
             {{ field.errors }}
@@ -22,7 +22,7 @@
         {% endfor %}
       </div>
     </fieldset>
-    <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Save</button><a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a></div>
+    <div class="purchase-order-form__actions"><button class="staff-button staff-button--primary" type="submit">Save Supplier</button><a class="staff-button staff-button--secondary" href="{% url cancel_url %}">Cancel</a></div>
   </form>
 </section>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, pos_views
 from apps.products import staff_views as product_staff_views
 from apps.procurement import staff_views as procurement_staff_views
 from apps.inventory import staff_views as inventory_staff_views
@@ -9,6 +9,8 @@ urlpatterns = [
     path("orders/", views.orders, name="orders"),
     path("orders/<str:order_number>/", views.order_detail, name="order_detail"),
     path("products/", product_staff_views.product_list, name="catalog_products"),
+    path("products/<uuid:product_id>/", product_staff_views.product_detail, name="catalog_product_detail"),
+    path("products/<uuid:product_id>/edit/", product_staff_views.product_edit, name="catalog_product_edit"),
     path("products/new/", product_staff_views.product_create, name="catalog_product_create"),
     path("production/", views.production, name="production"),
     path("production/batches/new/", views.production_batch_create, name="production_batch_create"),
@@ -37,6 +39,12 @@ urlpatterns = [
     path("inventory/receipts/new/", inventory_staff_views.receipt_create, name="inventory_receipt_create"),
     path("inventory/stock/", inventory_staff_views.stock, name="inventory_stock"),
     path("inventory/history/", inventory_staff_views.history, name="inventory_history"),
+    path("inventory/locations/", inventory_staff_views.location_list, name="inventory_location_list"),
+    path("inventory/locations/new/", inventory_staff_views.location_form, name="inventory_location_create"),
+    path("inventory/locations/<uuid:location_id>/edit/", inventory_staff_views.location_form, name="inventory_location_edit"),
+    path("inventory/suppliers/", procurement_staff_views.supplier_list, name="inventory_supplier_list"),
+    path("inventory/suppliers/new/", procurement_staff_views.supplier_form, name="inventory_supplier_create"),
+    path("inventory/suppliers/<uuid:supplier_id>/edit/", procurement_staff_views.supplier_form, name="inventory_supplier_edit"),
     path("inventory/adjustments/", inventory_staff_views.adjustments, name="inventory_adjustments"),
     path("inventory/adjustments/request/", inventory_staff_views.adjustment_request, name="inventory_adjustment_request"),
     path("inventory/adjustments/approve/", inventory_staff_views.adjustment_approve, name="inventory_adjustment_approve"),
@@ -47,6 +55,7 @@ urlpatterns = [
     path("procurement/purchases/new/", procurement_staff_views.purchase_create, name="procurement_purchase_create"),
     path("procurement/purchases/<str:number>/", procurement_staff_views.purchase_detail, name="procurement_purchase_detail"),
     path("procurement/purchases/<str:number>/<str:action>/", procurement_staff_views.purchase_transition, name="procurement_purchase_transition"),
-    path("pos/", views.pos, name="pos"),
-    path("pos/sale/", views.pos_sale, name="pos_sale"),
+    path("pos/orders/<uuid:order_id>/", pos_views.order_detail, name="pos_order_detail"),
+    path("pos/", pos_views.pos, name="pos"),
+    path("pos/sale/", pos_views.process_sale, name="pos_sale"),
 ]

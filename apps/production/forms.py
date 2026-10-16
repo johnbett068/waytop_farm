@@ -3,6 +3,7 @@ import uuid
 from django import forms
 
 from apps.products.models import Product
+from apps.inventory.models import InventoryLocation
 
 from .models import NurseryActivity, ProductionBatch, ProductionLabour, ProductionPurchase
 
@@ -19,6 +20,10 @@ class AuditCommandForm(forms.Form):
 
 
 class BatchCreateForm(AuditCommandForm):
+    location = forms.ModelChoiceField(
+        queryset=InventoryLocation.objects.filter(is_active=True, allows_saleable_stock=True),
+        required=False, help_text="Unassigned batches cannot be booked. Existing booking locations cannot change.",
+    )
     batch_number = forms.CharField(max_length=64)
     product = forms.ModelChoiceField(
         queryset=Product.objects.none(),
@@ -36,7 +41,11 @@ class BatchCreateForm(AuditCommandForm):
 
 
 class BatchUpdateForm(AuditCommandForm):
-    current_quantity = forms.DecimalField(max_digits=12, decimal_places=3, min_value=0)
+    location = forms.ModelChoiceField(
+        queryset=InventoryLocation.objects.filter(is_active=True, allows_saleable_stock=True),
+        required=False, help_text="Unassigned batches cannot be booked. Existing booking locations cannot change.",
+    )
+    current_quantity = forms.DecimalField(max_digits=12, decimal_places=3, min_value=0, label="Current expected usable quantity")
     expected_ready_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
     notes = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 3}))
     reason = forms.CharField(widget=forms.Textarea(attrs={"rows": 2}))

@@ -21,6 +21,7 @@ from .services import record_rejected_verification_attempt, submit_payment_evide
 class PaymentFoundationTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-PAY-001",
             slug="payment-product",
             name="Payment Product",

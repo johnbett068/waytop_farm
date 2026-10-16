@@ -1,6 +1,6 @@
 <article class="catalog-card" data-product-card data-commerce-product="{{ product.slug }}" data-name="{{ product.name|lower }} {{ product.sku|lower }}" data-price="{% if product.catalog_lowest_price is not None %}{{ product.catalog_lowest_price }}{% endif %}">
   <a class="catalog-card__media" href="{% url 'products:product_detail' product.slug %}" aria-label="View {{ product.name }}">
-    <span class="catalog-product-placeholder" aria-hidden="true">WT</span>
+    {% if product.catalog_main_image.url %}<img src="{{ product.catalog_main_image.url }}" alt="{{ product.catalog_main_image.alt }}" width="640" height="512" loading="lazy">{% else %}<span class="catalog-product-placeholder" aria-hidden="true">WT</span>{% endif %}
   </a>
   <button class="commerce-heart" type="button" data-wishlist-toggle="{{ product.slug }}" aria-label="Save {{ product.name }} to wishlist" aria-pressed="false"><span aria-hidden="true">♡</span></button>
   <div class="catalog-card__body">

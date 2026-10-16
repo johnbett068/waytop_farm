@@ -33,6 +33,7 @@ from .services import MovementLineInput, post_inventory_movement
 class ReadyAvailabilityTestCase(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-AVL-001",
             slug="availability-seedling",
             name="Availability Seedling",
@@ -154,6 +155,7 @@ class ReadyAvailabilityCalculationTests(ReadyAvailabilityTestCase):
             condition=StockLot.Condition.SALEABLE,
         )
         small_product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-AVL-SMALL",
             slug="availability-small",
             name="Availability Small",
@@ -240,6 +242,7 @@ class ReadyAvailabilityCalculationTests(ReadyAvailabilityTestCase):
         self.assertEqual(self.availability(sale_unit=single).available_sale_units, 10)
 
         other_product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-AVL-002",
             slug="availability-other",
             name="Availability Other",
@@ -337,6 +340,7 @@ class ReadyAvailabilityEligibilityTests(ReadyAvailabilityTestCase):
 
     def test_missing_inventory_provider_is_error_not_fabricated_zero(self):
         product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-AVL-NO-INV",
             slug="availability-no-inventory",
             name="No Inventory Provider",

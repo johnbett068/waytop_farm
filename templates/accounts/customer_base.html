@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/customer-account.css' %}">{% endblock %}
+{% block content %}<section class="section"><div class="container customer-account">
+{% for message in messages %}<p class="customer-account__notice" role="status">{{ message }}</p>{% endfor %}
+{% block account_content %}{% endblock %}
+</div></section>{% endblock %}

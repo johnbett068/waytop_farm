@@ -21,6 +21,7 @@ def make_product(**overrides):
         "sku": "WTP-REAL-001",
         "slug": "persistent-seedling",
         "name": "Persistent Seedling",
+        "category": Product.Category.VEGETABLE,
         "description": "An authoritative catalog description.",
         "base_inventory_unit": "seedling",
         "is_active": True,
@@ -46,6 +47,7 @@ class ProductPersistenceTests(TestCase):
     def test_inactive_product_cannot_be_published(self):
         product = Product(
             sku="WTP-REAL-003", slug="invalid-publication", name="Invalid",
+            category=Product.Category.VEGETABLE,
             base_inventory_unit="seedling", is_active=False, is_published=True,
         )
         with self.assertRaises(ValidationError):

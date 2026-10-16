@@ -1,0 +1,18 @@
+{% extends "accounts/customer_base.html" %}
+{% block title %}My Account | WayTop Farm{% endblock %}
+{% block account_content %}<h1>My Account</h1><p>Manage your buyer details and where you prefer to collect seedlings.</p>
+{% if missing_fields %}<div class="customer-account__notice"><h2>Complete your account details</h2><p>Still needed: {{ missing_fields|join:", " }}.</p></div>{% else %}<p class="customer-account__notice">Your buyer details are complete. Public ordering is not available yet.</p>{% endif %}
+<form method="post" class="customer-account__form">{% csrf_token %}{{ form.non_field_errors }}
+<fieldset><legend>Personal details</legend>
+{% include "accounts/customer_field.html" with field=form.full_name %}
+{% include "accounts/customer_field.html" with field=form.phone %}
+{% include "accounts/customer_field.html" with field=form.email %}</fieldset>
+<fieldset><legend>Your location</legend><p>Where you are based. This is separate from your picking location.</p>
+{% include "accounts/customer_field.html" with field=form.county %}
+{% include "accounts/customer_field.html" with field=form.town_or_area %}
+{% include "accounts/customer_field.html" with field=form.address_line %}</fieldset>
+<fieldset><legend>Picking preference</legend>
+{% if form.no_locations %}<p role="alert">No picking locations are currently available. Please contact our team so we can configure a collection location.</p>{% endif %}
+{% include "accounts/customer_field.html" with field=form.preferred_picking_location %}</fieldset>
+<button class="btn btn--primary" type="submit">Save Changes</button></form>
+<form method="post" action="{% url 'accounts:customer_logout' %}">{% csrf_token %}<button class="btn btn--outline" type="submit">Sign out</button></form>{% endblock %}

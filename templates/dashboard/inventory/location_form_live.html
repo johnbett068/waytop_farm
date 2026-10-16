@@ -1,0 +1,22 @@
+{% extends "staff_base.html" %}
+{% load static %}
+{% block title %}{{ title }} | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}">{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Setup</p><h1>{{ title }}</h1></header>
+  <p>The physical WayTop Farm branch/site where stock is held.</p>
+  <form method="post" class="staff-form purchase-order-form" novalidate>
+    {% csrf_token %}{{ form.non_field_errors }}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{{ hidden.errors }}{% endfor %}
+    <div class="purchase-order-form__section purchase-order-form__field">
+      <label class="purchase-order-form__label" for="{{ form.name.id_for_label }}">{{ form.name.label }} *</label>
+      {{ form.name }}{{ form.name.errors }}
+    </div>
+    <div class="purchase-order-form__actions">
+      <button class="staff-button staff-button--primary" type="submit">Save Location</button>
+      <a class="staff-button staff-button--secondary" href="{% url 'dashboard:inventory_location_list' %}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

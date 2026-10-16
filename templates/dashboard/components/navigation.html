@@ -11,11 +11,17 @@
     <a href="{% url 'dashboard:orders' %}"{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order_detail' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9636;</span>Orders</a>
     <p>Farm Operations</p>
     {% if perms.production.view_operations %}<a href="{% url 'dashboard:production' %}"{% if 'production' in request.resolver_match.url_name or request.resolver_match.url_name == 'source_lots' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9827;</span>Production</a>{% endif %}
-    <a href="{% url 'dashboard:inventory' %}"{% if 'inventory' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9638;</span>Inventory</a>
-    {% if perms.procurement.view %}<a href="{% url 'dashboard:procurement_purchase_list' %}"{% if 'procurement' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9636;</span>Suppliers &amp; Purchases</a>{% endif %}
+    <a href="{% url 'dashboard:inventory' %}"{% if 'inventory' in request.resolver_match.url_name and 'supplier' not in request.resolver_match.url_name and 'location' not in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9638;</span>Inventory</a>
     <p>Customers &amp; Catalog</p>
     {% if perms.products.view_product %}<a href="{% url 'dashboard:catalog_products' %}"{% if request.resolver_match.url_name == 'catalog_products' or request.resolver_match.url_name == 'catalog_product_create' %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9671;</span>Products</a>{% endif %}
     <a href="{% url 'products:shop' %}"><span aria-hidden="true">&#9671;</span>View public catalog</a>
+    {% if perms.inventory.view or perms.procurement.view %}
+    <div role="group" aria-label="Setup navigation">
+      <p>Setup</p>
+      {% if perms.inventory.view %}<a href="{% url 'dashboard:inventory_location_list' %}"{% if 'inventory_location_' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9678;</span>Locations / Branches</a>{% endif %}
+      <a href="{% url 'dashboard:inventory_supplier_list' %}"{% if 'supplier' in request.resolver_match.url_name %} class="is-active" aria-current="page"{% endif %}><span aria-hidden="true">&#9671;</span>Suppliers</a>
+    </div>
+    {% endif %}
     <p>System</p>
     <a href="#staff-notification-drawer" data-open-drawer><span aria-hidden="true">&#9826;</span>Notifications</a>
   </nav>

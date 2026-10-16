@@ -50,8 +50,23 @@ class ActiveReservationProvider:
 
     coverage = ReservationCoverage.COMPLETE
 
+    def __init__(self, location_id=None):
+        self.location_id = location_id
+
     def active_ready_reserved_base_quantity(self, *, inventory_item, calculated_at):
         from .models import Reservation
+
+        if self.location_id is not None:
+            from .models import SourceAllocation
+            # Allocation lines apportion an active Reservation across locations.
+            # Subtract that reservation share once, never both aggregates.
+            return SourceAllocation.objects.filter(
+                reservation__inventory_item=inventory_item,
+                reservation__state=Reservation.State.ACTIVE,
+                reservation__remaining_base_quantity__gt=0,
+                stock_position__location_id=self.location_id,
+                remaining_base_quantity__gt=0,
+            ).aggregate(total=Sum("remaining_base_quantity"))["total"] or Decimal("0.000")
 
         return (
             Reservation.objects.filter(
@@ -80,9 +95,9 @@ def _exact_non_negative_base_quantity(value, *, source):
     return quantized
 
 
-def eligible_stock_positions(*, inventory_item, business_date):
+def eligible_stock_positions(*, inventory_item, business_date, location_id=None):
     """Shared ratified eligibility query for Availability and Allocation."""
-    return (
+    positions = (
         StockPosition.objects.filter(
             item=inventory_item,
             item__kind=InventoryItem.Kind.PRODUCT,
@@ -95,17 +110,51 @@ def eligible_stock_positions(*, inventory_item, business_date):
         )
         .filter(Q(lot__expiry_date__isnull=True) | Q(lot__expiry_date__gte=business_date))
     )
+    return positions.filter(location_id=location_id) if location_id is not None else positions
 
 
-def _eligible_physical_base_quantity(*, inventory_item, business_date):
+def _eligible_physical_base_quantity(*, inventory_item, business_date, location_id=None):
     total = eligible_stock_positions(
         inventory_item=inventory_item,
         business_date=business_date,
+        location_id=location_id,
     ).aggregate(total=Sum("on_hand_base_quantity"))["total"]
     return _exact_non_negative_base_quantity(
         total if total is not None else Decimal("0.000"),
         source="Inventory",
     )
+
+
+def available_ready_base_quantity(*, inventory_item, calculated_at, location_id=None, reservation_provider=None):
+    """Shared exact balance for scoped carts and whole-Sale-Unit availability."""
+    business_date = timezone.localdate(calculated_at)
+    eligible_base = _eligible_physical_base_quantity(
+        inventory_item=inventory_item,
+        business_date=business_date,
+        location_id=location_id,
+    )
+    provider = reservation_provider or ActiveReservationProvider(location_id=location_id)
+    if not hasattr(provider, "active_ready_reserved_base_quantity") or not hasattr(
+        provider, "coverage"
+    ):
+        raise AvailabilityUnavailable(
+            "RESERVATION_PROVIDER_UNAVAILABLE",
+            "The READY Reservation provider is unavailable.",
+        )
+    reserved_base = _exact_non_negative_base_quantity(
+        provider.active_ready_reserved_base_quantity(
+            inventory_item=inventory_item,
+            calculated_at=calculated_at,
+        ),
+        source="Reservation",
+    )
+    if reserved_base > eligible_base:
+        raise AvailabilityUnavailable(
+            "RESERVATION_INVARIANT_VIOLATION",
+            "Active READY Reservations exceed eligible physical Inventory.",
+        )
+
+    return eligible_base - reserved_base, provider.coverage
 
 
 def get_ready_availability(
@@ -114,6 +163,7 @@ def get_ready_availability(
     sale_unit,
     supply_mode=OrderLine.SupplyMode.READY,
     reservation_provider=None,
+    location_id=None,
 ):
     """Calculate aggregate READY availability without exposing source details.
 
@@ -171,30 +221,10 @@ def get_ready_availability(
 
     calculated_at = timezone.now()
     business_date = timezone.localdate(calculated_at)
-    eligible_base = _eligible_physical_base_quantity(
-        inventory_item=inventory_item,
-        business_date=business_date,
+    available_base, coverage = available_ready_base_quantity(
+        inventory_item=inventory_item, calculated_at=calculated_at,
+        location_id=location_id, reservation_provider=reservation_provider,
     )
-    provider = reservation_provider or ActiveReservationProvider()
-    if not hasattr(provider, "active_ready_reserved_base_quantity") or not hasattr(
-        provider, "coverage"
-    ):
-        raise AvailabilityUnavailable(
-            "RESERVATION_PROVIDER_UNAVAILABLE",
-            "The READY Reservation provider is unavailable.",
-        )
-    reserved_base = _exact_non_negative_base_quantity(
-        provider.active_ready_reserved_base_quantity(
-            inventory_item=inventory_item,
-            calculated_at=calculated_at,
-        ),
-        source="Reservation",
-    )
-    if reserved_base > eligible_base:
-        raise AvailabilityUnavailable(
-            "RESERVATION_INVARIANT_VIOLATION",
-            "Active READY Reservations exceed eligible physical Inventory.",
-        )
 
     sale_unit_base = _exact_non_negative_base_quantity(
         sale_unit.base_quantity,
@@ -205,7 +235,6 @@ def get_ready_availability(
             "CATALOG_SALE_UNIT_UNAVAILABLE",
             "Sale Unit base quantity must be positive.",
         )
-    available_base = eligible_base - reserved_base
     with localcontext() as context:
         context.prec = 50
         available_sale_units = int(
@@ -214,5 +243,5 @@ def get_ready_availability(
     return ReadyAvailability(
         available_sale_units=available_sale_units,
         calculated_at=calculated_at,
-        reservation_coverage=provider.coverage,
+        reservation_coverage=coverage,
     )

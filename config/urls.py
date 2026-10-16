@@ -1,6 +1,8 @@
 """Project URL configuration for Waytop Farm."""
 
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import include, path
 
 urlpatterns = [
@@ -19,3 +21,6 @@ urlpatterns = [
     path("dashboard/", include(("apps.dashboard.urls", "dashboard"), namespace="dashboard")),
     path("notifications/", include(("apps.notifications.urls", "notifications"), namespace="notifications")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

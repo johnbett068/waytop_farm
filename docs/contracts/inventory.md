@@ -1,5 +1,24 @@
 # Inventory contract (future)
 
+## Implemented external acquisition lot traceability
+
+Acquire Stock generates `WTP-LOT-<32 uppercase hexadecimal idempotency UUID characters>`
+on submission and persists it in the existing `StockLot.lot_code`. Different command
+UUIDs yield distinct codes without counts, dates, SKU dependencies, or another lot
+table. The existing unique item/lot-code constraint is the database backstop;
+collisions fail instead of reusing historical stock. Acquisition idempotency keys
+are database-unique; PostgreSQL advisory locks and existing Product row locks
+serialize retries and receipt creation inside the atomic acquisition transaction.
+
+Each new acquisition introduces its own lot; retries return the original receipt.
+Acquisition lot codes cannot be renamed through model saves or queryset updates.
+Supplier Batch / Lot is optional immutable source evidence on
+`ExternalStockAcquisition.supplier_batch_reference`, independent of the optional
+Supplier relationship and of the WayTop lot. It does not reuse provenance/reference
+fields, which retain their existing meanings. History shows it when supplied.
+Existing lots and historical movement records are not renamed or backfilled.
+Other receipt workflows and all five condition/availability rules remain unchanged.
+
 ## Boundary
 
 This is a domain contract, not implementation approval. Phase 3C.7 creates no Django model, migration, API, calculation, movement or stock projection.

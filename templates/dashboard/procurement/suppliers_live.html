@@ -1,4 +1,21 @@
-{% extends "staff_base.html" %}{% block title %}Suppliers | WayTop Farm{% endblock %}{% block content %}
-<section class="staff-workspace"><header class="staff-page-heading"><p>Procurement</p><h1>Suppliers</h1><a class="staff-button staff-button--primary" href="{% url 'dashboard:procurement_supplier_create' %}">New Supplier</a></header>
-{% if messages %}{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}{% endif %}
-{% if suppliers %}<div class="staff-table-wrap"><table><thead><tr><th>Code</th><th>Name</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>{% for supplier in suppliers %}<tr><td>{{ supplier.code }}</td><td>{{ supplier.name }}</td><td>{{ supplier.contact_person|default:"—" }}</td><td>{% if supplier.is_active %}Active{% else %}Inactive{% endif %}</td><td><a href="{% url 'dashboard:procurement_supplier_edit' supplier.pk %}">Edit</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<p data-authoritative-empty>No Suppliers recorded yet.</p>{% endif %}</section>{% endblock %}
+{% extends "staff_base.html" %}
+{% block title %}Suppliers | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Setup</p><h1>Suppliers</h1>
+    {% if perms.procurement.manage_suppliers %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_supplier_create' %}">Add Supplier</a>{% endif %}
+  </header>
+  <p>Who we acquire external stock from.</p>
+  {% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}
+  {% if suppliers %}
+  <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Supplier name</th><th>Contact person</th><th>Phone</th><th>Email</th><th>Details</th><th></th></tr></thead>
+    <tbody>{% for supplier in suppliers %}<tr>
+      <td>{{ supplier.name }}</td><td>{{ supplier.contact_person|default:"—" }}</td>
+      <td>{{ supplier.phone|default:"—" }}</td><td>{{ supplier.email|default:"—" }}</td>
+      <td>{% if supplier.address or supplier.notes %}<details><summary>View details</summary>{% if supplier.address %}<strong>Address / location</strong><p>{{ supplier.address|linebreaksbr }}</p>{% endif %}{% if supplier.notes %}<strong>Notes</strong><p>{{ supplier.notes|linebreaksbr }}</p>{% endif %}</details>{% else %}&mdash;{% endif %}</td>
+      <td>{% if perms.procurement.manage_suppliers %}<a href="{% url 'dashboard:inventory_supplier_edit' supplier.pk %}">Edit</a>{% endif %}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p data-authoritative-empty>No Suppliers recorded yet.</p>{% endif %}
+</section>
+{% endblock %}

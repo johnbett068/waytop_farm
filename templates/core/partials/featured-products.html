@@ -9,7 +9,7 @@
       <div class="grid-4 featured-products__grid">
         {% for product in featured_products %}
           <article class="product-card featured-products__card" data-commerce-product="{{ product.slug }}">
-            <div class="featured-products__media catalog-product-placeholder" aria-hidden="true">WT</div>
+            {% if product.catalog_main_image.url %}<div class="featured-products__media"><img src="{{ product.catalog_main_image.url }}" alt="{{ product.catalog_main_image.alt }}" width="640" height="512" loading="lazy"></div>{% else %}<div class="featured-products__media catalog-product-placeholder" aria-hidden="true">WT</div>{% endif %}
             <button class="commerce-heart" type="button" data-wishlist-toggle="{{ product.slug }}" aria-label="Save {{ product.name }} to wishlist" aria-pressed="false"><span aria-hidden="true">♡</span></button>
             <div class="featured-products__content">
               <span class="floating-badge">{{ product.sku }}</span>

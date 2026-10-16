@@ -1,0 +1,5 @@
+{% extends "accounts/customer_base.html" %}
+{% block title %}Create account | WayTop Farm{% endblock %}
+{% block account_content %}<h1>Create account</h1><p>Save your buyer details and choose where you prefer to collect your seedlings.</p>
+<form method="post" class="customer-account__form">{% csrf_token %}{{ form.as_div }}<button class="btn btn--primary" type="submit">Create account</button></form>
+<p>Already have an account? <a href="{% url 'accounts:customer_login' %}">Sign in</a></p>{% endblock %}

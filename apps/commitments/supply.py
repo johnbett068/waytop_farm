@@ -261,6 +261,7 @@ def supply_ready_commitment(
         eligible_stock_positions(
             inventory_item=inventory_item,
             business_date=timezone.localdate(),
+            location_id=commitment.order.location_id,
         )
         .filter(pk__in=position_ids)
         .values_list("pk", flat=True)

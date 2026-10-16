@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
@@ -11,6 +12,14 @@ class Customer(models.Model):
     """Mutable current customer profile; future Orders must store snapshots."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="customer_profile",
+    )
+    preferred_picking_location = models.ForeignKey(
+        "inventory.InventoryLocation", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="preferred_customers",
+    )
     display_name = models.CharField(max_length=200)
     phone = models.CharField(max_length=32, blank=True)
     email = models.EmailField(blank=True)

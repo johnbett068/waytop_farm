@@ -5,11 +5,21 @@
 {% block content %}
 <section class="catalog-form-page" aria-labelledby="product-form-title">
   <header class="catalog-staff__header"><div><p>Products</p><h1 id="product-form-title">Create Product</h1><span>Create one seedling Product and its first sale unit.</span></div></header>
-  <form class="catalog-form" method="post" novalidate>{% csrf_token %}
+  <form class="catalog-form" method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
     {% if form.non_field_errors %}<div class="catalog-form__errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
     <fieldset><legend>Product information</legend>{% for field in form %}{% if field.name == 'sale_unit_name' %}</fieldset><fieldset><legend>How this Product is sold</legend>{% endif %}<label{% if field.field.widget.input_type == 'checkbox' %} class="catalog-checkbox"{% endif %}>{{ field }}<span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</label>{% endfor %}</fieldset>
+    <fieldset data-first-product-image data-product-image-upload><legend>Product image</legend>
+      {% if perms.products.change_product %}
+      <p>Upload the first product image (optional). Additional images can be managed from Product detail after saving.</p>
+      {% include "dashboard/products/image_guidance.html" with image_upload_form=image_form %}
+      {{ image_form.non_field_errors }}
+      {% for field in image_form %}<label for="{{ field.id_for_label }}"><span>{{ field.label }} (optional)</span>{{ field }}<small>{{ field.help_text }}</small>{% for error in field.errors %}<em role="alert">{{ error }}</em>{% endfor %}</label>{% if field.name == 'image' %}{% include "dashboard/products/image_preview.html" %}{% endif %}{% endfor %}
+      {% if image_form.is_bound %}<small>If a file was selected, select it again before saving.</small>{% endif %}
+      {% else %}<p>Image upload is optional and requires permission to change Products. You can create this Product without an image.</p>{% endif %}
+    </fieldset>
     <p class="catalog-boundary">Saving creates catalog records only. It does not create Inventory or a Production batch.</p>
     <div class="catalog-form__actions"><button class="staff-button staff-button--primary" type="submit">Save Product</button><a class="staff-button staff-button--secondary" href="{% url 'dashboard:catalog_products' %}">Cancel</a></div>
   </form>
 </section>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/product-image-preview.js' %}" defer></script>{% endblock %}

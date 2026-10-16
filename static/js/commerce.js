@@ -138,12 +138,18 @@
     toast('Item removed from your cart.', 'Undo', function () { state.cart[key] = previous; persistAndRender(); });
   }
 
+  function productImageMarkup(product, className) {
+    const image = product.main_image;
+    if (!image || !image.url) return '<div class="' + className + ' commerce-product-placeholder" aria-hidden="true">WT</div>';
+    return '<div class="' + className + '"><img src="' + escapeHtml(image.url) + '" alt="' + escapeHtml(image.alt || product.name) + '" loading="lazy"></div>';
+  }
+
   function miniCartMarkup(entry) {
     if (!entry.current) {
       return '<article class="mini-cart-item mini-cart-item--stale"><div class="commerce-product-placeholder" aria-hidden="true">?</div><div><h3 class="heading-4">Unavailable catalog item</h3><p>' + entry.item.quantity + ' × saved item</p><p class="commerce-unavailable">Remove or revisit the catalog.</p></div><button class="commerce-icon-button" type="button" data-cart-remove="' + escapeHtml(entry.key) + '" aria-label="Remove unavailable item"><span aria-hidden="true">×</span></button></article>';
     }
     const product = entry.current.product; const unit = entry.current.unit;
-    return '<article class="mini-cart-item"><div class="commerce-product-placeholder" aria-hidden="true">WT</div><div><h3 class="heading-4"><a href="' + escapeHtml(product.product_url) + '">' + escapeHtml(product.name) + '</a></h3><p>' + entry.item.quantity + ' × ' + escapeHtml(unit.name) + '</p><p class="mini-cart-item__price">' + money(unit.currency, Number(unit.amount) * entry.item.quantity) + '</p></div><button class="commerce-icon-button" type="button" data-cart-remove="' + escapeHtml(entry.key) + '" aria-label="Remove ' + escapeHtml(product.name) + '"><span aria-hidden="true">×</span></button></article>';
+    return '<article class="mini-cart-item">' + productImageMarkup(product, 'mini-cart-item__media') + '<div><h3 class="heading-4"><a href="' + escapeHtml(product.product_url) + '">' + escapeHtml(product.name) + '</a></h3><p>' + entry.item.quantity + ' × ' + escapeHtml(unit.name) + '</p><p class="mini-cart-item__price">' + money(unit.currency, Number(unit.amount) * entry.item.quantity) + '</p></div><button class="commerce-icon-button" type="button" data-cart-remove="' + escapeHtml(entry.key) + '" aria-label="Remove ' + escapeHtml(product.name) + '"><span aria-hidden="true">×</span></button></article>';
   }
 
   function renderMiniCart() {
@@ -162,7 +168,7 @@
     }
     const first = product.sale_units[0];
     const price = first ? money(first.currency, first.amount) + ' per ' + first.name : 'No current price';
-    return '<article class="wishlist-card" data-commerce-product="' + escapeHtml(product.slug) + '"><div class="wishlist-card__media commerce-product-placeholder" aria-hidden="true">WT</div><button class="commerce-heart" type="button" data-wishlist-toggle="' + escapeHtml(product.slug) + '" aria-pressed="true" aria-label="Remove ' + escapeHtml(product.name) + ' from wishlist"><span aria-hidden="true">♥</span></button><div class="wishlist-card__body"><h2 class="heading-3"><a href="' + escapeHtml(product.product_url) + '">' + escapeHtml(product.name) + '</a></h2><p class="wishlist-card__meta">' + escapeHtml(price) + '</p><div class="wishlist-card__actions"><a class="btn btn--outline" href="' + escapeHtml(product.product_url) + '">Choose sale unit</a></div></div></article>';
+    return '<article class="wishlist-card" data-commerce-product="' + escapeHtml(product.slug) + '">' + productImageMarkup(product, 'wishlist-card__media') + '<button class="commerce-heart" type="button" data-wishlist-toggle="' + escapeHtml(product.slug) + '" aria-pressed="true" aria-label="Remove ' + escapeHtml(product.name) + ' from wishlist"><span aria-hidden="true">♥</span></button><div class="wishlist-card__body"><h2 class="heading-3"><a href="' + escapeHtml(product.product_url) + '">' + escapeHtml(product.name) + '</a></h2><p class="wishlist-card__meta">' + escapeHtml(price) + '</p><div class="wishlist-card__actions"><a class="btn btn--outline" href="' + escapeHtml(product.product_url) + '">Choose sale unit</a></div></div></article>';
   }
 
   function renderWishlistPage() {
@@ -177,7 +183,7 @@
       return '<article class="cart-item" data-cart-item="' + escapeHtml(entry.key) + '"><div class="cart-item__media commerce-product-placeholder" aria-hidden="true">?</div><div class="cart-item__content"><div class="cart-item__top"><div><h2 class="heading-3">Unavailable catalog item</h2><p class="commerce-unavailable">This saved identifier no longer resolves to a published product, active sale unit, and current price.</p></div><button class="commerce-text-button" type="button" data-cart-remove="' + escapeHtml(entry.key) + '">Remove</button></div></div></article>';
     }
     const product = entry.current.product; const unit = entry.current.unit;
-    return '<article class="cart-item" data-cart-item="' + escapeHtml(entry.key) + '"><div class="cart-item__media commerce-product-placeholder" aria-hidden="true">WT</div><div class="cart-item__content"><div class="cart-item__top"><div><h2 class="heading-3"><a href="' + escapeHtml(product.product_url) + '">' + escapeHtml(product.name) + '</a></h2><p class="cart-item__unit">' + money(unit.currency, unit.amount) + ' per ' + escapeHtml(unit.name) + '</p></div><button class="commerce-text-button" type="button" data-cart-remove="' + escapeHtml(entry.key) + '">Remove</button></div><div class="cart-item__controls"><label class="commerce-field"><span>Quantity</span><span class="quantity-control"><button type="button" data-quantity-action="decrease" aria-label="Decrease quantity">−</button><input type="number" min="1" max="99" value="' + entry.item.quantity + '" data-cart-quantity aria-label="Quantity for ' + escapeHtml(product.name) + '"><button type="button" data-quantity-action="increase" aria-label="Increase quantity">+</button></span></label></div><div class="cart-item__footer"><span class="small">' + escapeHtml(unit.base_quantity + ' ' + unit.base_unit + ' per ' + unit.name) + '</span><strong class="cart-item__line-total">' + money(unit.currency, Number(unit.amount) * entry.item.quantity) + '</strong></div></div></article>';
+    return '<article class="cart-item" data-cart-item="' + escapeHtml(entry.key) + '">' + productImageMarkup(product, 'cart-item__media') + '<div class="cart-item__content"><div class="cart-item__top"><div><h2 class="heading-3"><a href="' + escapeHtml(product.product_url) + '">' + escapeHtml(product.name) + '</a></h2><p class="cart-item__unit">' + money(unit.currency, unit.amount) + ' per ' + escapeHtml(unit.name) + '</p></div><button class="commerce-text-button" type="button" data-cart-remove="' + escapeHtml(entry.key) + '">Remove</button></div><div class="cart-item__controls"><label class="commerce-field"><span>Quantity</span><span class="quantity-control"><button type="button" data-quantity-action="decrease" aria-label="Decrease quantity">−</button><input type="number" min="1" max="99" value="' + entry.item.quantity + '" data-cart-quantity aria-label="Quantity for ' + escapeHtml(product.name) + '"><button type="button" data-quantity-action="increase" aria-label="Increase quantity">+</button></span></label></div><div class="cart-item__footer"><span class="small">' + escapeHtml(unit.base_quantity + ' ' + unit.base_unit + ' per ' + unit.name) + '</span><strong class="cart-item__line-total">' + money(unit.currency, Number(unit.amount) * entry.item.quantity) + '</strong></div></div></article>';
   }
 
   function renderCartPage() {

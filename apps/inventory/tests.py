@@ -24,6 +24,7 @@ from .services import MovementLineInput, post_inventory_movement
 class InventoryTestCase(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-INV-001",
             slug="inventory-seedling",
             name="Inventory Seedling",
@@ -129,6 +130,7 @@ class InventoryModelTests(InventoryTestCase):
 
     def test_stock_position_relationship_rejects_a_lot_from_another_item(self):
         other_product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-INV-002",
             slug="other-inventory-item",
             name="Other Item",
@@ -300,6 +302,7 @@ class InventoryMovementServiceTests(InventoryTestCase):
                 [self.line(source=self.location, destination=self.other_location)],
             )
         other_product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-INV-003",
             slug="movement-other",
             name="Movement Other",

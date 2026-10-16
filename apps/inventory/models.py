@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal, ROUND_HALF_EVEN
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -33,6 +34,10 @@ class ImmutableMovementQuerySet(ServiceWriteQuerySet):
 
 class StockPositionQuerySet(ServiceWriteQuerySet):
     error_message = "Stock Positions may be changed only by the Inventory movement service."
+
+
+class StockAcquisitionQuerySet(ServiceWriteQuerySet):
+    error_message = "External stock acquisition history is immutable."
 
 
 class InventorySupply(models.Model):
@@ -265,7 +270,15 @@ class InventoryLocation(models.Model):
         return f"{self.code} - {self.name}"
 
 
+class StockLotQuerySet(models.QuerySet):
+    def update(self, **kwargs):
+        if "lot_code" in kwargs and self.filter(movement_lines__external_acquisition__isnull=False).exists():
+            raise ValidationError("Acquisition lot identifiers are immutable.")
+        return super().update(**kwargs)
+
+
 class StockLot(models.Model):
+    objects = StockLotQuerySet.as_manager()
     class Condition(models.TextChoices):
         SALEABLE = "SALEABLE", "Saleable"
         HELD = "HELD", "Held"
@@ -300,6 +313,9 @@ class StockLot(models.Model):
             raise ValidationError({"lot_code": "Lot code is required."})
         if self.pk:
             original = type(self).objects.filter(pk=self.pk).first()
+            if (original is not None and original.lot_code != self.lot_code
+                    and self.movement_lines.filter(external_acquisition__isnull=False).exists()):
+                raise ValidationError({"lot_code": "Acquisition lot identifiers are immutable."})
             if original is not None and original.condition != self.condition:
                 raise ValidationError(
                     {"condition": "Lot condition changes require a future audited condition command."}
@@ -527,6 +543,91 @@ class InventoryMovementLine(models.Model):
 
     def __str__(self):
         return f"{self.movement_id} line {self.line_number}"
+
+
+class ExternalStockAcquisition(models.Model):
+    """Immutable commercial evidence linked to one authoritative product receipt line."""
+
+    objects = StockAcquisitionQuerySet.as_manager()
+    supplier_batch_reference = models.CharField(max_length=100, blank=True, default="")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    movement = models.OneToOneField(
+        InventoryMovement, on_delete=models.PROTECT, related_name="external_acquisition"
+    )
+    movement_line = models.OneToOneField(
+        InventoryMovementLine,
+        on_delete=models.PROTECT,
+        related_name="external_acquisition",
+    )
+    supplier = models.ForeignKey(
+        "procurement.Supplier",
+        on_delete=models.PROTECT,
+        related_name="stock_acquisitions",
+        blank=True,
+        null=True,
+    )
+    acquisition_date = models.DateField()
+    unit_cost = models.DecimalField(max_digits=14, decimal_places=2)
+    currency = models.CharField(max_length=3, default="KES", editable=False)
+    reference = models.CharField(max_length=160, blank=True)
+    note = models.TextField(blank=True)
+    acquired_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="external_stock_acquisitions",
+    )
+    correlation_id = models.UUIDField(editable=False)
+    idempotency_key = models.UUIDField(unique=True, editable=False)
+    request_fingerprint = models.CharField(max_length=64, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-acquisition_date", "-created_at", "id")
+        default_permissions = ()
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(unit_cost__gte=0),
+                name="external_acquisition_unit_cost_non_negative",
+            ),
+            models.CheckConstraint(
+                condition=Q(currency="KES"),
+                name="external_acquisition_currency_kes",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        self.reference = (self.reference or "").strip()
+        self.note = (self.note or "").strip()
+        errors = {}
+        if self.movement_line_id and self.movement_id:
+            line = self.movement_line
+            if line.movement_id != self.movement_id:
+                errors["movement_line"] = "Acquisition line must belong to its receipt movement."
+            if line.item.kind != InventoryItem.Kind.PRODUCT:
+                errors["movement_line"] = "External seedling acquisition requires a Product item."
+            if line.source_location_id or not line.destination_location_id:
+                errors["movement_line"] = "External acquisition must be an incoming stock line."
+        if self.movement_id and self.movement.movement_type != InventoryMovement.Type.RECEIPT:
+            errors["movement"] = "External acquisition must link to an Inventory receipt."
+        if errors:
+            raise ValidationError(errors)
+
+    @property
+    def total_acquisition_cost(self):
+        return (self.movement_line.quantity * self.unit_cost).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_EVEN
+        )
+
+    def save(self, *args, **kwargs):
+        if not kwargs.pop("_stock_acquisition_service_write", False) or not self._state.adding:
+            raise ValidationError("External stock acquisitions require the acquisition service.")
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("External stock acquisition history cannot be deleted.")
 
 
 class Reservation(models.Model):

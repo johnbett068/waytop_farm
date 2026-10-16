@@ -40,6 +40,7 @@ from .services import MovementLineInput, post_inventory_movement
 class ReservationAllocationTestCase(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-RES-001",
             slug="reservation-seedling",
             name="Reservation Seedling",

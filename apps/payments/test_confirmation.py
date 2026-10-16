@@ -33,6 +33,7 @@ from .services import submit_payment_evidence, verify_payment_and_confirm_order
 class AtomicConfirmationTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-F-001",
             slug="phase-f-product",
             name="Phase F Product",
@@ -361,4 +362,4 @@ class AtomicConfirmationTests(TestCase):
         self.assertEqual({attempt.actor_id, payment_event.actor_id, order_event.actor_id}, {self.actor.pk})
         self.assertFalse(hasattr(result, "stock_position"))
         self.assertFalse(hasattr(result, "lot"))
-        self.assertFalse(hasattr(result, "location"))
+        self.assertIsNone(result.location_id)

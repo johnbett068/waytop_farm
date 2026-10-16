@@ -3,15 +3,13 @@
 {% block content %}
 <section class="staff-workspace staff-dashboard">
   <header class="staff-page-header">
-    <div><p class="staff-eyebrow">Physical stock</p><h1>Inventory</h1><p>Products are seedlings sold to customers. Supplies are operational items used by the nursery or farm.</p></div>
+    <div><p class="staff-eyebrow">Physical stock</p><h1>Inventory</h1><p>WayTop-grown and occasionally acquired seedlings converge in the same authoritative Inventory.</p></div>
     <div class="staff-page-header__actions">
-      {% if perms.inventory.manage_supplies %}<a class="staff-button staff-button--secondary" href="{% url 'dashboard:inventory_supply_create' %}">Add Supply</a>{% endif %}
-      {% if perms.procurement.manage_purchases %}<a class="staff-button staff-button--secondary" href="{% url 'dashboard:procurement_purchase_create' %}">Create Purchase Order</a>{% endif %}
-      {% if perms.inventory.receive %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_receipt_create' %}">Receive Stock</a>{% endif %}
-      <a class="staff-button staff-button--secondary" href="{% url 'dashboard:inventory_stock' %}">View Supply Inventory</a>
+      {% if perms.inventory.receive %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_receipt_create' %}">Acquire Stock</a>{% endif %}
+      <a class="staff-button staff-button--secondary" href="{% url 'dashboard:inventory_stock' %}">View On-Hand Stock</a>
     </div>
   </header>
-  <p class="staff-rule-note">Creating a Purchase Order does not add stock. Only a posted Goods Receipt changes Inventory on-hand quantities.</p>
+  <p class="staff-rule-note">Stock changes only through authoritative Inventory movements. External acquisition posts a receipt; it does not create Production records or a second stock balance.</p>
   <div class="metric-grid operations-metric-grid">
     <article class="metric-card"><span>Saleable Product definitions</span><strong>{{ product_count }}</strong><small>Customer eligibility remains Product-only</small></article>
     <article class="metric-card"><span>Operational Supply definitions</span><strong>{{ supply_count }}</strong><small>Never customer-saleable</small></article>
@@ -25,13 +23,13 @@
         {% if product_items %}<div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Product</th><th>SKU</th><th>On hand</th><th>Status</th></tr></thead><tbody>{% for item in product_items %}<tr><td>{{ item.product.name }}</td><td>{{ item.product.sku }}</td><td>{{ item.total_on_hand|default_if_none:"0.000" }} {{ item.base_unit }}</td><td>{% if item.total_on_hand > 0 %}<span class="staff-status staff-status--success">In stock</span>{% else %}<span class="staff-status staff-status--danger">Out of stock</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p data-authoritative-empty>No saleable seedling Inventory Items recorded yet.</p>{% endif %}
       </section>
       <section class="staff-panel">
-        <header class="staff-panel__header"><div><p>Supply</p><h2>Operational supplies</h2></div><a href="{% url 'dashboard:inventory_supply_list' %}">Manage Supplies</a></header>
+        <header class="staff-panel__header"><div><p>Supply</p><h2>Operational supplies</h2></div></header>
         {% if supply_items %}<div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Supply</th><th>SKU / code</th><th>On hand</th><th>Status</th></tr></thead><tbody>{% for item in supply_items %}<tr><td><a href="{% url 'dashboard:inventory_supply_detail' item.supply.code %}">{{ item.supply.name }}</a></td><td>{{ item.supply.code }}</td><td>{{ item.total_on_hand|default_if_none:"0.000" }} {{ item.base_unit }}</td><td>{% if not item.supply.is_active %}<span class="staff-status staff-status--neutral">Inactive</span>{% elif item.total_on_hand > 0 %}<span class="staff-status staff-status--success">In stock</span>{% else %}<span class="staff-status staff-status--danger">Out of stock</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p data-authoritative-empty>No operational supplies recorded yet.</p>{% endif %}
       </section>
     </div>
     <aside class="staff-dashboard-column">
       <section class="staff-panel">
-        <header class="staff-panel__header"><div><p>Immutable ledger</p><h2>Recent Inventory movements</h2></div><a href="{% url 'dashboard:inventory_history' %}">Supply history</a></header>
+        <header class="staff-panel__header"><div><p>Immutable ledger</p><h2>Recent Inventory movements</h2></div><a href="{% url 'dashboard:inventory_history' %}">History</a></header>
         {% if recent_movements %}<ol class="staff-activity">{% for movement in recent_movements %}<li><span></span><div><strong>{{ movement.get_movement_type_display }} · {{ movement.posted_at }}</strong><p>{{ movement.reason }}</p>{% for line in movement.lines.all %}<small>{% if line.item.kind == 'PRODUCT' %}Product: {{ line.item.product.name }}{% else %}Supply: {{ line.item.supply.name }}{% endif %} · {{ line.quantity }} {{ line.item.base_unit }} · {{ line.lot.lot_code }}</small>{% endfor %}</div></li>{% endfor %}</ol>{% else %}<p data-authoritative-empty>No Inventory movements posted yet.</p>{% endif %}
       </section>
     </aside>

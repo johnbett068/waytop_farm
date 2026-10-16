@@ -15,7 +15,7 @@
     <div class="staff-shell">
       {% include "dashboard/components/topbar.html" %}
       <main class="staff-main" id="staff-main" tabindex="-1">
-        {% if '/dashboard/inventory/' in request.path or '/dashboard/procurement/' in request.path %}
+        {% if '/dashboard/inventory/' in request.path and '/suppliers/' not in request.path and '/locations/' not in request.path %}
           {% include "dashboard/components/inventory_shortcuts.html" %}
         {% endif %}
         {% block content %}{% endblock %}

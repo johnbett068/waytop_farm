@@ -40,7 +40,10 @@
             <span class="nav-bar__badge" data-cart-count hidden>0</span>
           </button>
         </div>
-        <a href="tel:{{ business_phone.uri }}" class="btn btn--outline nav-bar__account"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3 4 5c0 8 7 15 15 15l2-3-4-3-2 2c-3-1-6-4-7-7l2-2-3-4Z"/></svg>Talk to our team</a>
+        {% if request.user.is_authenticated %}
+        {% if request.user.is_staff %}<a href="{% url 'dashboard:dashboard' %}" class="btn btn--outline nav-bar__account">Staff dashboard</a>
+        {% else %}<a href="{% url 'accounts:customer_profile' %}" class="btn btn--outline nav-bar__account">My Account</a>{% endif %}
+        {% else %}<a href="{% url 'accounts:customer_login' %}" class="btn btn--outline nav-bar__account">Sign in</a>{% endif %}
       </div>
 
       <button class="nav-bar__toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-drawer">
@@ -66,6 +69,10 @@
       <a href="{% url 'products:search' %}" class="nav-drawer__link"{% if request.resolver_match.url_name == 'search' %} aria-current="page"{% endif %}>Search</a>
       <a href="{% url 'wishlist:wishlist' %}" class="nav-drawer__link"{% if request.resolver_match.namespace == 'wishlist' %} aria-current="page"{% endif %}>Wishlist <span data-wishlist-count>0</span></a>
       <button type="button" class="nav-drawer__link nav-drawer__button" data-cart-open aria-controls="mini-cart" aria-expanded="false">Cart <span data-cart-count>0</span></button>
+      {% if request.user.is_authenticated %}
+      {% if request.user.is_staff %}<a class="nav-drawer__link" href="{% url 'dashboard:dashboard' %}">Staff dashboard</a>
+      {% else %}<a class="nav-drawer__link" href="{% url 'accounts:customer_profile' %}">My Account</a>{% endif %}
+      {% else %}<a class="nav-drawer__link" href="{% url 'accounts:customer_login' %}">Sign in</a><a class="nav-drawer__link" href="{% url 'accounts:customer_register' %}">Create account</a>{% endif %}
       <a href="{% url 'core:home' %}#why-waytop" class="nav-drawer__link">Why WayTop</a>
       <a href="{% url 'core:home' %}#how-it-works" class="nav-drawer__link">How to order</a>
     </nav>

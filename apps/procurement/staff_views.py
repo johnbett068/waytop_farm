@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import PurchaseOrderForm, PurchaseTransitionForm, SupplierForm
 from .models import Supplier, SupplierPurchaseOrder
 from .services import (
-    PurchaseLineInput, create_purchase_order, require_procurement_view, save_supplier,
+    PurchaseLineInput, _require, create_purchase_order, require_procurement_view, save_supplier,
     transition_purchase_order,
 )
 
@@ -25,32 +25,36 @@ def _errors(form, error):
 
 @login_required(login_url="accounts:login")
 def supplier_list(request):
-    require_procurement_view(request.user)
-    return render(request, "dashboard/procurement/suppliers_live.html", {"suppliers": Supplier.objects.all()})
+    _require(request.user, "inventory.view" if request.user.has_perm("inventory.view") else "procurement.view")
+    return render(request, "dashboard/procurement/suppliers_live.html", {"suppliers": Supplier.objects.order_by("name", "pk")})
 
 
 @login_required(login_url="accounts:login")
 def supplier_form(request, supplier_id=None):
-    require_procurement_view(request.user)
+    _require(request.user, "procurement.manage_suppliers")
     supplier = get_object_or_404(Supplier, pk=supplier_id) if supplier_id else None
     initial = _audit_initial()
     if supplier:
         initial.update({field: getattr(supplier, field) for field in (
-            "code", "name", "contact_person", "phone", "email", "address", "notes", "is_active"
+            "name", "contact_person", "phone", "email", "address", "notes"
         )})
     form = SupplierForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         try:
             saved = save_supplier(
-                supplier_id=supplier.pk if supplier else None, actor=request.user, **form.cleaned_data
+                supplier_id=supplier.pk if supplier else None, actor=request.user,
+                code=supplier.code if supplier else f"SUP-{form.cleaned_data['idempotency_key'].hex}",
+                is_active=supplier.is_active if supplier else True,
+                reason="Supplier details updated" if supplier else "Supplier created",
+                **form.cleaned_data,
             )
         except ValidationError as error: _errors(form, error)
         else:
-            messages.success(request, f"Supplier {saved.code} saved.")
-            return redirect("dashboard:procurement_supplier_list")
+            messages.success(request, f"Supplier {saved.name} saved.")
+            return redirect("dashboard:inventory_supplier_list")
     return render(request, "dashboard/procurement/form_live.html", {
         "form": form, "title": "Edit Supplier" if supplier else "New Supplier",
-        "cancel_url": "dashboard:procurement_supplier_list",
+        "cancel_url": "dashboard:inventory_supplier_list",
     })
 
 

@@ -50,6 +50,7 @@ class OperationsDashboardProjectionTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-OPS-001",
             slug="operations-product",
             name="Operations Product",

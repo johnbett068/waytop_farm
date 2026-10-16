@@ -157,6 +157,7 @@ def production_batch_create(request):
                 start_date=values["start_date"],
                 expected_ready_date=values["expected_ready_date"],
                 quantity_started=values["quantity_started"],
+                location_id=values["location"].pk if values["location"] else None,
                 notes=values["notes"],
                 actor=request.user,
                 correlation_id=values["correlation_id"],
@@ -183,6 +184,7 @@ def production_batch_update(request, batch_number):
     batch = get_object_or_404(ProductionBatch, batch_number=batch_number)
     initial = {
         "current_quantity": batch.current_quantity,
+        "location": batch.location_id,
         "expected_ready_date": batch.expected_ready_date,
         "notes": batch.notes,
     }
@@ -193,6 +195,7 @@ def production_batch_update(request, batch_number):
             update_batch(
                 batch_id=batch.pk,
                 current_quantity=values["current_quantity"],
+                location_id=values["location"].pk if values["location"] else None,
                 expected_ready_date=values["expected_ready_date"],
                 notes=values["notes"],
                 reason=values["reason"],

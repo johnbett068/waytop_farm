@@ -41,6 +41,7 @@ from .supply import supply_ready_commitment
 class SupplyTestCase(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-SUP-001",
             slug="supply-seedling",
             name="Supply Seedling",

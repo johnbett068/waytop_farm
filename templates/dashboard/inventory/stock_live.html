@@ -1,1 +1,8 @@
-{% extends "staff_base.html" %}{% block title %}Supply Stock | WayTop Farm{% endblock %}{% block content %}<section class="staff-workspace"><header class="staff-page-heading"><p>Inventory</p><h1>Supply Stock</h1><a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_receipt_create' %}">Receive Stock</a></header>{% if positions %}<table><thead><tr><th>Supply</th><th>Lot</th><th>Location</th><th>On hand</th></tr></thead><tbody>{% for position in positions %}<tr><td>{{ position.item.supply.name }}</td><td>{{ position.lot.lot_code }}</td><td>{{ position.location.name }}</td><td>{{ position.on_hand_base_quantity }} {{ position.item.base_unit }}</td></tr>{% endfor %}</tbody></table>{% else %}<p data-authoritative-empty>No Supply stock on hand yet.</p>{% endif %}</section>{% endblock %}
+{% extends "staff_base.html" %}
+{% block title %}On-Hand Stock | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Inventory</p><h1>On-Hand Stock</h1>{% if perms.inventory.receive %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_receipt_create' %}">Acquire Stock</a>{% endif %}</header>
+  {% if positions %}<div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Item</th><th>Type</th><th>Lot</th><th>Location</th><th>On hand</th></tr></thead><tbody>{% for position in positions %}<tr><td>{% if position.item.kind == 'PRODUCT' %}{{ position.item.product.name }}{% else %}{{ position.item.supply.name }}{% endif %}</td><td>{{ position.item.get_kind_display }}</td><td>{{ position.lot.lot_code }}</td><td>{{ position.location.name }}</td><td>{{ position.on_hand_base_quantity }} {{ position.item.base_unit }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p data-authoritative-empty>No stock on hand yet.</p>{% endif %}
+</section>
+{% endblock %}

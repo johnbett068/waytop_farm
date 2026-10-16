@@ -27,6 +27,7 @@ from .services import (
 class CommitmentTestCase(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-COM-001",
             slug="commitment-seedling",
             name="Commitment Seedling",
@@ -289,6 +290,7 @@ class CommitmentFIFOTests(CommitmentTestCase):
             order=self.create_order(supply_mode=OrderLine.SupplyMode.PRE_ORDER)
         )
         other_product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-COM-002",
             slug="other-commitment-item",
             name="Other Commitment Item",

@@ -41,6 +41,7 @@ class ProductionTestCase(TestCase):
             username="inactive-production", password="test-password", is_staff=True, is_active=False
         )
         cls.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-SEEDLING-001",
             slug="test-seedling",
             name="Test Seedling",

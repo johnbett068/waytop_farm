@@ -1,0 +1,54 @@
+{% extends "staff_base.html" %}{% load static %}
+{% block title %}POS | WayTop Farm{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/staff-procurement.css' %}"><link rel="stylesheet" href="{% static 'css/staff-pos-live.css' %}?v=checkout-top-3">{% endblock %}
+{% block content %}
+<section class="staff-workspace pos-workspace{% if not is_booking %} pos-sales-workspace{% endif %}">
+  {% if not is_booking %}<div class="pos-sales-controls">{% endif %}
+  <div class="pos-workspace-heading"><header class="staff-page-heading"><p>{% if is_booking %}Bookings{% else %}Sales{% endif %}</p><h1>POS</h1></header>
+  <nav aria-label="POS activity" class="pos-tabs"><a href="{% url 'dashboard:pos' %}"{% if not is_booking %} aria-current="page"{% endif %}>Sales</a><a href="{% url 'dashboard:pos' %}?activity=bookings"{% if is_booking %} aria-current="page"{% endif %}>Bookings</a></nav></div>
+  {% if is_booking %}<p>These seedlings are in production and can be booked for future supply. Expected readiness is an estimate.</p>{% endif %}
+  {% for message in messages %}<p role="alert">{{ message }}</p>{% endfor %}
+  <form method="post" class="pos-location purchase-order-form__field">{% csrf_token %}<input type="hidden" name="activity" value="{{ activity }}"><input type="hidden" name="action" value="location">
+    <label for="pos-location">Location / Branch</label>
+    <select id="pos-location" name="location_id" required><option value="">Select Location / Branch</option>{% for choice in locations %}<option value="{{ choice.pk }}"{% if choice.pk == location.pk %} selected{% endif %}>{{ choice.name }}</option>{% endfor %}</select>
+    <button class="staff-button staff-button--secondary">Switch location</button>
+  </form>
+  {% if not location %}<p>Select a configured Location / Branch to view stock.</p>{% endif %}
+  {% if not is_booking %}</div>{% endif %}
+  <div class="pos-columns">
+    <section class="staff-panel pos-catalog-panel"><div class="pos-panel-heading"><h2>{% if is_booking %}Bookable production{% else %}Products{% endif %}</h2>
+      {% if perms.products.view_product %}<a class="staff-button staff-button--secondary" href="{% url 'dashboard:catalog_products' %}">Manage products and prices</a>{% endif %}</div>
+      <form method="get" class="pos-search"><input type="hidden" name="activity" value="{{ activity }}"><label for="pos-search">Search products</label><input id="pos-search" name="q" value="{{ search }}" placeholder="Product name or SKU"><button class="staff-button staff-button--secondary">Search</button></form>
+      <div class="pos-products">{% for entry in products %}<article class="pos-product">
+        {% if not is_booking %}{% with photo=entry.unit.product.images.all.0 %}<div class="pos-product-image">{% if photo.display_url %}<img src="{{ photo.display_url }}" alt="{{ photo.alt_text|default:entry.unit.product.name }}" width="80" height="80" loading="lazy">{% else %}<span class="catalog-product-placeholder" aria-label="No product image">WT</span>{% endif %}</div>{% endwith %}{% endif %}
+        <h3>{{ entry.unit.product.name }}</h3><p>{{ entry.unit.product.sku }} · {{ entry.unit.name }}</p>
+        <p>KES {{ entry.price|floatformat:2 }} <small>per {{ entry.unit.name }}</small></p>
+        {% if entry.batch %}<p>In Production &middot; {{ entry.batch.batch_number }}</p><p>Expected readiness: {{ entry.batch.expected_ready_date|date:"j F Y" }}</p><p>{{ entry.available }} {{ entry.unit.name }} available for booking at {{ location.name }}</p>{% elif entry.availability_error %}<p>Availability could not be verified. Review Product configuration and inventory.</p>{% elif entry.available %}<p>{{ entry.available }} {{ entry.unit.name }} available at {{ location.name }}</p>{% else %}<p>Out of stock at {{ location.name }}</p>{% endif %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="activity" value="{{ activity }}"><input type="hidden" name="action" value="add"><input type="hidden" name="location_id" value="{{ location.pk }}"><input type="hidden" name="sale_unit_id" value="{{ entry.unit.pk }}"><input type="hidden" name="batch_id" value="{% if entry.batch %}{{ entry.batch.pk }}{% elif entry.line.production_batch_id %}{{ entry.line.production_batch_id }}{% endif %}"><input type="hidden" name="cart_key" value="{{ entry.cart_key }}">
+          <label for="qty-{{ entry.batch.pk }}-{{ entry.unit.pk }}">Quantity</label><input id="qty-{{ entry.batch.pk }}-{{ entry.unit.pk }}" type="number" name="quantity" value="1" min="1" max="{{ entry.available }}" step="1" required{% if not entry.available %} disabled{% endif %}>
+          <button class="staff-button staff-button--primary"{% if not entry.available %} disabled{% endif %}>Add to cart</button>
+        </form>
+      </article>{% empty %}<p>No products match the POS catalog requirements or your search. Products must be active, published, and have an active Sale Unit with a valid current price. Review Product configuration for missing settings.</p>{% endfor %}</div>
+    </section>
+    <section class="staff-panel pos-checkout-panel" aria-label="{% if is_booking %}Booking checkout{% else %}Sales checkout{% endif %}"><h2>{% if is_booking %}Booking cart{% else %}Sales cart{% endif %}</h2><p class="pos-cart-location">{{ location.name }}</p>
+      <div class="pos-cart-items" tabindex="0" aria-label="Cart items">
+      {% for entry in cart %}<article class="pos-product"><h3>{{ entry.product.name }}</h3><p>{{ entry.unit.name }} · KES {{ entry.price|floatformat:2 }} each</p>
+        <form method="post">{% csrf_token %}<input type="hidden" name="activity" value="{{ activity }}"><input type="hidden" name="location_id" value="{{ location.pk }}"><input type="hidden" name="sale_unit_id" value="{{ entry.unit.pk }}"><input type="hidden" name="batch_id" value="{% if entry.batch %}{{ entry.batch.pk }}{% elif entry.line.production_batch_id %}{{ entry.line.production_batch_id }}{% endif %}"><input type="hidden" name="cart_key" value="{{ entry.cart_key }}">
+          <label for="cart-{{ entry.cart_key }}">Quantity</label><input id="cart-{{ entry.cart_key }}" name="quantity" type="number" min="1" step="1" value="{{ entry.line.quantity }}" required>
+          <button name="action" value="update">Update</button><button name="action" value="remove" formnovalidate>Remove</button>
+        </form><p>Line total: KES {{ entry.total|floatformat:2 }}</p>
+      </article>{% empty %}<p>Your cart is empty.</p>{% endfor %}
+      </div><div class="pos-totals"><p><span>Subtotal</span><span>KES {{ total|floatformat:2 }}</span></p><p class="pos-total"><strong>Total</strong><strong>KES {{ total|floatformat:2 }}</strong></p></div>
+      <form method="post" action="{% url 'dashboard:pos_sale' %}" class="purchase-order-form__field pos-payment-form">{% csrf_token %}<input type="hidden" name="activity" value="{{ activity }}">
+        <input type="hidden" name="location_id" value="{{ location.pk|default:'' }}"><input type="hidden" name="idempotency_key" value="{{ state.key }}">
+        <label for="pos-customer">Customer</label><select name="customer" id="pos-customer"><option value="">Anonymous walk-in</option>{% for customer in customers %}<option value="{{ customer.pk }}">{{ customer.display_name }}</option>{% endfor %}</select>
+        <label for="pos-payment-method">Payment method</label><select id="pos-payment-method" name="payment_method" required><option value="MPESA">M-Pesa</option><option value="CASH">Cash</option></select>
+        <div id="pos-reference-field"><label for="pos-reference">M-Pesa Reference</label><input id="pos-reference" name="reference" maxlength="64" required></div>
+        <p id="pos-payment-help"{% if not is_booking %} class="sr-only" data-mpesa="Enter the M-Pesa transaction reference to complete the sale." data-cash="Confirm the cash payment to complete the sale."{% endif %} aria-live="polite">{% if is_booking %}Confirm receipt of payment to complete this booking.{% else %}Enter the M-Pesa transaction reference to complete the sale.{% endif %}</p>
+        <button {% if not is_booking %}data-complete-sale data-cart-valid="{% if cart_valid and location %}true{% else %}false{% endif %}"{% endif %} class="staff-button staff-button--primary"{% if not cart_valid or not location %} disabled{% endif %}>{% if is_booking %}Confirm Payment{% else %}Complete Sale{% endif %}</button>
+      </form>
+      <form method="post" class="pos-new-cart">{% csrf_token %}<input type="hidden" name="activity" value="{{ activity }}"><button name="action" value="new" class="staff-button staff-button--secondary">New cart</button></form>
+    </section>
+  </div>
+</section>
+<script src="{% static 'js/pos-payment.js' %}" defer></script>{% if not is_booking %}<script src="{% static 'js/pos-layout.js' %}?v=checkout-top-2" defer></script>{% endif %}{% endblock %}

@@ -42,6 +42,7 @@ from apps.products.models import Product, ProductPrice, ProductSaleUnit
 class ReadyLifecycleTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-G-001",
             slug="phase-g-product",
             name="Phase G Product",

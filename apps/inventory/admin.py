@@ -8,6 +8,7 @@ from .models import (
     InventoryLocation,
     InventoryMovement,
     InventoryMovementLine,
+    ExternalStockAcquisition,
     Reservation,
     ReservationEvent,
     SourceAllocation,
@@ -91,6 +92,17 @@ class InventoryMovementLineAdmin(ReadOnlyInventoryAdmin):
         "source_location", "destination_location",
     )
     search_fields = ("movement__id", "item__product__sku", "lot__lot_code")
+
+
+@admin.register(ExternalStockAcquisition)
+class ExternalStockAcquisitionAdmin(ReadOnlyInventoryAdmin):
+    list_display = (
+        "acquisition_date", "movement_line", "unit_cost", "currency", "supplier", "acquired_by",
+    )
+    search_fields = (
+        "movement_line__item__product__sku", "movement_line__item__product__name",
+        "reference", "supplier__code", "supplier__name",
+    )
 
 
 class ReadOnlyCommitmentSupplyAdmin(admin.ModelAdmin):

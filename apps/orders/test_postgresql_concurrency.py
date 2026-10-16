@@ -47,6 +47,7 @@ class PostgreSQLReadyLifecycleConcurrencyTests(TransactionTestCase):
 
     def setUp(self):
         self.product = Product.objects.create(
+            category=Product.Category.VEGETABLE,
             sku="WTP-PG-LOCK",
             slug="postgres-lock-product",
             name="PostgreSQL Lock Product",

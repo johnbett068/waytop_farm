@@ -1,0 +1,17 @@
+{% extends "staff_base.html" %}
+{% block title %}Locations | WayTop Farm{% endblock %}
+{% block content %}
+<section class="staff-workspace">
+  <header class="staff-page-heading"><p>Setup</p><h1>Locations / Branches</h1>
+    {% if perms.inventory.add_inventorylocation %}<a class="staff-button staff-button--primary" href="{% url 'dashboard:inventory_location_create' %}">Add Location</a>{% endif %}
+  </header>
+  <p>WayTop Farm branches/sites where stock is physically held.</p>
+  {% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}
+  {% if locations %}<div class="staff-table-wrap"><table class="staff-table">
+    <thead><tr><th>Branch / Location name</th><th></th></tr></thead>
+    <tbody>{% for location in locations %}<tr><td>{{ location.name }}</td>
+      <td>{% if perms.inventory.change_inventorylocation %}<a href="{% url 'dashboard:inventory_location_edit' location.pk %}">Edit</a>{% endif %}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p data-authoritative-empty>No Locations recorded yet.</p>{% endif %}
+</section>
+{% endblock %}

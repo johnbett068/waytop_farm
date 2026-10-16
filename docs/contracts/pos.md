@@ -1,5 +1,7 @@
 # POS frontend contract
 
+> The implemented Sales + Production Bookings workflow is described in [the September 2026 POS report](../reviews/pos-sales-production-bookings.md). Its owner-ratified rules supersede older READY-only/M-Pesa-only POS restrictions.
+
 > **Superseded for V1.** POS is an Order-entry channel under the [ratified V1 business contract](../architecture/v1-business-contract.md).
 
 ## Projection inputs

@@ -184,3 +184,8 @@
   .catalog-card__footer { align-items: stretch; flex-direction: column; }
   .catalog-card__footer .btn { width: 100%; }
 }
+
+.product-gallery-stack { min-width: 0; display: grid; gap: 1rem; align-content: start; }
+.product-gallery-additional { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.product-gallery-additional img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-md); }
+.product-gallery img { object-fit: contain; }

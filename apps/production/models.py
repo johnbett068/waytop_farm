@@ -32,6 +32,11 @@ class ServiceControlledModel:
 
 
 class ProductionBatch(ServiceControlledModel, models.Model):
+    # Historical batches remain unassigned and cannot provide booking capacity.
+    location = models.ForeignKey(
+        "inventory.InventoryLocation", on_delete=models.PROTECT,
+        related_name="production_batches", null=True, blank=True,
+    )
     class Status(models.TextChoices):
         PLANNED = "PLANNED", "Planned"
         IN_PRODUCTION = "IN_PRODUCTION", "In production"
@@ -112,6 +117,14 @@ class ProductionBatch(ServiceControlledModel, models.Model):
 
 
 class ProductionBatchEvent(ServiceControlledModel, models.Model):
+    previous_location = models.ForeignKey(
+        "inventory.InventoryLocation", on_delete=models.PROTECT,
+        related_name="production_location_before_events", null=True, blank=True,
+    )
+    location = models.ForeignKey(
+        "inventory.InventoryLocation", on_delete=models.PROTECT,
+        related_name="production_location_events", null=True, blank=True,
+    )
     class Operation(models.TextChoices):
         CREATED = "CREATED", "Created"
         UPDATED = "UPDATED", "Planning or quantity updated"
@@ -312,4 +325,3 @@ class NurseryActivity(ServiceControlledModel, models.Model):
             raise ValidationError(
                 "Coverage quantity and coverage unit must be supplied together."
             )
-

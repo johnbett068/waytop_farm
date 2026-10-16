@@ -21,6 +21,8 @@ htmlcov/
 *.sqlite3-journal
 postgresql-concurrency.log
 postgresql-regression.log
+.tmp/
+media/
 
 # Editor and operating-system files
 .vscode/
